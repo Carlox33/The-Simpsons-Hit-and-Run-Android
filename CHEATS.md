@@ -6,7 +6,7 @@
 
 [Discord](https://discord.gg/6Gw6jTJv8w)
 ---
-![Cheatsheet](imagenesCheats\definitivo\CHEATS.png)
+![Cheatsheet](imagenCheats\CHEATS.png)
 # 🇪🇸 Español
 
 # 🎮 The Simpsons Hit & Run — Cheats (Mandos Modernos)
