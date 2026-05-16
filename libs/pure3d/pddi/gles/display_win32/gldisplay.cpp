@@ -342,6 +342,52 @@ void pglDisplay::SwapBuffers(void)
 {
     SDL_GL_SwapWindow(win);
     reset = false;
+    #ifdef RAD_ANDROID
+    // --- FPS CAP 60 (muy ligero) ---
+    // Si además quieres, condiciona esto a m_only60 o a GetForceVSync().
+    if (m_only60)
+    {
+        static const double TARGET_MS = 1000.0 / 60.0;  // 16.666...
+        static Uint64 freq = 0;
+        static Uint64 last = 0;
+
+        if (freq == 0) {
+            freq = SDL_GetPerformanceFrequency();
+            last = SDL_GetPerformanceCounter();
+            return;
+        }
+
+        Uint64 now = SDL_GetPerformanceCounter();
+        double ms = (double)(now - last) * 1000.0 / (double)freq;
+
+        if (ms < TARGET_MS)
+        {
+            // SDL_Delay es barato; puede tener cierta imprecisión, pero para física ligada a frame suele ir bien.
+            Uint32 delayMs = (Uint32)(TARGET_MS - ms);
+            if (delayMs > 0) SDL_Delay(delayMs);
+            // Re-sincroniza timestamp tras el delay
+            now = SDL_GetPerformanceCounter();
+        }
+
+        last = now;
+    }
+#endif
+
+#if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+    static int frames = 0;
+    static Uint32 lastTick = 0;
+
+    Uint32 t = SDL_GetTicks();
+    if (lastTick == 0) lastTick = t;
+
+    frames++;
+    if (t - lastTick >= 1000)
+    {
+        SDL_Log("[FPS] %d", frames);
+        frames = 0;
+        lastTick = t;
+    }
+#endif
 }
 
     

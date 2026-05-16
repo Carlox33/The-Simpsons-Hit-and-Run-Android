@@ -62,6 +62,7 @@ public:
 
     void SetCheatEnabled( eCheatID cheatID, bool enable );
     bool IsCheatEnabled( eCheatID cheatID ) const;
+    void DisableAllCheats();
 
     void ReceiveInputs( eCheatInput* cheatInputs,
                         int numInputs = NUM_CHEAT_SEQUENCE_INPUTS );

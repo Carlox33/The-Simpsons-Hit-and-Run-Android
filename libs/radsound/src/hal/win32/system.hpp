@@ -6,75 +6,90 @@
 //
 //=============================================================================
 
-#ifndef SOUND_HAL_WIN32_SYSTEM_HPP
-#define SOUND_HAL_WIN32_SYSTEM_HPP
+#ifndef SOUND_HAL_OPENAL_SYSTEM_HPP
+#define SOUND_HAL_OPENAL_SYSTEM_HPP
 
 //============================================================================
 // Include Files
 //============================================================================
-
 #include <radsound_hal.hpp>
 #include "radsoundwin.hpp"
 #include "../../common/radsoundupdatableobject.hpp"
 
-//============================================================================
-// Definitiona
-//============================================================================
+// OpenAL (OpenAL Soft también en Android)
+#include <AL/al.h>
+#include <AL/alc.h>
 
+// EFX types (solo tipos; si no está disponible en tu build, lo cambiamos)
+#include <AL/efx.h>
+
+//============================================================================
+// Definitions
+//============================================================================
 #define RSD_SYSTEM_MAX_AUX_SENDS 2
 
 //============================================================================
 // Component: radSoundHalSystem
 //============================================================================
-
 class radSoundHalSystem
-	:
-	public IRadSoundHalSystem,
-	public radSoundObject
+    :
+    public IRadSoundHalSystem,
+    public radSoundObject
 {
-    public: 
+public:
+    IMPLEMENT_REFCOUNTED("radSoundHalSystem")
 
-	    IMPLEMENT_REFCOUNTED( "radSoundHalSystem" )
+    radSoundHalSystem(radMemoryAllocator allocator);
+    ~radSoundHalSystem(void);
 
-        radSoundHalSystem( radMemoryAllocator allocator );
-        ~radSoundHalSystem( void );
-        virtual void Initialize( const SystemDescription & systemDescription );
-	    virtual IRadSoundHalMemoryRegion * GetRootMemoryRegion( void );
-        virtual unsigned int GetNumAuxSends( );
-	    virtual void SetOutputMode( radSoundOutputMode mode );
-	    virtual radSoundOutputMode GetOutputMode( void );
-        virtual void Service( void );
-        virtual void ServiceOncePerFrame( void );
-        virtual void GetStats( IRadSoundHalSystem::Stats * pStats );
-        virtual void SetAuxEffect( unsigned int auxNumber, IRadSoundHalEffect * pIRadSoundHalEffect );
-        virtual IRadSoundHalEffect * GetAuxEffect( unsigned int auxNumber );
-        virtual void SetAuxGain( unsigned int aux, float gain );
-        virtual float GetAuxGain( unsigned int aux );
-        ALCdevice * GetOpenALDevice( void );
-        ALCcontext * GetOpenALContext( void );
-        ALuint GetOpenALAuxSlot( unsigned int aux );
+    virtual void Initialize(const SystemDescription& systemDescription);
+    virtual IRadSoundHalMemoryRegion* GetRootMemoryRegion(void);
+    virtual unsigned int GetNumAuxSends();
+    virtual void SetOutputMode(radSoundOutputMode mode);
+    virtual radSoundOutputMode GetOutputMode(void);
+    virtual void Service(void);
+    virtual void ServiceOncePerFrame(void);
+    virtual void GetStats(IRadSoundHalSystem::Stats* pStats);
 
-        static radSoundHalSystem * GetInstance( void );
+    virtual void SetAuxEffect(unsigned int auxNumber, IRadSoundHalEffect* pIRadSoundHalEffect);
+    virtual IRadSoundHalEffect* GetAuxEffect(unsigned int auxNumber);
 
-        static radSoundHalSystem * s_pRsdSystem;
+    virtual void SetAuxGain(unsigned int aux, float gain);
+    virtual float GetAuxGain(unsigned int aux);
 
-    private:
+    // Estos métodos deben existir también en Android si usamos OpenAL Soft
+    ALCdevice*  GetOpenALDevice(void);
+    ALCcontext* GetOpenALContext(void);
+    ALuint      GetOpenALAuxSlot(unsigned int aux);
 
-        void *          m_pSoundMemory;
-        ALCint          m_NumAuxSends;
-        ALCuint         m_AuxSlots[RSD_SYSTEM_MAX_AUX_SENDS];
+    static radSoundHalSystem* GetInstance(void);
+    static radSoundHalSystem* s_pRsdSystem;
 
-        ALCdevice *     m_pDevice;
-        ALCcontext *    m_pContext;
+private:
+// este private tiene inizializaciones a 0 y a nullptr lo cual el port original de switch no posee 
+    void*       m_pSoundMemory = nullptr;
 
-        ref< IRadSoundHalEffect >      m_refIRadSoundHalEffect[ RSD_SYSTEM_MAX_AUX_SENDS ];
+    ALCint      m_NumAuxSends  = 0;
+    ALuint      m_AuxSlots[RSD_SYSTEM_MAX_AUX_SENDS] = {0};
 
-        unsigned int    m_LastServiceTime;
+    ALCdevice*  m_pDevice  = nullptr;
+    ALCcontext* m_pContext = nullptr;
 
-        LPALGENAUXILIARYEFFECTSLOTS alGenAuxiliaryEffectSlots;
+    ref<IRadSoundHalEffect> m_refIRadSoundHalEffect[RSD_SYSTEM_MAX_AUX_SENDS];
+
+    unsigned int m_LastServiceTime = 0;
+	/*
+	 LPALGENAUXILIARYEFFECTSLOTS alGenAuxiliaryEffectSlots;
         LPALDELETEAUXILIARYEFFECTSLOTS alDeleteAuxiliaryEffectSlots;
         LPALAUXILIARYEFFECTSLOTF alAuxiliaryEffectSlotf;
         LPALGETAUXILIARYEFFECTSLOTF alGetAuxiliaryEffectSlotf;
+*/
+
+    // EFX function pointers (si no hay EFX, quedan nullptr y m_NumAuxSends se fuerza a 0)
+    LPALGENAUXILIARYEFFECTSLOTS     alGenAuxiliaryEffectSlots     = nullptr;
+    LPALDELETEAUXILIARYEFFECTSLOTS  alDeleteAuxiliaryEffectSlots  = nullptr;
+    LPALAUXILIARYEFFECTSLOTF        alAuxiliaryEffectSlotf        = nullptr;
+    LPALGETAUXILIARYEFFECTSLOTF     alGetAuxiliaryEffectSlotf     = nullptr;
 };
 
-#endif // SOUND_HAL_WIN32_SYSTEM_HPP
+#endif // SOUND_HAL_OPENAL_SYSTEM_HPP

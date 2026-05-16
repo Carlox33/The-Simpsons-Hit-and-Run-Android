@@ -659,16 +659,58 @@ void ParkedCarManager::AddLocator( CarStartLocator* loc )
 //=============================================================================
 void ParkedCarManager::AddFreeCar( const char* name, CarStartLocator* loc )
 {
+    
     if ( GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_REDBRICK ) )
     {
         //This Bud's for you.
         name = "redbrick";
     }
+        //This is for you Carlox
+    else if ( GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_ROCKET ) )
+    {
+         name = "rocke_v";
+    }
+    else if(GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_MONORAIL ))
+    {
+        
+         name="mono_v";
+
+    }
+    else if(GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_LISA_BOAT ))
+    {
+         name="knigh_v";
+
+    }
+    else if(GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_ATV ))
+    {
+         name="atv_v";
+
+    }
+    else if(GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_MONSTER_TRUCK ))
+    {
+        
+         name="oblit_v";
+
+    }
+    else if(GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_BART_SEDAN ))
+    {
+         name="hype_v";
+
+    }
+    else if(GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_RC_CAR ))
+    {
+         name="dune_v";
+
+    }
+
+
 
     if(!mParkedCarsEnabled)
     {
         return;
     }
+    
+   
     
     if ( mFreeCar.mCar == NULL )
     {
@@ -872,6 +914,26 @@ void ParkedCarManager::CreateFreeCar()
     //Set the position and facing and reset.
     rmt::Vector location;
     mFreeCarLocator->GetLocation( &location );
+    // comienza nuevo fragmento para cheats de coches especiales problematicos en lvl 6 
+    float facing=mFreeCarLocator->GetRotation();
+    if( GetGameplayManager()->GetCurrentLevelIndex() == RenderEnums::L6 )
+    {
+        if( GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_MONSTER_TRUCK ) )
+        {
+            location.y += 5.0f;
+        } else
+        if(GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_MONORAIL ))
+        {
+            location.y += 6.5f;
+
+            const float forwardOffset = 0.25f; // esta variable controla el offset hacia adelante
+
+            location.x += rmt::Sin( facing ) * forwardOffset;
+            location.z += rmt::Cos( facing ) * forwardOffset;
+        }
+    }
+
+    // termina nuevo fragmento
     car->SetInitialPositionGroundOffsetAutoAdjust( &location );
 
     car->SetResetFacingInRadians( mFreeCarLocator->GetRotation() );

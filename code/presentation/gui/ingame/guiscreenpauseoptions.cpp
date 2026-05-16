@@ -38,7 +38,10 @@ enum ePauseMenuItem
 #endif
     MENU_ITEM_CONTROLLER,
     MENU_ITEM_SOUND,
+
+#ifndef RAD_ANDROID
     MENU_ITEM_SETTINGS,
+#endif
 //    MENU_ITEM_CAMERA,
 
     NUM_PAUSE_MENU_ITEMS
@@ -52,7 +55,10 @@ static const char* PAUSE_MENU_ITEMS[] =
 #endif
     "Controller",
     "Sound",
+
+#ifndef RAD_ANDROID
     "Settings",
+#endif
 //    "Camera",
 
     ""
@@ -117,6 +123,35 @@ MEMTRACK_PUSH_GROUP( "CGUIScreenPauseOptions" );
                               pLArrow,
                               pRArrow );
     }
+
+    // NUEVO BLOQUE PARA ELIMINAR opciones->configuracion para android y asi evitar un crash accidental
+#ifdef RAD_ANDROID
+    Scrooby::Text* pSettings = menu->GetText( "Settings" );
+    if( pSettings != NULL )
+    {
+        pSettings->SetVisible( false );
+    }
+
+    Scrooby::Text* pSettingsValue = pPage->GetText( "Settings_Value" );
+    if( pSettingsValue != NULL )
+    {
+        pSettingsValue->SetVisible( false );
+    }
+
+    Scrooby::Sprite* pSettingsLArrow = pPage->GetSprite( "Settings_LArrow" );
+    if( pSettingsLArrow != NULL )
+    {
+        pSettingsLArrow->SetVisible( false );
+    }
+
+    Scrooby::Sprite* pSettingsRArrow = pPage->GetSprite( "Settings_RArrow" );
+    if( pSettingsRArrow != NULL )
+    {
+        pSettingsRArrow->SetVisible( false );
+    }
+#endif
+
+    // FIN NUEVO BLOQUE 
 
 #ifndef RAD_PC
     Scrooby::Text* pText = menu->GetText( "Display" );
@@ -217,10 +252,12 @@ void CGuiScreenPauseOptions::HandleMessage
                 {
                     m_pParent->HandleMessage( GUI_MSG_GOTO_SCREEN, GUI_SCREEN_ID_SOUND );
                 }
+                #ifndef RAD_ANDROID
                 else if( param1 == MENU_ITEM_SETTINGS )
                 {
-                    m_pParent->HandleMessage( GUI_MSG_GOTO_SCREEN, GUI_SCREEN_ID_SETTINGS );
+                     m_pParent->HandleMessage( GUI_MSG_GOTO_SCREEN, GUI_SCREEN_ID_SETTINGS );
                 }
+                #endif
 #ifdef RAD_PC
                 else if( param1 == MENU_ITEM_DISPLAY )
                 {

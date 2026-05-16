@@ -29,8 +29,42 @@
 #include <radmemorymonitor.hpp>
 #include "system.hpp"
 #include "thread.hpp"
-
 #include <SDL.h>
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+  #define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
+
+static void LogActiveThread(const char* where, unsigned index, void* value_or_null)
+{
+    unsigned long tid = (unsigned long)SDL_ThreadID();
+    radThread* t = (radThread*)radThread::GetActiveThread(); // si es estática pública, perfecto
+
+    if (t)
+    {
+        LOGI("[radTLS] %s tid=%lu activeRadThread=%p index=%u value=%p",
+             where, tid, (void*)t, index, value_or_null);
+    }
+    else
+    {
+        LOGE("[radTLS] %s tid=%lu activeRadThread=NULL index=%u value=%p",
+             where, tid, index, value_or_null);
+    }
+}
+
+
 
 //=============================================================================
 // Local Definitions
@@ -45,6 +79,17 @@
 // up memory as this will require the memory system to be initialized.
 // 
 static unsigned int s_theThreadMemory[ ((sizeof( radThread)) / sizeof(unsigned int)) + 1 ];
+
+// NEW LINES FOR ANDROID 
+// --- Thread system init flag (para evitar attach antes de Initialize()) ---
+static bool s_RadThreadSystemInitialized = false;
+
+// --- Pool estático para wrappers "attached" (sin heap) ---
+// Reservamos hasta MAX_RADTHREADS-1 porque el slot 0 es el "main thread" de radThread::Initialize().
+static unsigned int s_attachedThreadMemory[ MAX_RADTHREADS - 1 ]
+                                      [ ((sizeof(radThread)) / sizeof(unsigned int)) + 1 ];
+
+static bool s_attachedThreadUsed[ MAX_RADTHREADS - 1 ] = { false };
 
 //
 // This table is used to manage pointers to currently created threads. Pointers
@@ -102,6 +147,8 @@ void radThreadCreateThread
                                             priority, stackSize );
 }
 
+
+
 //=============================================================================
 // Function:    radThreadGetActiveThread
 //=============================================================================
@@ -132,6 +179,15 @@ IRadThread* radThreadGetActiveThread( void )
 //
 // Notes:       Need platform specific implementation of this function.
 //------------------------------------------------------------------------------
+
+
+// NEW FUNCTION FOR CAN DO AttachCurrentThreadIfNeeded from main(ANDROID USE  THIS )
+
+void radThreadAttachCurrentThreadIfNeeded(void)
+{
+    radThread::AttachCurrentThreadIfNeeded();
+}
+
 
 void radThreadSleep
 ( 
@@ -327,6 +383,7 @@ void radThread::Initialize( unsigned int milliseconds )
     // (chicken - egg problem ).
     //
     new( s_theThreadMemory ) radThread( );
+    s_RadThreadSystemInitialized = true;// NEW LINE FOR ANDROID 
 
     (void)milliseconds;
 }
@@ -419,6 +476,7 @@ void radThread::Terminate( void )
     {
         rAssert( s_ThreadTable[ i ] == NULL );
     }
+    s_RadThreadSystemInitialized = false; // NEW LINE FOR ANDROID 
 }
 
 //=============================================================================
@@ -586,6 +644,36 @@ radThread::radThread
         m_ThreadLocalStorageValues[i] = NULL;
     }
 }
+
+//=============================================================================
+// Function:    radThread::radThread( AttachTag )
+//=============================================================================
+// Wrapper constructor for attaching an EXISTING OS thread (SDLThread, etc).
+// ANDROID NEED THIS FOR SDL THREAD 
+// IMPORTANT: Must NOT touch s_ThreadTable[0].
+//=============================================================================
+radThread::radThread( AttachTag )
+    :
+    m_ReferenceCount( 1 ),
+    m_IsRunning( true ),
+    m_ReturnCode( 0 ),
+    m_EntryFunction( NULL ),
+    m_UserData( NULL ),
+    m_Priority( IRadThread::PriorityNormal ),
+    m_ThreadId( 0 ),
+    m_ThreadHandle( NULL ),
+    m_pActiveFiber( NULL )
+{
+    // Identificación en monitor (si está disponible)
+    radMemoryMonitorIdentifyAllocation( this, g_nameFTech, "radThread(Attached)" );
+
+    // TLS a NULL
+    for ( unsigned int i = 0; i < MAX_THREADLOCALSTORAGE_OBJECTS; i++ )
+    {
+        m_ThreadLocalStorageValues[i] = NULL;
+    }
+}
+
 
 //=============================================================================
 // Function:    radThread::~radThread
@@ -940,11 +1028,121 @@ IRadThread* radThread::GetActiveThread( void )
     //
     if( MAX_RADTHREADS == i )
     {
+        #ifdef RAD_ANDROID
+        //LOGE("[radTHREAD] GetActiveThread FAILED tid=%u",
+          //   (unsigned int)SDL_ThreadID());
+        #endif
         return( NULL );
     }
-
+    #ifdef RAD_ANDROID
+    //LOGI("[radTHREAD] GetActiveThread OK tid=%u slot=%u radThread=%p",
+      //   (unsigned int)SDL_ThreadID(),
+        // i,
+         //(void*)s_ThreadTable[i]);
+    #endif
     return( s_ThreadTable[ i ] );
 }
+
+// FUNCION VERY IMPORTANT PA ANDROID LA VERDAH, fuera bromas esto hace que el SDL thread se enlace con la tabla de memoria donde se controlan todos los hilos, y en principio habrá que revisar pero es poco invasivo, 
+// por lo que es bastante bueno para evitar bugs raros en el futuro
+radThread* radThread::AttachCurrentThreadIfNeeded( void )
+{
+#ifdef RAD_ANDROID
+    const unsigned long tid = (unsigned long) SDL_ThreadID();
+
+    // 0) Si aún no se inicializó el sistema, no tocamos nada.
+    if ( !s_RadThreadSystemInitialized )
+    {
+        LOGE("[radTHREAD] AttachCurrentThreadIfNeeded called before radThread::Initialize (tid=%lu)", tid);
+        return NULL;
+    }
+
+    // 1) Fast path: si ya hay active thread, devolvemos.
+    {
+        IRadThread* active = radThread::GetActiveThread();
+        if ( active != NULL )
+        {
+            return (radThread*) active;
+        }
+    }
+
+    // 2) Slow path: lock + buscar / crear wrapper
+    radThreadInternalLock();
+
+    // 2a) Puede que otro haya registrado justo antes de nuestro lock
+    for ( unsigned int i = 0; i < MAX_RADTHREADS; i++ )
+    {
+        if ( s_ThreadTable[i] && s_ThreadTable[i]->m_ThreadId == tid )
+        {
+            radThread* found = s_ThreadTable[i];
+            radThreadInternalUnlock();
+            //LOGI("[radTHREAD] Attach: already attached tid=%lu slot=%u radThread=%p", tid, i, (void*)found);
+            return found;
+        }
+    }
+
+    // 2b) Buscar slot libre en la tabla (NO usar slot 0)
+    unsigned int freeSlot = MAX_RADTHREADS;
+    for ( unsigned int i = 1; i < MAX_RADTHREADS; i++ )
+    {
+        if ( s_ThreadTable[i] == NULL )
+        {
+            freeSlot = i;
+            break;
+        }
+    }
+
+    if ( freeSlot == MAX_RADTHREADS )
+    {
+        radThreadInternalUnlock();
+        LOGE("[radTHREAD] Attach FAILED: no free slot in s_ThreadTable (tid=%lu)", tid);
+        return NULL;
+    }
+
+    // 2c) Reservar un bloque en el pool
+    int poolIndex = -1;
+    for ( unsigned int p = 0; p < (MAX_RADTHREADS - 1); p++ )
+    {
+        if ( !s_attachedThreadUsed[p] )
+        {
+            s_attachedThreadUsed[p] = true;
+            poolIndex = (int)p;
+            break;
+        }
+    }
+
+    if ( poolIndex < 0 )
+    {
+        radThreadInternalUnlock();
+        LOGE("[radTHREAD] Attach FAILED: no free pool blocks (tid=%lu)", tid);
+        return NULL;
+    }
+
+    // 2d) Construir wrapper sin heap y registrar
+    radThread* wrapper = new ( s_attachedThreadMemory[poolIndex] ) radThread( AttachTag{} );
+
+    wrapper->m_ThreadId     = tid;
+    wrapper->m_ThreadHandle = NULL;
+    wrapper->m_IsRunning    = true;
+
+    // TLS a NULL (redundante con ctor, pero lo dejo por seguridad)
+    for ( unsigned int t = 0; t < MAX_THREADLOCALSTORAGE_OBJECTS; t++ )
+        wrapper->m_ThreadLocalStorageValues[t] = NULL;
+
+    s_ThreadTable[ freeSlot ] = wrapper;
+
+    radThreadInternalUnlock();
+
+    //LOGI("[radTHREAD] Attach OK tid=%lu slot=%u pool=%d radThread=%p",
+      //   tid, freeSlot, poolIndex, (void*)wrapper);
+
+    return wrapper;
+#else
+    // En otras plataformas normalmente no hace falta.
+    return (radThread*)radThread::GetActiveThread();
+#endif
+}
+
 
 //=============================================================================
 // Function:    radThread::SetLocalStorage
@@ -959,7 +1157,7 @@ IRadThread* radThread::GetActiveThread( void )
 //
 // Notes:
 //------------------------------------------------------------------------------
-
+/*
 void radThread::SetLocalStorage
 (
      unsigned int index,
@@ -973,7 +1171,11 @@ void radThread::SetLocalStorage
 
      if( thread != NULL)
      {
+        LOGI("el thread no es nulo ");
          thread->m_ThreadLocalStorageValues[ index ] = value;
+     }else{
+        LOGI("el thread SI es nulo");
+
      }
 }
 
@@ -1001,10 +1203,77 @@ void* radThread::GetLocalStorage
      radThread* thread = (radThread*) GetActiveThread( );
      if( thread != NULL )
      {
+        LOGI("el thread no es nulo ");
          return( thread->m_ThreadLocalStorageValues[ index ] );
+     }else{
+        LOGI("el thread SI es nulo");
+
      }
      return( NULL );
 }
+*/
+
+
+// NEW FUNCTIONS FOR  IN ANDROID 
+
+void radThread::SetLocalStorage(unsigned int index, void* value)
+{
+    // 1) Intentar obtener el thread activo (camino rápido)
+    radThread* thread = (radThread*)GetActiveThread();
+
+    // 2) Solo si NO existe, attach + reintento
+#ifdef RAD_ANDROID
+    if (!thread)
+    {
+        radThread::AttachCurrentThreadIfNeeded();
+        thread = (radThread*)GetActiveThread();
+    }
+#endif
+
+//#ifdef RAD_ANDROID
+    // Log opcional, pero sin re-llamar GetActiveThread() otra vez
+  //  if (thread)
+       // LOGI("[radTLS] SET tid=%lu activeRadThread=%p index=%u value=%p",
+         //    (unsigned long)SDL_ThreadID(), (void*)thread, index, value);
+    //else
+        //LOGE("[radTLS] SET tid=%lu activeRadThread=NULL index=%u value=%p",
+          //   (unsigned long)SDL_ThreadID(), index, value);
+//#endif
+
+    if (thread)
+        thread->m_ThreadLocalStorageValues[index] = value;
+}
+
+void* radThread::GetLocalStorage(unsigned int index)
+{
+    // 1) Camino rápido
+    radThread* thread = (radThread*)GetActiveThread();
+
+    // 2) Solo si NO existe, attach + reintento
+#ifdef RAD_ANDROID
+    if (!thread)
+    {
+        radThread::AttachCurrentThreadIfNeeded();
+        thread = (radThread*)GetActiveThread();
+    }
+#endif
+
+    void* cur = nullptr;
+    if (thread)
+        cur = thread->m_ThreadLocalStorageValues[index];
+
+//#ifdef RAD_ANDROID
+  //  if (thread)
+        //LOGI("[radTLS] GET tid=%lu activeRadThread=%p index=%u value=%p",
+          //   (unsigned long)SDL_ThreadID(), (void*)thread, index, cur);
+    //else
+      //  LOGE("[radTLS] GET tid=%lu activeRadThread=NULL index=%u value=%p",
+        //     (unsigned long)SDL_ThreadID(), index, cur);
+//#endif
+
+    return cur;
+}
+
 
 
 //=============================================================================

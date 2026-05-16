@@ -22,7 +22,12 @@
 #include "pch.hpp"
 #include "listener.hpp"
 #include "system.hpp"
-#include <efx.h>
+#ifndef RAD_ANDROID
+  #include <efx.h>
+#endif
+#ifdef RAD_ANDROID
+  #include <AL/efx.h>
+#endif
 
 //============================================================================
 // Static definitions

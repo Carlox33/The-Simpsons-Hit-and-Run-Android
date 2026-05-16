@@ -40,6 +40,7 @@
 
 #include <mission/gameplaymanager.h>
 
+
 #ifdef RAD_PS2
 #include <pddi/pddiext.hpp>
 #include <main/ps2platform.h>
@@ -63,7 +64,6 @@ void MemoryHackCallback() { INIT_MEM() };
 #ifdef RAD_PS2
     void MemoryHackCallback() { INIT_MEM() };
 #endif
-
 #ifdef RAD_WIN32
 #include <main/win32platform.h>
 #define INIT_MEM()  Memory::InitializeMemoryUtilities();Win32Platform::InitializeMemory();
@@ -630,7 +630,9 @@ void PrintOutOfMemoryMessage( void* userData, radMemoryAllocator heap, const uns
 
 static int pushNumberStack[ 48 ];
 static int currentStackPointer = 0;
-
+//static thread_local int pushNumberStack[48];
+//static thread_local int currentStackPointer = 0;
+//static thread_local int pushNumber = 0;
 HeapStack::HeapStack (GameMemoryAllocator defaultAllocator)
 {
     int i;
@@ -656,7 +658,7 @@ HeapStack::~HeapStack ()
 
 void HeapStack::Push (GameMemoryAllocator alloc)
 {
-    static int pushNumber = 0;
+    static int pushNumber = 0; 
     rAssert( currentStackPointer < 48 );
     pushNumberStack[ currentStackPointer ] = pushNumber;
     ++currentStackPointer;

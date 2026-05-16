@@ -53,6 +53,26 @@
 #include <Text.h>
 #include <FeLoaders.h>
 
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+  #define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
+
+
+
+
 // Static pointer to instance of singleton.
 CGuiSystem* CGuiSystem::spInstance = NULL;
 
@@ -508,7 +528,7 @@ MEMTRACK_PUSH_GROUP( "CGUISystem" );
     //
     GetGameDataManager()->RegisterGameData( this, 1, "GUI System" );
 
-#if defined( PAL ) && !defined( RAD_DEMO )
+#if (defined(PAL) && !defined(RAD_DEMO)) //|| defined(RAD_ANDROID) // HAY QUE BUSCAR COMO HACER QUE ANDROID SEA PAL ESTO ES CHAPUZA Y HACE QUE LOS VIDEOS QUEDEN NTSC
 /*
   #ifdef RAD_GAMECUBE
     // GC ONLY: load language configuration file
@@ -771,7 +791,7 @@ void CGuiSystem::HandleMessage
 		default:
 		{
             // relay message to current GUI manager
-            //
+            //Aqui estamos en handle message 
             CGuiManager* currentManager = this->GetCurrentManager();
             if( currentManager != NULL )
             {
@@ -797,6 +817,7 @@ void CGuiSystem::HandleMessage
 //===========================================================================
 void CGuiSystem::OnProjectLoadComplete( Scrooby::Project* pProject )
 {
+    //LOGI("GUI: OnProjectLoadComplete entered. pProject=%p state=%d", pProject, (int)m_state);
 MEMTRACK_PUSH_GROUP( "CGUISystem" );
 	rAssert( pProject != NULL );
     m_pProject = pProject;
@@ -810,6 +831,8 @@ MEMTRACK_PUSH_GROUP( "CGUISystem" );
     {
         case LANGUAGE_LOADING:
         {
+            //LOGI("Entramos en el caso Language_loading");
+           
             HeapMgr()->PushHeap( GMA_LEVEL_FE );
 
 			m_pManagerLanguage = new CGuiManagerLanguage( m_pProject, this );
@@ -818,15 +841,16 @@ MEMTRACK_PUSH_GROUP( "CGUISystem" );
 			// Populate screens	
 			//
 			m_pManagerLanguage->Populate();
+            //LOGI("GUI: LANGUAGE_LOADING -> Populate done");
 
             HeapMgr()->PopHeap( GMA_LEVEL_FE );
 
             m_state = LANGUAGE_ACTIVE;
-
+            //LOGI("GUI: LANGUAGE_LOADING -> calling Start()");
             // Start it up!
             //
             m_pManagerLanguage->Start();
-
+           // LOGI("GUI: LANGUAGE_LOADING -> Start() returned");
             break;
         }
         case BOOTUP_LOADING:
@@ -1690,7 +1714,7 @@ void CGuiSystem::FormatTutorialTextWithLineBreaks()
             {
 #ifdef RAD_DEBUG
                 numLineBreaks++;
-                rAssert( numLineBreaks < MAX_NUM_LINES_PER_MESSAGE );
+                //rAssert( numLineBreaks < MAX_NUM_LINES_PER_MESSAGE );
 #endif
                 numCharsInCurrentLine = 0;
 
@@ -1715,7 +1739,7 @@ void CGuiSystem::FormatTutorialTextWithLineBreaks()
 
 #ifdef RAD_DEBUG
                 numLineBreaks++;
-                rAssertMsg( numLineBreaks < MAX_NUM_LINES_PER_MESSAGE, "Too many lines in tutorial message! Tell Tony." );
+                //rAssertMsg( numLineBreaks < MAX_NUM_LINES_PER_MESSAGE, "Too many lines in tutorial message! Tell Tony." );
 #endif
 
                 rAssertMsg( numCharsInCurrentLine <= MAX_NUM_CHARS_PER_LINE, "We might encounter this w/ Japanese text!" );

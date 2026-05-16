@@ -121,9 +121,11 @@ IRadMemorySpaceCopyRequest * radMemorySpaceCopyAsync
 )
 {   
     rAssert( pDest != NULL );
-    rAssert( spaceDest = radMemorySpace_Main );
+    //rAssert( spaceDest = radMemorySpace_Main );
+	rAssert( spaceDest == radMemorySpace_Main );// new line 
     rAssert( pSrc != NULL );
-    rAssert( spaceSrc = radMemorySpace_Main );
+	rAssert( spaceSrc == radMemorySpace_Main );// new line 
+    //rAssert( spaceSrc = radMemorySpace_Main );
     rAssert( bytes > 0 );
 
 	::memcpy( pDest, pSrc, bytes ); 

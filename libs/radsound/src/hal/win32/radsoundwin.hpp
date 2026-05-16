@@ -6,7 +6,13 @@
 #ifndef RADSOUNDWIN_HPP
 #define RADSOUNDWIN_HPP
 
-#include <al.h>
+#ifndef RAD_ANDROID
+  #include <al.h>
+#endif
+#ifdef RAD_ANDROID
+  #include <AL/al.h> 
+#endif
+
 
 //============================================================================
 // Helper Functions

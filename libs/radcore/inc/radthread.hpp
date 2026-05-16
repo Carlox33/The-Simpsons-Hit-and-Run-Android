@@ -88,6 +88,10 @@ struct IRadThreadSemaphore : public IRefCount
     virtual void Signal( void ) = 0;
 };
 
+// NEW LINE FOR ANDROID 
+void radThreadAttachCurrentThreadIfNeeded(void);  
+
+
 //
 // This interface is used to interact with a thread. Releasing the last reference
 // to the thread object will kill the thread. This is a harsh method and it is 

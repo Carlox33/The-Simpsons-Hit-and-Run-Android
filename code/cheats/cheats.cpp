@@ -86,6 +86,41 @@ static const Cheat REGISTERED_CHEATS[] =
         "Red Brick"
     },
     {
+        CHEAT_ID_ROCKET,
+        { CHEAT_INPUT_3, CHEAT_INPUT_0, CHEAT_INPUT_0, CHEAT_INPUT_3 },
+        "Special Rocket Car"
+    },
+    {
+        CHEAT_ID_MONORAIL,
+        { CHEAT_INPUT_2, CHEAT_INPUT_1, CHEAT_INPUT_0, CHEAT_INPUT_3 },
+        "Special Monorail Car"
+    },
+    {
+        CHEAT_ID_LISA_BOAT,
+        { CHEAT_INPUT_1, CHEAT_INPUT_2, CHEAT_INPUT_0, CHEAT_INPUT_0 },
+        "Special Lisa Boat"
+    },
+    {
+        CHEAT_ID_ATV,
+        { CHEAT_INPUT_1, CHEAT_INPUT_2, CHEAT_INPUT_0, CHEAT_INPUT_2 },
+        "Special atv"
+    },
+    {
+        CHEAT_ID_MONSTER_TRUCK,
+        { CHEAT_INPUT_3, CHEAT_INPUT_2, CHEAT_INPUT_3, CHEAT_INPUT_2 },
+        "Special Monster Truck"
+    },
+    {
+        CHEAT_ID_BART_SEDAN,
+        { CHEAT_INPUT_1, CHEAT_INPUT_3, CHEAT_INPUT_0, CHEAT_INPUT_2 },
+        "Special Bart Sedan"
+    },
+    {
+        CHEAT_ID_RC_CAR,
+        { CHEAT_INPUT_0, CHEAT_INPUT_0, CHEAT_INPUT_3, CHEAT_INPUT_3 },
+        "Special RC Car"
+    },
+    {
         CHEAT_ID_INVINCIBLE_CAR,
         { CHEAT_INPUT_3, CHEAT_INPUT_0, CHEAT_INPUT_3, CHEAT_INPUT_0 },
         "Invincible Car"
@@ -99,6 +134,11 @@ static const Cheat REGISTERED_CHEATS[] =
         CHEAT_ID_TRIPPY,
         { CHEAT_INPUT_3, CHEAT_INPUT_1, CHEAT_INPUT_3, CHEAT_INPUT_1 },
         "Trippy"
+    },
+    {
+        CHEAT_ID_DISABLE_ALL_CHEATS,
+        { CHEAT_INPUT_0, CHEAT_INPUT_3, CHEAT_INPUT_3, CHEAT_INPUT_0 },
+        "Disable All Cheats"
     },
 
     

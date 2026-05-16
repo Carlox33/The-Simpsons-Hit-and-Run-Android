@@ -49,6 +49,23 @@
 
 #include <string.h>
 
+
+#if defined(RAD_ANDROID)
+#include <android/log.h>
+#define LOG_TAG "SimpsonsHitAndRun"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+#include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
 //******************************************************************************
 //
 // Global Data, Local Data, Local Classes
@@ -190,8 +207,11 @@ void FMVPlayer::LoadData( const char* fileName, bool bInInventory, void* pUserDa
 // Return:      void 
 //
 //=============================================================================
+//FUNCION ORIGINAL
+/*
 void FMVPlayer::Play()
 {
+    LOGI("FMV: Play() state=%d player=%p", (int)GetState(), (void*)m_refIRadMoviePlayer);
     if(( GetState() == ANIM_LOADED ) && ( m_refIRadMoviePlayer != NULL ))
     {
         AnimationPlayer::Play();
@@ -216,7 +236,58 @@ void FMVPlayer::Play()
 		}
 
 		m_refIRadMoviePlayer->SetVolume(mMovieVolume);
+
         m_refIRadMoviePlayer->Play( ); 
+    }
+}
+*/
+
+
+
+// NUEVA FUNCION ANDROID
+void FMVPlayer::Play()
+{
+    //LOGI("FMV: Play() state=%d player=%p", (int)GetState(), (void*)m_refIRadMoviePlayer);
+
+    if(( GetState() == ANIM_LOADED ) && ( m_refIRadMoviePlayer != NULL ))
+    {
+        AnimationPlayer::Play();
+
+#ifdef RAD_ANDROID
+        // En Android NO queremos overlay negro al iniciar el vídeo
+        // Alpha 1.0 = transparente
+        FadeScreen(1.0f);
+#else
+        // Comportamiento original en otras plataformas
+        FadeScreen(0.0f);
+        p3d::context->SwapBuffers();
+#endif
+
+        p3d::display->SetForceVSync(true);
+
+#ifdef FINAL
+        m_UserInputHandler->SetEnabled(GetSkippable());
+#endif
+
+        // registrar input
+        for( unsigned i = 0; i < GetInputManager()->GetMaxControllers(); i++ )
+        {
+            GetInputManager()->RegisterMappable( i, m_UserInputHandler );
+        }
+
+        mElapsedTime = 0.0f;
+        mFadeOut = -1.0f;
+
+        mMovieVolume = VOLUME_MULTIPLIER;
+
+        if(GetGameFlow()->GetCurrentContext() != CONTEXT_BOOTUP)
+        {
+            mMovieVolume *= GetSoundManager()->GetDialogueVolume();
+        }
+
+        m_refIRadMoviePlayer->SetVolume(mMovieVolume);
+
+        m_refIRadMoviePlayer->Play();
     }
 }
 
@@ -242,8 +313,15 @@ void FMVPlayer::Abort(void)
 // Return:      void 
 //
 //=============================================================================
+// FUNCION ORIGINAL SOLO CON LOGI
+/*
 void FMVPlayer::Stop()
 { 
+    // NEW LINES FOR LOGI 
+    LOGI("FMV: Stop() state=%d playing=%d player=%p",
+     (int)GetState(), (int)this->IsPlaying(), (void*)m_refIRadMoviePlayer);
+
+// END NEW LINES FOR LOGI 
 	// Force a clear screen.
 	FadeScreen(0.0f);
     p3d::context->SwapBuffers();
@@ -262,7 +340,131 @@ void FMVPlayer::Stop()
     }
 	mFadeOut = -1.0f;
 }
+*/
 
+
+// NEW FUNCION PARA ANDROID 
+/*
+void FMVPlayer::Stop()
+{
+    // ✅ Guard: si ya no hay película “real” en marcha, no hagas nada.
+    if( !this->IsPlaying() || m_refIRadMoviePlayer == NULL )
+    {
+        LOGI("FMV: Stop() IGNORED state=%d playing=%d player=%p",
+             (int)GetState(), (int)this->IsPlaying(), (void*)m_refIRadMoviePlayer);
+        mFadeOut = -1.0f;
+        return;
+    }
+
+    LOGI("FMV: Stop() EXEC state=%d playing=%d player=%p",
+         (int)GetState(), (int)this->IsPlaying(), (void*)m_refIRadMoviePlayer);
+
+    // Force a clear screen.
+   #ifdef RAD_ANDROID
+    FadeScreen(1.0f); // ✅ transparente (no tapes el backbuffer)
+    // p3d::context->SwapBuffers(); // ⚠️ quítalo en Android (ver Cambio 2)
+#else
+    FadeScreen(0.0f);
+    p3d::context->SwapBuffers();
+#endif
+    p3d::display->SetForceVSync(false);
+
+    for( unsigned i = 0; i < GetInputManager()->GetMaxControllers(); i++ )
+    {
+        GetInputManager()->UnregisterMappable( i, m_UserInputHandler );
+    }
+
+    m_UserInputHandler->SetEnabled(true);
+    GetSoundManager()->ResumeAfterMovie();
+    AnimationPlayer::Stop();
+
+    ClearData();
+
+    mFadeOut = -1.0f;
+}
+*/
+
+// NUEVA FUNCION 
+/*
+void FMVPlayer::Stop()
+{
+    // Guard: si ya no hay película “real” en marcha, no hagas nada.
+    if( !this->IsPlaying() || m_refIRadMoviePlayer == NULL )
+    {
+        LOGI("FMV: Stop() IGNORED state=%d playing=%d player=%p",
+             (int)GetState(), (int)this->IsPlaying(), (void*)m_refIRadMoviePlayer);
+        mFadeOut = -1.0f;
+        return;
+    }
+
+    LOGI("FMV: Stop() EXEC state=%d playing=%d player=%p",
+         (int)GetState(), (int)this->IsPlaying(), (void*)m_refIRadMoviePlayer);
+
+    // En Android: NO hacer SwapBuffers aquí (lo controla RenderManager::ContextUpdate)
+#if defined(RAD_ANDROID)
+    FadeScreen(0.0f);
+#else
+    FadeScreen(0.0f);
+    p3d::context->SwapBuffers();
+#endif
+
+    p3d::display->SetForceVSync(false);
+
+    for( unsigned i = 0; i < GetInputManager()->GetMaxControllers(); i++ )
+    {
+        GetInputManager()->UnregisterMappable( i, m_UserInputHandler );
+    }
+
+    m_UserInputHandler->SetEnabled(true);
+    GetSoundManager()->ResumeAfterMovie();
+    AnimationPlayer::Stop();
+
+    ClearData();
+
+    mFadeOut = -1.0f;
+}
+*/
+
+//ULTIMA PRUEBA 
+void FMVPlayer::Stop()
+{
+    // Evitar doble stop
+    if( !this->IsPlaying() || m_refIRadMoviePlayer == NULL )
+    {
+        //LOGI("FMV: Stop() IGNORED state=%d playing=%d player=%p",
+             //(int)GetState(), (int)this->IsPlaying(), (void*)m_refIRadMoviePlayer);
+        mFadeOut = -1.0f;
+        return;
+    }
+
+   // LOGI("FMV: Stop() EXEC state=%d playing=%d player=%p",
+     //    (int)GetState(), (int)this->IsPlaying(), (void*)m_refIRadMoviePlayer);
+
+#ifdef RAD_ANDROID
+    // En Android NO tapar la pantalla con negro
+    FadeScreen(1.0f);
+#else
+    FadeScreen(0.0f);
+    p3d::context->SwapBuffers();
+#endif
+
+    p3d::display->SetForceVSync(false);
+
+    for( unsigned i = 0; i < GetInputManager()->GetMaxControllers(); i++ )
+    {
+        GetInputManager()->UnregisterMappable( i, m_UserInputHandler );
+    }
+
+    m_UserInputHandler->SetEnabled(true);
+
+    GetSoundManager()->ResumeAfterMovie();
+
+    AnimationPlayer::Stop();
+
+    ClearData();
+
+    mFadeOut = -1.0f;
+}
 //=============================================================================
 // FMVPlayer::ForceStop
 //=============================================================================
@@ -406,11 +608,44 @@ void FMVPlayer::DoRender()
         Stop();
     }
 }
-
+// IterateLoop para android que funciona, pero vamos a probar una version "mejorada" por eso la comento 
+/*
 void FMVPlayer::IterateLoop( IRadMoviePlayer2* pIRadMoviePlayer )
 {
-    rAssert( pIRadMoviePlayer != NULL );
+    // NEW LINES FOR DEBUG 
+    #if defined (RAD_ANDROID) && defined (RAD_DEBUG)
+    static int sCount = 0;
+    if ((sCount++ % 30) == 0) // 1 log por ~30 frames
+    {
+        LOGI("FMV: IterateLoop() player=%p state=%d frame=%u time=%.3f",
+             pIRadMoviePlayer,
+             (int)(m_refIRadMoviePlayer ? m_refIRadMoviePlayer->GetState() : -1),
+             pIRadMoviePlayer ? pIRadMoviePlayer->GetCurrentFrameNumber() : 0u,
+             pIRadMoviePlayer ? (pIRadMoviePlayer->GetCurrentFrameNumber() / pIRadMoviePlayer->GetFrameRate()) : 0.0f);
+    }
+#endif
+    //END NEW LINES FOR DEBUG 
 
+    rAssert( pIRadMoviePlayer != NULL );
+// NEW LINES 
+#if defined(RAD_ANDROID)
+    // --- FORCE STATES FOR MOVIE DRAW (debug) ---
+    bool oldZWrite = p3d::pddi->GetZWrite();
+    pddiCompareMode oldZComp = p3d::pddi->GetZCompare();
+
+    p3d::pddi->SetZWrite(false);
+    p3d::pddi->SetZCompare(PDDI_COMPARE_ALWAYS);
+#endif
+
+    pIRadMoviePlayer->Render();
+
+#if defined(RAD_ANDROID)
+    // --- RESTORE STATES ---
+    p3d::pddi->SetZCompare(oldZComp);
+    p3d::pddi->SetZWrite(oldZWrite);
+#endif
+
+// END NEW LINES 
     pIRadMoviePlayer->Render();
 	if(mFadeOut > 0.0f )
 	{
@@ -426,6 +661,76 @@ void FMVPlayer::IterateLoop( IRadMoviePlayer2* pIRadMoviePlayer )
 	}
     mFrameReady = true;
 }
+
+*/
+
+
+// NUEVA FUNCION "MEJORADA"
+
+void FMVPlayer::IterateLoop( IRadMoviePlayer2* pIRadMoviePlayer )
+{
+    // NEW LINES FOR DEBUG 
+    #if defined (RAD_ANDROID) && defined (RAD_DEBUG)
+    static int sCount = 0;
+    if ((sCount++ % 30) == 0) // 1 log por ~30 frames
+    {
+        LOGI("FMV: IterateLoop() player=%p state=%d frame=%u time=%.3f",
+             pIRadMoviePlayer,
+             (int)(m_refIRadMoviePlayer ? m_refIRadMoviePlayer->GetState() : -1),
+             pIRadMoviePlayer ? pIRadMoviePlayer->GetCurrentFrameNumber() : 0u,
+             pIRadMoviePlayer ? (pIRadMoviePlayer->GetCurrentFrameNumber() / pIRadMoviePlayer->GetFrameRate()) : 0.0f);
+    }
+    #endif
+    //END NEW LINES FOR DEBUG 
+
+    rAssert( pIRadMoviePlayer != NULL );
+
+    // NEW LINES 
+#if defined(RAD_ANDROID)
+    // --- FORCE STATES FOR MOVIE DRAW (definitive) ---
+    // En Android/GLES algunos estados de depth (ZCompare/ZWrite) quedan “sucios” del render 3D,
+    // y el quad fullscreen del vídeo puede FALLAR el depth test => vídeo “invisible” y se ve negro/GUI.
+    // Forzamos overlay-style: siempre pasa depth y no escribe Z.
+    bool oldZWrite = p3d::pddi->GetZWrite();
+    pddiCompareMode oldZComp = p3d::pddi->GetZCompare();
+
+    p3d::pddi->SetZWrite(false);
+    p3d::pddi->SetZCompare(PDDI_COMPARE_ALWAYS);
+#endif
+    // END NEW LINES 
+
+    // Render del frame de vídeo (UNA sola vez)
+    pIRadMoviePlayer->Render();
+
+    // NEW LINES 
+#if defined(RAD_ANDROID)
+    // --- RESTORE STATES ---
+    p3d::pddi->SetZCompare(oldZComp);
+    p3d::pddi->SetZWrite(oldZWrite);
+#endif
+    // END NEW LINES 
+
+    if( mFadeOut > 0.0f )
+    {
+        pIRadMoviePlayer->SetVolume( mMovieVolume * mFadeOut );
+        FadeScreen( mFadeOut );
+    }
+
+    float deltaTime = mElapsedTime;
+    mElapsedTime = pIRadMoviePlayer->GetCurrentFrameNumber() / pIRadMoviePlayer->GetFrameRate();
+
+    if( mFadeOut > 0.0f )
+    {
+        deltaTime = mElapsedTime - deltaTime;
+        mFadeOut -= deltaTime * 2.0f; // Half second fade.
+    }
+
+    mFrameReady = true;
+}
+
+
+
+
 
 //=============================================================================
 // FMVPlayer::Finalize
@@ -473,6 +778,15 @@ void FMVPlayer::OnDriveOperationsComplete( void* pUserData )
 
 void FMVPlayer::FadeScreen(float Alpha)
 {
+
+    // NEW LINES FOR DEBUG
+    const float clamped = rmt::Clamp(Alpha, 0.0f, 1.0f);
+    const int finalA = int(0xFF * (1.0f - clamped));
+
+    //  LOG: pon esto aquí
+   // LOGI("FMV: FadeScreen Alpha=%f clamped=%f => finalA=%d playing=%d",
+     //    Alpha, clamped, finalA, (int)this->IsPlaying());
+    //END NEW LINES FOR DEBUG
     tColour c;
 	c.Set( 0, 0, 0, int(0xFF * (1.0f - rmt::Clamp(Alpha, 0.0f, 1.0f))) );
     p3d::stack->Push();

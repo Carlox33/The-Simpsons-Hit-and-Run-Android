@@ -205,10 +205,13 @@ void FMVUserInputHandler::OnControllerDisconnect( int id )
         m_controllerPromptShown = true;
         char str_buffer[256];
         CGuiScreenMessage::GetControllerDisconnectedMessage(controllerID, str_buffer,  255);
-        GetGame()->GetPlatform()->OnControllerError(str_buffer);
+        // FIX temporal anticrash en 64 bits 
+        //GetGame()->GetPlatform()->OnControllerError(str_buffer);
     }
 #endif
 }
+// FUNCION ORIGINAL
+/* 
 void FMVUserInputHandler::OnControllerConnect( int id )
 {
 #ifndef RAD_GAMECUBE
@@ -218,8 +221,28 @@ void FMVUserInputHandler::OnControllerConnect( int id )
     }
 #endif
 }
+*/
 
 
+// NUEVA FUNCION 
+
+void FMVUserInputHandler::OnControllerConnect( int id )
+{
+#ifndef RAD_GAMECUBE
+    int controllerID = GetInputManager()->GetControllerIDforPlayer( 0 );
+
+    if( m_controllerPromptShown && id == controllerID )
+    {
+        GetGame()->GetPlatform()->ClearControllerError();
+        m_controllerPromptShown = false;
+        m_controllerReconnect = false;
+    }
+#endif
+}
+
+// FUNCION ORIGINAL 
+
+/*
 void FMVUserInputHandler::OnButtonDown( int controllerId, int buttonId, const IButton* pButton )
 {
     bool button_skip = buttonId == FMVInput::Skip;
@@ -242,6 +265,27 @@ void FMVUserInputHandler::OnButtonDown( int controllerId, int buttonId, const IB
         }
     }
 }
+*/
+
+// NUEVA FUNCION 
+void FMVUserInputHandler::OnButtonDown( int controllerId, int buttonId, const IButton* pButton )
+{
+    bool button_skip = buttonId == FMVInput::Skip;
+
+    if (buttonId==FMVInput::Start) // start also skip
+        button_skip = true;
+
+    else if( m_isEnabled && button_skip )
+    {
+        if( GetPresentationManager()->GetFMVPlayer()->IsPlaying() &&
+            GetPresentationManager()->GetFMVPlayer()->GetElapsedTime() > MIN_MOVIE_TIME )
+        {
+            GetPresentationManager()->GetFMVPlayer()->Abort();
+        }
+    }
+}
+
+
 
 void FMVUserInputHandler::LoadControllerMappings( unsigned int controllerId )
 {

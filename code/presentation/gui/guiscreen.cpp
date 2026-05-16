@@ -45,6 +45,24 @@
 #include <input/inputmanager.h>
 #endif
 
+
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+  #define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
+
 //===========================================================================
 // Global Data, Local Data, Local Classes
 //===========================================================================
@@ -216,7 +234,17 @@ CGuiScreen::CGuiScreen
         pPage = m_pScroobyScreen->GetPage( ACCEPT_PAGES[ j ] );
         if( pPage != NULL )
         {
+
             m_buttonIcons[ BUTTON_ICON_ACCEPT ] = pPage->GetGroup( "AcceptLabel" );
+
+            #if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+                LOGI("[CGuiScreen] Accept page chosen='%s' group=%p size=%u",
+                ACCEPT_PAGES[j],
+                (void*)m_buttonIcons[BUTTON_ICON_ACCEPT],
+                 m_buttonIcons[BUTTON_ICON_ACCEPT] ? m_buttonIcons[BUTTON_ICON_ACCEPT]->Size() : 0);
+            #endif
+
+            
             rAssert( m_buttonIcons[ BUTTON_ICON_ACCEPT ] != NULL );
 
 #ifdef RAD_WIN32
@@ -246,6 +274,15 @@ CGuiScreen::CGuiScreen
         if( pPage != NULL )
         {
             m_buttonIcons[ BUTTON_ICON_BACK ] = pPage->GetGroup( "BackLabel" );
+
+           #if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+            LOGI("[CGuiScreen] Back page chosen='%s' group=%p size=%u",
+                BACK_PAGES[k],
+                (void*)m_buttonIcons[BUTTON_ICON_BACK],
+                m_buttonIcons[BUTTON_ICON_BACK] ? m_buttonIcons[BUTTON_ICON_BACK]->Size() : 0);
+            #endif
+
+
             rAssert( m_buttonIcons[ BUTTON_ICON_BACK ] != NULL );
 
 #ifdef RAD_WIN32
@@ -839,6 +876,7 @@ CGuiScreen::RestoreButtons()
         if( m_buttonIcons[ i ] != NULL )
         {
             m_buttonIcons[ i ]->SetVisible( true );
+            /*ORIGINAL CODE (SWITCH AND PSVITA PORT )
 #if defined( RAD_WIN32 ) && !defined( RAD_PC )
             Scrooby::BoundedDrawable* buttonIcon = dynamic_cast< Scrooby::BoundedDrawable* >( m_buttonIcons[ i ]->GetChildDrawable( 1 ) );
             if( buttonIcon )
@@ -847,6 +885,41 @@ CGuiScreen::RestoreButtons()
                 buttonIcon->ScaleAboutCenter( BUTTON_SCALE );
             }
 #endif
+*/
+#if defined( RAD_WIN32 ) && !defined( RAD_PC )
+
+    #ifdef RAD_ANDROID
+    const int childCount = m_buttonIcons[i]->Size();
+    //LOGI("[RestoreButtons] icon=%d ptr=%p childrenCount=%d",
+      //   i, (void*)m_buttonIcons[i], childCount);
+
+    if( childCount > 1 )
+    {
+    #endif
+
+        Scrooby::BoundedDrawable* buttonIcon =
+            dynamic_cast< Scrooby::BoundedDrawable* >(
+                m_buttonIcons[ i ]->GetChildDrawable( 1 )
+            );
+
+        if( buttonIcon )
+        {
+            buttonIcon->ResetTransformation();
+            buttonIcon->ScaleAboutCenter( BUTTON_SCALE );
+        }
+
+    #ifdef RAD_ANDROID
+    }
+    else
+    {
+        //LOGI("[RestoreButtons] Skipping icon %d because childrenCount=%d",
+          //   i, childCount);
+    }
+    #endif
+
+#endif
+
+
         }
     }
 }

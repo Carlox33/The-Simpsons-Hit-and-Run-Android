@@ -63,6 +63,27 @@
 #include <mission/gameplaymanager.h>
 #include <mission/objectives/missionobjective.h>
 #include <Screen.h>
+
+
+
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+  #define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
+
+
 //******************************************************************************
 //
 // Global Data, Local Data, Local Classes
@@ -494,6 +515,7 @@ Description:    This is a callback when the event queued by PlayFMV.
 =============================================================================*/
 void PresentationManager::OnPresentationEventBegin( PresentationEvent* pEvent )
 {
+    //LOGI("[PM] OnPresentationEventBegin removing overlay");
     Context* context = GetGameFlow()->GetContext( GetGameFlow()->GetCurrentContext() );
     if( dynamic_cast<GameplayContext*>( context ) )
     {
@@ -507,6 +529,8 @@ void PresentationManager::OnPresentationEventBegin( PresentationEvent* pEvent )
     RenderLayer* rl = GetRenderManager()->mpLayer( RenderEnums::PresentationSlot );
     rAssert( rl );
     rl->RemoveGuts( mOverlay );
+    //LOGI("[PM] Overlay removed from PresentationSlot");
+    mWaitingOnFade = false; //NEW LINE FOR ANDROID 
 }
 /*=============================================================================
 Description:    This is a callback when the event queued by PlayFMV.
@@ -661,7 +685,8 @@ void PresentationManager::Update( unsigned int elapsedTime )
 
     if( mWaitingOnFade )
     {
-        if( mOverlay->GetAlpha() == 0.0f )
+        //if( mOverlay->GetAlpha() == 0.0f )// ORIGINAL LINE (PROBLEM ANDROID 64 bits )
+        if( mOverlay->GetAlpha() <= 0.001f )// NEW LINE FOR ANDROID 
         {
             // get one extra frame of full black.
             mWaitingOnFade = false;
@@ -1246,10 +1271,20 @@ void PresentationOverlay::Display( void )
         }
         alpha = mEnd.Alpha();
     }
+    
+    /*
     if( alpha <= 0 )
     {
+        LOGI("[OVERLAY] alpha<=0 frameCount=%d mAlpha=%f",
+         mFrameCount,
+         mAlpha);
         return;
     }
+    LOGI("[OVERLAY] DRAW alpha=%d frameCount=%d mAlpha=%f",
+     alpha,
+     mFrameCount,
+     mAlpha);
+     */
     // Now figure out the colour.
     tColour c;
     if( mFrameCount == -1 )

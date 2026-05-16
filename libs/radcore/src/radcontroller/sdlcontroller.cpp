@@ -36,6 +36,14 @@
 
 #include <SDL.h>
 
+#if defined(RAD_ANDROID)
+#include <SDL_system.h>
+#include <jni.h>
+#endif
+
+
+
+
 //============================================================================
 // Internal Interfaces
 //============================================================================
@@ -142,6 +150,101 @@ static SDLInputPoint g_SDLPoints[] =
 static class radControllerSystemSDL* s_pTheSDLControllerSystem2 = NULL;
 static radMemoryAllocator g_ControllerSystemAllocator = RADMEMORY_ALLOC_DEFAULT;
 
+
+#if defined(RAD_ANDROID)
+static bool AndroidJavaRumbleFallback(float intensity, int length)
+{
+    JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+    if (env == NULL)
+    {
+       
+        return false;
+    }
+
+    jclass cls = env->FindClass("org/libsdl/app/SDLControllerManager");
+    if (cls == NULL)
+    {
+        
+        if (env->ExceptionCheck())
+        {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        }
+        return false;
+    }
+
+    jmethodID mid = env->GetStaticMethodID(cls, "rumbleFallback", "(FI)Z");
+    if (mid == NULL)
+    {
+        
+        if (env->ExceptionCheck())
+        {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        }
+        env->DeleteLocalRef(cls);
+        return false;
+    }
+
+    jboolean result = env->CallStaticBooleanMethod(cls, mid, (jfloat)intensity, (jint)length);
+    if (env->ExceptionCheck())
+    {
+        
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        env->DeleteLocalRef(cls);
+        return false;
+    }
+
+    env->DeleteLocalRef(cls);
+    return result == JNI_TRUE;
+}
+
+static void AndroidJavaStopRumbleFallback()
+{
+    JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+    if (env == NULL)
+    {
+        
+        return;
+    }
+
+    jclass cls = env->FindClass("org/libsdl/app/SDLControllerManager");
+    if (cls == NULL)
+    {
+        
+        if (env->ExceptionCheck())
+        {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        }
+        return;
+    }
+
+    jmethodID mid = env->GetStaticMethodID(cls, "stopRumbleFallback", "()V");
+    if (mid == NULL)
+    {
+        
+        if (env->ExceptionCheck())
+        {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        }
+        env->DeleteLocalRef(cls);
+        return;
+    }
+
+    env->CallStaticVoidMethod(cls, mid);
+    if (env->ExceptionCheck())
+    {
+       
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+    }
+
+    env->DeleteLocalRef(cls);
+}
+#endif
 //============================================================================
 // Component: radControllerOutputPointSDL
 //============================================================================
@@ -217,6 +320,8 @@ class radControllerOutputPointSDL
         {
             value = 1.0f;
         }
+		
+		
 
         m_Gain = value;
     }
@@ -669,6 +774,8 @@ class radControllerSDL
     // radControllerSDL::iPoll
     //========================================================================
 
+// FUNCION ORIGINAL(LA COMENTO PARA PONER LA DE ABAJO CON ALGUNOS LOGI Y LOGE EXTRA)
+/**
     virtual void iPoll( unsigned int virtualTime )
     {
         //
@@ -681,6 +788,7 @@ class radControllerSDL
         {
             if ( m_pController != NULL )
             {
+				
 #if SDL_MAJOR_VERSION < 3
                 SDL_GameControllerUpdate();
 #else
@@ -732,6 +840,201 @@ class radControllerSDL
             }
         }                  
     }
+
+*/
+
+// NUEVOS METODOS 
+    bool EnsureHapticReady( void )
+    {
+        if ( m_HapticReady && m_pHaptic != NULL )
+        {
+            return true;
+        }
+
+        if ( m_pController == NULL )
+        {
+
+            return false;
+        }
+
+#if SDL_MAJOR_VERSION < 3
+        SDL_Joystick * pJoystick = SDL_GameControllerGetJoystick( m_pController );
+#else
+        SDL_Joystick * pJoystick = SDL_GetGamepadJoystick( m_pController );
+#endif
+
+        if ( pJoystick == NULL )
+        {
+
+            return false;
+        }
+
+        if ( SDL_JoystickIsHaptic( pJoystick ) != SDL_TRUE )
+        {
+
+            return false;
+        }
+
+        if ( m_pHaptic == NULL )
+        {
+            m_pHaptic = SDL_HapticOpenFromJoystick( pJoystick );
+            if ( m_pHaptic == NULL )
+            {
+
+                return false;
+            }
+        }
+
+        if ( SDL_HapticRumbleInit( m_pHaptic ) != 0 )
+        {
+
+            SDL_HapticClose( m_pHaptic );
+            m_pHaptic = NULL;
+            return false;
+        }
+
+        m_HapticReady = true;
+
+        return true;
+    }
+
+    bool RunHapticFallback( uint16_t left, uint16_t right )
+    {
+        if ( !EnsureHapticReady() )
+        {
+            return false;
+        }
+
+        float strength = ( ( left > right ) ? left : right ) / 65535.0f;
+
+        if ( strength <= 0.0f )
+        {
+            if ( SDL_HapticRumbleStop( m_pHaptic ) != 0 )
+            {
+
+                return false;
+            }
+
+
+            return true;
+        }
+
+        // Pequeña duración para que el poll la vaya renovando continuamente.
+        Uint32 durationMs = 50;
+
+        if ( SDL_HapticRumblePlay( m_pHaptic, strength, durationMs ) != 0 )
+        {
+
+            return false;
+        }
+
+
+        return true;
+    }
+// FIN NUEVOS METODOS 
+
+virtual void iPoll( unsigned int virtualTime )
+{
+    if ( GetRefCount( ) > 1 )
+    {
+        if ( m_pController != NULL )
+        {
+#if SDL_MAJOR_VERSION < 3
+            SDL_GameControllerUpdate();
+#else
+            SDL_UpdateGamepads();
+#endif
+        }
+
+        {
+            IRadControllerOutputPoint * pICop2_Left  =
+                reinterpret_cast< IRadControllerOutputPoint * >( m_xIOl_OutputPoints->GetAt( 0 ) );
+            IRadControllerOutputPoint * pICop2_Right =
+                reinterpret_cast< IRadControllerOutputPoint * >( m_xIOl_OutputPoints->GetAt( 1 ) );
+
+            uint16_t newLeftGain  = (uint16_t)( pICop2_Left->GetGain()  * 65535.0f );
+            uint16_t newRightGain = (uint16_t)( pICop2_Right->GetGain() * 65535.0f );
+
+            if
+            (
+                ( newLeftGain  != m_LeftGain ) ||
+                ( newRightGain != m_RightGain )
+            )
+            {
+                m_LeftGain  = newLeftGain;
+                m_RightGain = newRightGain;
+
+                rAssert( m_pController != NULL );
+
+                int result = 0;
+
+                if ( m_pController != NULL )
+                {
+
+
+#if SDL_MAJOR_VERSION < 3
+                    result = SDL_GameControllerRumble(
+                        m_pController,
+                        m_LeftGain,
+                        m_RightGain,
+                        0
+                    );
+#else
+                    result = SDL_RumbleGamepad(
+                        m_pController,
+                        m_LeftGain,
+                        m_RightGain,
+                        0
+                    );
+#endif
+
+                    if ( result != 0 )
+                    {
+
+
+							#if defined(RAD_ANDROID)
+							float strength = ( ( m_LeftGain > m_RightGain ) ? m_LeftGain : m_RightGain ) / 65535.0f;
+							// Aumento  global de vibración para Android Java fallback
+							strength *= 1.5f;
+
+							if ( strength > 1.0f )
+							{
+						strength = 1.0f;
+							}
+
+					if ( strength > 0.0f )
+{
+    AndroidJavaRumbleFallback( strength, 60 );
+}
+else
+{
+    AndroidJavaStopRumbleFallback();
+}
+#endif
+                }
+                else
+                {
+#if SDL_MAJOR_VERSION < 3
+                    SDL_GameControllerRumble(
+                        m_pController,
+                        m_LeftGain,
+                        m_RightGain,
+                        0
+                    );
+#else
+                    SDL_RumbleGamepad(
+                        m_pController,
+                        m_LeftGain,
+                        m_RightGain,
+                        0
+                    );
+#endif
+                }
+            }
+        }
+    }
+}
+}
 
     //========================================================================
     // radControllerSDL::iVirtualTimeReMapped
@@ -812,7 +1115,7 @@ class radControllerSDL
         //
         return "SDLStandard";
     }
-    
+
     //========================================================================
     // radControllerSDL::GetClassification
     //========================================================================
@@ -853,7 +1156,7 @@ class radControllerSDL
             if ( strcmp( pICip2->GetType( ), pType ) == 0 )
             {
                 count++;
-            }        
+            }
         }
 
         return count;
@@ -883,7 +1186,7 @@ class radControllerSDL
             if ( strcmp( pICip2->GetType( ), pType ) == 0 )
             {
                 count++;
-            }        
+            }
         }
 
         return count;
@@ -924,7 +1227,7 @@ class radControllerSDL
                 count++;
             }
         }
-        
+
         return NULL;
     }
 
@@ -933,10 +1236,10 @@ class radControllerSDL
     //========================================================================
 
     IRadControllerOutputPoint * GetOutputPointByTypeAndIndex
-    (  
+    (
         const char * pType,
         unsigned int index
-    ) 
+    )
     {
         //
         // Just loop through all of the Output points counting each one of
@@ -1096,7 +1399,9 @@ class radControllerSDL
     )
         :
         radRefCount( 0 ),
-        m_pController( pController )
+        m_pController( pController ),
+		m_pHaptic( NULL ),
+		m_HapticReady( false )
     {
         radMemoryMonitorIdentifyAllocation( this, g_nameFTech, "radControllerSDL" );
 
@@ -1138,7 +1443,7 @@ class radControllerSDL
 			ref< radControllerInputPointSDL > pInputPoint = new( g_ControllerSystemAllocator ) radControllerInputPointSDL
 			(
                 m_pController,
-                g_SDLPoints[ button ].m_pType, 
+                g_SDLPoints[ button ].m_pType,
                 g_SDLPoints[ button ].m_pName,
                 g_SDLPoints[ button ].m_Mask
             );
@@ -1160,13 +1465,15 @@ class radControllerSDL
 
             m_xIOl_OutputPoints->AddObject( reinterpret_cast< IRefCount * >( pLeft ) );
             m_xIOl_OutputPoints->AddObject( reinterpret_cast< IRefCount * >( pRight ) );
+
+
         }
 
         //
         // Set everything to a know state using our regular runtime functions.
         // Note that the controller might get created during gameplay after
         // the controller system has been run for a while.
-        // 
+        //
 
         iSetBufferTime( bufferTime, pollingRate );
         iVirtualTimeReMapped( virtualTime );
@@ -1178,7 +1485,12 @@ class radControllerSDL
 
     ~radControllerSDL( void )
     {
+    if ( m_pHaptic != NULL )
+    {
+        SDL_HapticClose( m_pHaptic );
+        m_pHaptic = NULL;
     }
+}
 
     //========================================================================
     // radControllerSDL Data Members
@@ -1188,12 +1500,14 @@ class radControllerSDL
 #else
     SDL_Gamepad *                     m_pController;
 #endif
+	SDL_Haptic *                      m_pHaptic; // nuevas lineas para hacer fallback a SDL haptic y de esta forma tener vibracion
+    bool                              m_HapticReady; // nueva linea para el mismo proposito de arriba
 
     ref< IRadObjectList >             m_xIOl_InputPoints;
     ref< IRadObjectList >             m_xIOl_OutputPoints;
 
     ref< IRadString >                 m_xIString_Location;
-    
+
     uint16_t                          m_LeftGain, m_RightGain;
 };
 
@@ -1278,7 +1592,7 @@ class radControllerSystemSDL
             if( xISDLController2 == NULL )
             {
                 //
-                // Here the controller at this location has not yet been 
+                // Here the controller at this location has not yet been
                 // constructed, so construct a new controller
                 //
 
@@ -1286,7 +1600,7 @@ class radControllerSystemSDL
                 unsigned int pollingRate = 10;
 
                 virtualTime = radTimeGetMilliseconds() + sys->m_VirtualTimeAdjust;
-                            
+
                 if ( sys->m_xITimer != NULL )
                 {
                     pollingRate = sys->m_xITimer->GetTimeout( );
@@ -1323,7 +1637,7 @@ class radControllerSystemSDL
             //
             if ( xIController2 != NULL )
             {
-                //We need to remove this from the set as the next thing to 
+                //We need to remove this from the set as the next thing to
                 //plug in could be a new type of controller.
                 sys->m_xIOl_Controllers->RemoveObject( xIController2 );
             }
@@ -1452,7 +1766,7 @@ class radControllerSystemSDL
             m_UsingVirtualTime = true;
         }
 
-        
+
         unsigned int pollingRate = 10;
 
         pollingRate = m_xITimer->GetTimeout( );
@@ -1501,7 +1815,7 @@ class radControllerSystemSDL
         while ((pIXbc2 = reinterpret_cast< IRadControllerSDL * >( m_xIOl_Controllers->GetNext( ) )))
         {
             pIXbc2->iVirtualTimeReMapped( radTimeGetMilliseconds() + m_VirtualTimeAdjust );
-        }       
+        }
     }
 
     //========================================================================
@@ -1591,8 +1905,8 @@ class radControllerSystemSDL
                 return;
             }
         }
-        
-        rAssertMsg( false, "Controller connection change callback not registered." );            
+
+        rAssertMsg( false, "Controller connection change callback not registered." );
     }
 
     //========================================================================
@@ -1601,7 +1915,7 @@ class radControllerSystemSDL
 
     void Service( void )
     {
-        m_xITimerList->Service(  );   
+        m_xITimerList->Service(  );
     }
 
     //========================================================================
@@ -1626,7 +1940,7 @@ class radControllerSystemSDL
         //
         rAssert( s_pTheSDLControllerSystem2 == NULL );
         s_pTheSDLControllerSystem2 = this;
-        
+
         g_ControllerSystemAllocator = thisAllocator;
 
 		//
@@ -1637,7 +1951,7 @@ class radControllerSystemSDL
         //
         // Create a timer list to drive the processing of contollers
         //
-    
+
         radTimeCreateList( &m_xITimerList, 1, g_ControllerSystemAllocator );
 
         m_xITimerList->CreateTimer( & m_xITimer, 10, this );
@@ -1728,7 +2042,7 @@ class radControllerSystemSDL
 
         //
         // Set everything to know state
-        //        
+        //
         SetCaptureRate( 10 );
         MapVirtualTime( 0, 0 );
         SetBufferTime( 0 );
@@ -1737,7 +2051,7 @@ class radControllerSystemSDL
     //========================================================================
     // radControllerSystemSDL::~radControllerSystemSDL
     //========================================================================
-        
+
     ~radControllerSystemSDL( void )
     {
         //
@@ -1752,7 +2066,7 @@ class radControllerSystemSDL
         //
         // Make sure the client(s) unregistered all of their callbacks.
         //
-        
+
         rAssertMsg( m_xIOl_Callbacks->GetSize() == 0, "Somebody forgot to unregister a controller connection change callback" );
 
         g_ControllerSystemAllocator = RADMEMORY_ALLOC_DEFAULT;
@@ -1770,7 +2084,7 @@ class radControllerSystemSDL
     //========================================================================
     // Data Members
     //========================================================================
-    
+
     bool m_UsingVirtualTime;
     unsigned int m_VirtualTimeAdjust;
     unsigned int m_EventBufferTime;
@@ -1823,7 +2137,7 @@ void radControllerTerminate( void )
 // Use this function to obtain an interface to the controller system object.
 //
 IRadControllerSystem* radControllerSystemGet
-( 
+(
     void
 )
 {

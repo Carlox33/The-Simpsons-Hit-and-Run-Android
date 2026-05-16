@@ -9,7 +9,7 @@
 //
 // only win32 and xbox take advantage of the pch at this moment.
 //
-#if defined RAD_WIN32 || defined RAD_XBOX
+#if defined RAD_WIN32 || defined RAD_XBOX || defined RAD_ANDROID
 //
 // Microsoft header files
 //
@@ -21,6 +21,8 @@
 #ifdef RAD_XBOX
 #include <xtl.h>
 #include <dsound.h>
+#elif defined RAD_ANDROID
+
 #else
 #include <al.h>
 #include <alc.h>
@@ -33,6 +35,6 @@
 
 #include <stdio.h>
 
-#endif // defined RAD_WIN32 || defined RAD_XBOX
+#endif // defined RAD_WIN32 || defined RAD_XBOX|| defined RAD_ANDROID
 
 #endif // RADSOUND_PCH_HPP

@@ -59,10 +59,8 @@ bool tPNGHandler::CheckFormat(Format format)
 
 void tPNGHandler::CreateImage(tFile* file, tImageHandler::Builder* builder)
 {
-    png_structp pPNG = png_create_read_struct_2
-         (PNG_LIBPNG_VER_STRING, 
-         0, p3d_png_err, p3d_png_warn, 
-         0, p3d_png_malloc, p3d_png_free);
+    png_structp pPNG = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+
 
     if(!pPNG)
     {

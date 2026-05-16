@@ -69,6 +69,8 @@ set(RADCORE_SOURCES
 	"src/radtime/time.cpp"
 )
 
+# esto es la carga de los assets de la version de pc, aqui tendre luego que añadir un archivo
+# o modificar el sdldrive.cpp para android 
 if(VITA)
 	list(APPEND RADCORE_SOURCES	"src/radfile/vita/vitadrive.cpp")
 else()
@@ -77,6 +79,14 @@ endif()
 if(SRR2_MICROPROFILE)
 	list(APPEND RADCORE_SOURCES	"src/radprofiler/microprofile.cpp")
 endif()
+
+#if(ANDROID)
+	#list(REMOVE_ITEM RADCORE_SOURCES
+	#	"src/radmemory/dlheap.cpp"
+	#	"src/radmemory/platalloc.cpp"
+	#)
+	#message(STATUS "Android: Excluded Windows-specific memory allocators")
+#endif()
 
 add_library(radcore STATIC ${RADCORE_SOURCES})
 target_include_directories(radcore

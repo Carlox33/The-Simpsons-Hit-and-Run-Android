@@ -272,8 +272,11 @@ void CGuiScreenPauseMission::HandleMessage
                     }
                     case MENU_ITEM_OPTIONS:
                     {
+                        // Linea original
                         m_pParent->HandleMessage( GUI_MSG_GOTO_SCREEN, GUI_SCREEN_ID_OPTIONS );
+                        // fin linea original
 
+                        
                         break;
                     }
                     case MENU_ITEM_QUIT_GAME:

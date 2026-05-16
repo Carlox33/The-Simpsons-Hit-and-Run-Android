@@ -88,6 +88,24 @@
 #include <radmemorymonitor.hpp>
 #include <worldsim/worldphysicsmanager.h>
 #endif
+
+
+#if defined(RAD_ANDROID)
+#include <android/log.h>
+#define LOG_TAG "SimpsonsHitAndRun"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+#include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
 //******************************************************************************
 //
 // Global Data, Local Data, Local Classes
@@ -484,6 +502,8 @@ bool RenderManager::LoadAllNeededData
 // Constraints: 
 //
 //==============================================================================
+// FUNCION ORIGINAL 
+/*
 void RenderManager::ContextUpdate( unsigned int iElapsedTime )
 {
     // On the PS2, use a minimum blur all the time    
@@ -533,6 +553,8 @@ void RenderManager::ContextUpdate( unsigned int iElapsedTime )
     END_PROFILE( "Begin Frame" );
 
     // Render Stuff; call your Render shots, Tex.
+    // FOR original,
+    
     for( int i=RenderEnums::numLayers-1; i>-1; i-- )
     {
 #ifdef DEBUGINFO_ENABLED
@@ -550,6 +572,7 @@ void RenderManager::ContextUpdate( unsigned int iElapsedTime )
     END_PROFILE( "Layers" );
         }
     }
+
 
 
     END_PROFILE( "Rendering" );
@@ -619,7 +642,46 @@ void RenderManager::ContextUpdate( unsigned int iElapsedTime )
 
         GetGame()->SetTime( time );
     }
+#if defined(RAD_ANDROID) && defined (RAD_DEBUG)
+{
+	if(!p3d::display || !p3d::pddi){
+		// NO HACER NADA. MUCHO OJO ESTO SIN EL IF ELSE DE ARRIBA HA PROVOCADO CRASH EN 32 bits, el codigo de este juego es poco estable me parece
+	}else{
+    static int frames = 0;
+    static unsigned int lastTime = 0;
+    static int fps = 0;
 
+    unsigned int now = radTimeGetMilliseconds();
+
+    if (lastTime == 0)
+        lastTime = now;
+
+    frames++;
+
+    if (now - lastTime >= 1000)
+    {
+        fps = frames;
+        frames = 0;
+        lastTime = now;
+    }
+
+    char buff[32];
+    sprintf(buff, "FPS: %d", fps);
+
+    const int RIGHT = p3d::display->GetWidth() - 150;
+    const int TOP   = 40;
+
+    const pddiColour GREEN(0,255,0);
+    const pddiColour BLACK(0,0,0);
+
+// sombra (ligeramente desplazada)
+    p3d::pddi->DrawString(buff, RIGHT + 2, TOP + 2, BLACK);
+
+// texto principal
+p3d::pddi->DrawString(buff, RIGHT, TOP, GREEN);
+}
+}
+#endif
    p3d::context->EndFrame( false );
 
 
@@ -638,6 +700,738 @@ void RenderManager::ContextUpdate( unsigned int iElapsedTime )
     //unsigned int time1 = radTimeGetMicroseconds();
     //rReleasePrintf( "Render Loop: %d micro's\n", time1-time0 );
 }
+
+*/
+
+
+// NUEVA FUNCION 
+/*
+void RenderManager::ContextUpdate( unsigned int iElapsedTime )
+{
+    // On the PS2, use a minimum blur all the time    
+#ifdef RAD_PS2
+    ApplyPS2Blur();
+#endif
+
+    GetIntersectManager()->mbSameFrame = false;
+#ifdef DEBUGWATCH
+   unsigned int t0 = radTimeGetMicroseconds();
+#endif 
+    BEGIN_PROFILE( "Rendering" );
+
+
+    BEGIN_PROFILE( "Swap Buffers" );
+    p3d::context->SwapBuffers();
+    END_PROFILE( "Swap Buffers" );
+
+#if defined( RAD_XBOX ) || defined ( RAD_GAMECUBE ) || defined( RAD_WIN32 )
+    LoadingManager* lm = GetLoadingManager();
+    PresentationManager* pm = GetPresentationManager();
+    p3d::display->SetForceVSync( lm && !lm->IsLoading(), !(pm && pm->GetFMVPlayer()->IsPlaying()));               
+#endif
+
+#ifdef LOAD_SYNC
+    FlushDelList(); 
+#else
+    MunchDelList(2000);   // work on the DelList for up to 2000 microseconds, then return
+#endif
+    
+	BEGIN_PROFILE( "Lens Flare Frame Buffer Read" );
+	LensFlareDSG::ReadFrameBufferIntensities();
+	END_PROFILE( "Lens Flare Frame Buffer Read" );
+
+#ifdef DEBUGWATCH
+    mDebugSwapTime = radTimeGetMicroseconds()-t0;
+    t0 = radTimeGetMicroseconds();
+#endif 
+
+    if( mMood.mTransition >= 0.0f )
+    {
+        TransitionMoodLighting( iElapsedTime );
+    }
+
+    BEGIN_PROFILE( "Begin Frame" );
+    p3d::context->BeginFrame();
+    END_PROFILE( "Begin Frame" );
+
+    // NEW LINES
+#if defined(RAD_ANDROID)
+    // Detectar ON/OFF de FMV y registrar el estado de capas
+    static bool sPrevFmv = false;
+    bool fmvPlaying = false;
+
+    //PresentationManager* pm = GetPresentationManager();
+    if (pm && pm->GetFMVPlayer())
+        fmvPlaying = pm->GetFMVPlayer()->IsPlaying();
+
+    const bool gui  = mpRenderLayers[RenderEnums::GUI]->IsRenderReady();
+    const bool pres = mpRenderLayers[RenderEnums::PresentationSlot]->IsRenderReady();
+    const bool lvl  = mpRenderLayers[RenderEnums::LevelSlot]->IsRenderReady();
+
+    if (fmvPlaying != sPrevFmv)
+    {
+        sPrevFmv = fmvPlaying;
+        LOGI("RM: FMV transition -> %d | RenderReady GUI=%d PRES=%d LEVEL=%d",
+             (int)fmvPlaying, (int)gui, (int)pres, (int)lvl);
+
+        // Log y fuerza de ClearMask en el view del PresentationSlot
+        RenderLayer* pr = mpRenderLayers[RenderEnums::PresentationSlot];
+        if (pr && pr->GetNumViews() > 0 && pr->pView(0))
+        {
+            // Si existe GetClearMask en tu SDK, úsalo; si no, deja solo el SetClearMask(0).
+            // LOGI("RM: PRES view0 clearMask(before)=%u", (unsigned)pr->pView(0)->GetClearMask());
+            pr->pView(0)->SetClearMask(0);
+            LOGI("RM: PRES view0 SetClearMask(0) forced (FMV=%d)", (int)fmvPlaying);
+        }
+        else
+        {
+            LOGE("RM: PRES view0 not available to force ClearMask!");
+        }
+    }
+
+    // Mientras el FMV está activo, refuerza ClearMask(0) por si alguien lo pisa cada frame
+    if (fmvPlaying && pres)
+    {
+        RenderLayer* pr = mpRenderLayers[RenderEnums::PresentationSlot];
+        if (pr && pr->GetNumViews() > 0 && pr->pView(0))
+        {
+            pr->pView(0)->SetClearMask(0);
+        }
+    }
+#endif
+    //END NEW LINES
+
+    // Render Stuff; call your Render shots, Tex.
+    // FOR original,
+    
+// NEW LINES 12:21 
+// NEW LINES
+#if defined(RAD_ANDROID)
+    bool isFmv = false;
+    {
+        PresentationManager* pm = GetPresentationManager();
+        if(pm && pm->GetFMVPlayer())
+            isFmv = pm->GetFMVPlayer()->IsPlaying();
+    }
+
+    // Detecta transición (para no spamear)
+    sPrevFmv = -1;
+    if(sPrevFmv != (int)isFmv)
+    {
+        sPrevFmv = (int)isFmv;
+        LOGI("RM: FMV transition -> %d | RenderReady GUI=%d PRES=%d LEVEL=%d",
+             (int)isFmv,
+             mpRenderLayers[RenderEnums::GUI]->IsRenderReady(),
+             mpRenderLayers[RenderEnums::PresentationSlot]->IsRenderReady(),
+             mpRenderLayers[RenderEnums::LevelSlot]->IsRenderReady());
+    }
+
+    if(isFmv && mpRenderLayers[RenderEnums::PresentationSlot])
+    {
+        tView* v = mpRenderLayers[RenderEnums::PresentationSlot]->pView(0);
+        if(v)
+        {
+            // CLAVE: limpiar COLOR + DEPTH para evitar ghosting y depth “sucio”
+            const int wantMask = PDDI_BUFFER_COLOUR | PDDI_BUFFER_DEPTH;
+
+            // (Opcional) también puedes meter STENCIL si tu build lo usa:
+            // const int wantMask = PDDI_BUFFER_COLOUR | PDDI_BUFFER_DEPTH | PDDI_BUFFER_STENCIL;
+
+            v->SetClearMask(wantMask);
+
+            static int sOnce = 0;
+            if(!sOnce) { sOnce = 1; LOGI("RM: PRES view0 SetClearMask(COLOUR|DEPTH) while FMV"); }
+        }
+        else
+        {
+            LOGE("RM: PRES view0 is NULL during FMV");
+        }
+    }
+#endif
+// END NEW LINES
+
+// END NEW LINES 
+
+
+    for( int i=RenderEnums::numLayers-1; i>-1; i-- )
+    {
+#ifdef DEBUGINFO_ENABLED
+        // We need to render the debug info just before we render the GUI layer
+        //since rendering that layer changes the world matrix.
+        if( i == RenderEnums::GUI )
+        {
+            DEBUGINFO_RENDER();
+        }
+#endif
+        if( mpRenderLayers[i]->IsRenderReady() )
+        {    
+    BEGIN_PROFILE( "Layers" );
+            mpRenderLayers[i]->Render();
+    END_PROFILE( "Layers" );
+        }
+    }
+
+    END_PROFILE( "Rendering" );
+
+#ifdef DEBUGWATCH
+    t0 = radTimeGetMicroseconds();
+#endif 
+#ifndef FINAL
+    BEGIN_PROFILE( "Dump Stats" );
+    HeapMgr()->DumpHeapStats();
+    HeapMgr()->DumpArtStats();
+    END_PROFILE( "Dump Stats" );
+#endif 
+
+    RENDER_PROFILER();
+
+    //MEMTRACK_RENDER();
+
+    //HEAPSTACKS_RENDER();
+
+    SOUNDDEBUG_RENDER();
+
+#ifdef USE_BLUR
+    ((pddiExtFramebufferEffects*)p3d::pddi->GetExtension( PDDI_EXT_FRAMEBUFFER_EFFECTS ))->EnableMotionBlur( mEnableMotionBlur || ENABLE_MOTION_BLUR, mBlurAlpha, BLUR_SCALE, false );
+    ((pddiExtFramebufferEffects*)p3d::pddi->GetExtension( PDDI_EXT_FRAMEBUFFER_EFFECTS ))->SetQuality( pddiExtFramebufferEffects::Smallest );
+
+    if ( mEnableMotionBlur || ENABLE_MOTION_BLUR )
+    {
+        ((pddiExtFramebufferEffects*)p3d::pddi->GetExtension( PDDI_EXT_FRAMEBUFFER_EFFECTS ))->RenderMotionBlur();
+    }
+#endif
+
+
+    if ( CommandLineOptions::Get( CLO_DEMO_TEST ) ||
+         GetCheatInputSystem()->IsCheatEnabled( CHEAT_ID_DEMO_TEST ) )
+    {
+        char buffy[32];
+        sprintf( buffy, "Demo Count: %d", GetGame()->GetDemoCount() );
+
+        const int LEFT = 35;
+        const int TOP = 45;
+        const pddiColour WHITE(128,128,128);
+
+        p3d::pddi->DrawString( buffy, LEFT , 80 + TOP, WHITE );
+
+        static unsigned int time = 0;
+        time = GetGame()->GetTime();
+        time += iElapsedTime;
+
+        unsigned int hours = time / 3600000;
+        unsigned int deltaTime = time % 3600000;
+
+        unsigned int minutes = deltaTime / 60000;
+        deltaTime = deltaTime % 60000;
+
+        unsigned int seconds = deltaTime / 1000;
+        deltaTime = deltaTime % 1000;
+
+        sprintf( buffy, "Time: %d:%d:%d.%d", hours, minutes, seconds, deltaTime );
+        p3d::pddi->DrawString( buffy, LEFT , 100 + TOP, WHITE );
+
+        if ( GetGameplayManager() )
+        {
+            sprintf( buffy, "Level %d", GetGameplayManager()->GetCurrentLevelIndex() );
+            p3d::pddi->DrawString( buffy, LEFT , 120 + TOP, WHITE );
+        }
+
+        GetGame()->SetTime( time );
+    }
+#if defined(RAD_ANDROID) && defined (RAD_DEBUG)
+{
+	if(!p3d::display || !p3d::pddi){
+		// NO HACER NADA. MUCHO OJO ESTO SIN EL IF ELSE DE ARRIBA HA PROVOCADO CRASH EN 32 bits, el codigo de este juego es poco estable me parece
+	}else{
+    static int frames = 0;
+    static unsigned int lastTime = 0;
+    static int fps = 0;
+
+    unsigned int now = radTimeGetMilliseconds();
+
+    if (lastTime == 0)
+        lastTime = now;
+
+    frames++;
+
+    if (now - lastTime >= 1000)
+    {
+        fps = frames;
+        frames = 0;
+        lastTime = now;
+    }
+
+    char buff[32];
+    sprintf(buff, "FPS: %d", fps);
+
+    const int RIGHT = p3d::display->GetWidth() - 150;
+    const int TOP   = 40;
+
+    const pddiColour GREEN(0,255,0);
+    const pddiColour BLACK(0,0,0);
+
+// sombra (ligeramente desplazada)
+    p3d::pddi->DrawString(buff, RIGHT + 2, TOP + 2, BLACK);
+
+// texto principal
+p3d::pddi->DrawString(buff, RIGHT, TOP, GREEN);
+}
+}
+#endif
+   p3d::context->EndFrame( false );
+
+
+#ifdef DEBUGWATCH
+    mDebugRenderTime = radTimeGetMicroseconds()-t0;
+    
+    if(mDebugDumpAllZones)
+    {
+        mDebugDumpAllZones = false;
+        mpLayer( RenderEnums::LevelSlot )->DumpAllDynaLoads(1, mEntityDeletionList );
+        GetWorldPhysicsManager()->FreeAllCollisionAreaIndicies();
+        FlushDelList();
+        ::radMemoryMonitorSuspend();
+    }
+#endif 
+    //unsigned int time1 = radTimeGetMicroseconds();
+    //rReleasePrintf( "Render Loop: %d micro's\n", time1-time0 );
+}
+
+*/
+
+// UNA PRUEBA MAS (Esta version es la que ha corregido el poder estar in-game y poder ver correctamente las cinematicas al finalizar o empezar una mision )
+/*
+void RenderManager::ContextUpdate( unsigned int iElapsedTime )
+{
+    // On the PS2, use a minimum blur all the time
+#ifdef RAD_PS2
+    ApplyPS2Blur();
+#endif
+
+    GetIntersectManager()->mbSameFrame = false;
+#ifdef DEBUGWATCH
+    unsigned int t0 = radTimeGetMicroseconds();
+#endif
+    BEGIN_PROFILE("Rendering");
+
+    BEGIN_PROFILE("Swap Buffers");
+    p3d::context->SwapBuffers();
+    END_PROFILE("Swap Buffers");
+
+#if defined( RAD_XBOX ) || defined ( RAD_GAMECUBE ) || defined( RAD_WIN32 )
+    LoadingManager *lm = GetLoadingManager();
+    PresentationManager *pm = GetPresentationManager();
+    p3d::display->SetForceVSync(lm && !lm->IsLoading(), !(pm && pm->GetFMVPlayer()->IsPlaying()));
+#endif
+
+#ifdef LOAD_SYNC
+    FlushDelList();
+#else
+    MunchDelList(2000);
+#endif
+
+    BEGIN_PROFILE("Lens Flare Frame Buffer Read");
+    LensFlareDSG::ReadFrameBufferIntensities();
+    END_PROFILE("Lens Flare Frame Buffer Read");
+
+#ifdef DEBUGWATCH
+    mDebugSwapTime = radTimeGetMicroseconds() - t0;
+    t0 = radTimeGetMicroseconds();
+#endif
+
+    if (mMood.mTransition >= 0.0f)
+    {
+        TransitionMoodLighting(iElapsedTime);
+    }
+
+    BEGIN_PROFILE("Begin Frame");
+    p3d::context->BeginFrame();
+    END_PROFILE("Begin Frame");
+
+#if defined(RAD_ANDROID)
+    bool isFmv = false;
+
+    LOGI("RMDBG: A");
+
+    PresentationManager *pmLocal = GetPresentationManager();
+    LOGI("RMDBG: B pmLocal=%p", (void*)pmLocal);
+
+    FMVPlayer *pFmvPlayer = NULL;
+    if (pmLocal != NULL)
+    {
+        pFmvPlayer = pmLocal->GetFMVPlayer();
+    }
+    LOGI("RMDBG: C fmvPlayer=%p", (void*)pFmvPlayer);
+
+    if (pFmvPlayer != NULL)
+    {
+        isFmv = pFmvPlayer->IsPlaying();
+    }
+    LOGI("RMDBG: D isFmv=%d", (int)isFmv);
+
+    static int sPrevFmv = -1;
+    if (sPrevFmv != (int)isFmv)
+    {
+        sPrevFmv = (int)isFmv;
+        LOGI("RMDBG: E transition changed -> %d", (int)isFmv);
+    }
+
+    LOGI("RMDBG: F");
+#endif
+
+#if defined(RAD_ANDROID)
+    {
+        static unsigned int sLayerPassLogCount = 0;
+        if (sLayerPassLogCount < 40)
+        {
+            LOGI("RM: entering layer render pass isFmv=%d", (int)isFmv);
+            sLayerPassLogCount++;
+        }
+    }
+#endif
+
+    for (int i = RenderEnums::numLayers - 1; i > -1; i--)
+    {
+#ifdef DEBUGINFO_ENABLED
+        if (i == RenderEnums::GUI)
+        {
+            DEBUGINFO_RENDER();
+        }
+#endif
+
+#if defined(RAD_ANDROID)
+        LOGI("RMDBG: L0 i=%d", i);
+#endif
+
+        RenderLayer *pLayer = mpRenderLayers[i];
+
+#if defined(RAD_ANDROID)
+        LOGI("RMDBG: L1 i=%d layer=%p", i, (void*)pLayer);
+#endif
+
+        if (pLayer == NULL)
+        {
+#if defined(RAD_ANDROID)
+            LOGE("RMDBG: LNULL i=%d", i);
+#endif
+            continue;
+        }
+
+#if defined(RAD_ANDROID)
+        LOGI("RMDBG: L2 i=%d", i);
+#endif
+
+        bool ready = pLayer->IsRenderReady();
+
+#if defined(RAD_ANDROID)
+        LOGI("RMDBG: L3 i=%d ready=%d", i, (int)ready);
+#endif
+
+        if (ready)
+        {
+#if defined(RAD_ANDROID)
+            LOGI("RMDBG: L4 i=%d", i);
+
+           
+#endif
+
+            BEGIN_PROFILE("Layers");
+            pLayer->Render();
+            END_PROFILE("Layers");
+
+#if defined(RAD_ANDROID)
+            LOGI("RMDBG: L5 i=%d", i);
+#endif
+        }
+    }
+
+    END_PROFILE("Rendering");
+
+#ifdef DEBUGWATCH
+    t0 = radTimeGetMicroseconds();
+#endif
+#ifndef FINAL
+    BEGIN_PROFILE("Dump Stats");
+    HeapMgr()->DumpHeapStats();
+    HeapMgr()->DumpArtStats();
+    END_PROFILE("Dump Stats");
+#endif
+
+    RENDER_PROFILER();
+
+    //MEMTRACK_RENDER();
+    //HEAPSTACKS_RENDER();
+
+    SOUNDDEBUG_RENDER();
+
+#ifdef USE_BLUR
+    ((pddiExtFramebufferEffects*)p3d::pddi->GetExtension(PDDI_EXT_FRAMEBUFFER_EFFECTS))->EnableMotionBlur(
+        mEnableMotionBlur || ENABLE_MOTION_BLUR, mBlurAlpha, BLUR_SCALE, false);
+    ((pddiExtFramebufferEffects*)p3d::pddi->GetExtension(PDDI_EXT_FRAMEBUFFER_EFFECTS))->SetQuality(
+        pddiExtFramebufferEffects::Smallest);
+
+    if (mEnableMotionBlur || ENABLE_MOTION_BLUR)
+    {
+        ((pddiExtFramebufferEffects*)p3d::pddi->GetExtension(PDDI_EXT_FRAMEBUFFER_EFFECTS))->RenderMotionBlur();
+    }
+#endif
+
+    if (CommandLineOptions::Get(CLO_DEMO_TEST) ||
+        GetCheatInputSystem()->IsCheatEnabled(CHEAT_ID_DEMO_TEST))
+    {
+        char buffy[32];
+        sprintf(buffy, "Demo Count: %d", GetGame()->GetDemoCount());
+
+        const int LEFT = 35;
+        const int TOP = 45;
+        const pddiColour WHITE(128, 128, 128);
+
+        p3d::pddi->DrawString(buffy, LEFT, 80 + TOP, WHITE);
+
+        static unsigned int time = 0;
+        time = GetGame()->GetTime();
+        time += iElapsedTime;
+
+        unsigned int hours = time / 3600000;
+        unsigned int deltaTime = time % 3600000;
+
+        unsigned int minutes = deltaTime / 60000;
+        deltaTime = deltaTime % 60000;
+
+        unsigned int seconds = deltaTime / 1000;
+        deltaTime = deltaTime % 1000;
+
+        sprintf(buffy, "Time: %d:%d:%d.%d", hours, minutes, seconds, deltaTime);
+        p3d::pddi->DrawString(buffy, LEFT, 100 + TOP, WHITE);
+
+        if (GetGameplayManager())
+        {
+            sprintf(buffy, "Level %d", GetGameplayManager()->GetCurrentLevelIndex());
+            p3d::pddi->DrawString(buffy, LEFT, 120 + TOP, WHITE);
+        }
+
+        GetGame()->SetTime(time);
+    }
+
+#if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+    {
+        if (!p3d::display || !p3d::pddi)
+        {
+            // NO HACER NADA
+        }
+        else
+        {
+            static int frames = 0;
+            static unsigned int lastTime = 0;
+            static int fps = 0;
+
+            unsigned int now = radTimeGetMilliseconds();
+
+            if (lastTime == 0)
+                lastTime = now;
+
+            frames++;
+
+            if (now - lastTime >= 1000)
+            {
+                fps = frames;
+                frames = 0;
+                lastTime = now;
+            }
+
+            char buff[32];
+            sprintf(buff, "FPS: %d", fps);
+
+            const int RIGHT = p3d::display->GetWidth() - 150;
+            const int TOP = 40;
+
+            const pddiColour GREEN(0, 255, 0);
+            const pddiColour BLACK(0, 0, 0);
+
+            p3d::pddi->DrawString(buff, RIGHT + 2, TOP + 2, BLACK);
+            p3d::pddi->DrawString(buff, RIGHT, TOP, GREEN);
+        }
+    }
+#endif
+
+    p3d::context->EndFrame(false);
+
+#ifdef DEBUGWATCH
+    mDebugRenderTime = radTimeGetMicroseconds() - t0;
+
+    if (mDebugDumpAllZones)
+    {
+        mDebugDumpAllZones = false;
+        mpLayer(RenderEnums::LevelSlot)->DumpAllDynaLoads(1, mEntityDeletionList);
+        GetWorldPhysicsManager()->FreeAllCollisionAreaIndicies();
+        FlushDelList();
+        ::radMemoryMonitorSuspend();
+    }
+#endif
+}
+
+*/
+
+// PONGO ESTA NUEVA FUNCION QUE ES COMO LA DE ARRIBA PERO SIN LAS COSAS DE LOGI Y ESO 
+
+void RenderManager::ContextUpdate( unsigned int iElapsedTime )
+{
+    // On the PS2, use a minimum blur all the time
+#ifdef RAD_PS2
+    ApplyPS2Blur();
+#endif
+
+    GetIntersectManager()->mbSameFrame = false;
+
+#ifdef DEBUGWATCH
+    unsigned int t0 = radTimeGetMicroseconds();
+#endif
+
+    BEGIN_PROFILE("Rendering");
+
+    BEGIN_PROFILE("Swap Buffers");
+    p3d::context->SwapBuffers();
+    END_PROFILE("Swap Buffers");
+
+#if defined( RAD_XBOX ) || defined ( RAD_GAMECUBE ) || defined( RAD_WIN32 )
+    LoadingManager *lm = GetLoadingManager();
+    PresentationManager *pm = GetPresentationManager();
+    p3d::display->SetForceVSync(lm && !lm->IsLoading(), !(pm && pm->GetFMVPlayer()->IsPlaying()));
+#endif
+
+#ifdef LOAD_SYNC
+    FlushDelList();
+#else
+    MunchDelList(2000);
+#endif
+
+    BEGIN_PROFILE("Lens Flare Frame Buffer Read");
+    LensFlareDSG::ReadFrameBufferIntensities();
+    END_PROFILE("Lens Flare Frame Buffer Read");
+
+#ifdef DEBUGWATCH
+    mDebugSwapTime = radTimeGetMicroseconds() - t0;
+    t0 = radTimeGetMicroseconds();
+#endif
+
+    if (mMood.mTransition >= 0.0f)
+    {
+        TransitionMoodLighting(iElapsedTime);
+    }
+
+    BEGIN_PROFILE("Begin Frame");
+    p3d::context->BeginFrame();
+    END_PROFILE("Begin Frame");
+
+    for (int i = RenderEnums::numLayers - 1; i > -1; i--)
+    {
+#ifdef DEBUGINFO_ENABLED
+        if (i == RenderEnums::GUI)
+        {
+            DEBUGINFO_RENDER();
+        }
+#endif
+
+        RenderLayer *pLayer = mpRenderLayers[i];
+
+        if (pLayer == NULL)
+        {
+            continue;
+        }
+
+        bool ready = pLayer->IsRenderReady();
+
+        if (ready)
+        {
+            BEGIN_PROFILE("Layers");
+            pLayer->Render();
+            END_PROFILE("Layers");
+        }
+    }
+
+    END_PROFILE("Rendering");
+
+#ifdef DEBUGWATCH
+    t0 = radTimeGetMicroseconds();
+#endif
+
+#ifndef FINAL
+    BEGIN_PROFILE("Dump Stats");
+    HeapMgr()->DumpHeapStats();
+    HeapMgr()->DumpArtStats();
+    END_PROFILE("Dump Stats");
+#endif
+
+    RENDER_PROFILER();
+
+    SOUNDDEBUG_RENDER();
+
+#ifdef USE_BLUR
+    ((pddiExtFramebufferEffects*)p3d::pddi->GetExtension(PDDI_EXT_FRAMEBUFFER_EFFECTS))->EnableMotionBlur(
+        mEnableMotionBlur || ENABLE_MOTION_BLUR, mBlurAlpha, BLUR_SCALE, false);
+
+    ((pddiExtFramebufferEffects*)p3d::pddi->GetExtension(PDDI_EXT_FRAMEBUFFER_EFFECTS))->SetQuality(
+        pddiExtFramebufferEffects::Smallest);
+
+    if (mEnableMotionBlur || ENABLE_MOTION_BLUR)
+    {
+        ((pddiExtFramebufferEffects*)p3d::pddi->GetExtension(PDDI_EXT_FRAMEBUFFER_EFFECTS))->RenderMotionBlur();
+    }
+#endif
+
+    if (CommandLineOptions::Get(CLO_DEMO_TEST) ||
+        GetCheatInputSystem()->IsCheatEnabled(CHEAT_ID_DEMO_TEST))
+    {
+        char buffy[32];
+        sprintf(buffy, "Demo Count: %d", GetGame()->GetDemoCount());
+
+        const int LEFT = 35;
+        const int TOP = 45;
+        const pddiColour WHITE(128, 128, 128);
+
+        p3d::pddi->DrawString(buffy, LEFT, 80 + TOP, WHITE);
+
+        static unsigned int time = 0;
+        time = GetGame()->GetTime();
+        time += iElapsedTime;
+
+        unsigned int hours = time / 3600000;
+        unsigned int deltaTime = time % 3600000;
+
+        unsigned int minutes = deltaTime / 60000;
+        deltaTime = deltaTime % 60000;
+
+        unsigned int seconds = deltaTime / 1000;
+        deltaTime = deltaTime % 1000;
+
+        sprintf(buffy, "Time: %d:%d:%d.%d", hours, minutes, seconds, deltaTime);
+        p3d::pddi->DrawString(buffy, LEFT, 100 + TOP, WHITE);
+
+        if (GetGameplayManager())
+        {
+            sprintf(buffy, "Level %d", GetGameplayManager()->GetCurrentLevelIndex());
+            p3d::pddi->DrawString(buffy, LEFT, 120 + TOP, WHITE);
+        }
+
+        GetGame()->SetTime(time);
+    }
+
+    p3d::context->EndFrame(false);
+
+#ifdef DEBUGWATCH
+    mDebugRenderTime = radTimeGetMicroseconds() - t0;
+
+    if (mDebugDumpAllZones)
+    {
+        mDebugDumpAllZones = false;
+        mpLayer(RenderEnums::LevelSlot)->DumpAllDynaLoads(1, mEntityDeletionList);
+        GetWorldPhysicsManager()->FreeAllCollisionAreaIndicies();
+        FlushDelList();
+        ::radMemoryMonitorSuspend();
+    }
+#endif
+}
+
 
 //******************************************************************************
 //
@@ -1686,11 +2480,13 @@ MEMTRACK_PUSH_GROUP( "RenderManager" );
         case RenderEnums::GUI:
             mpRenderLayers[i] = new FrontEndRenderLayer();
             mpRenderLayers[i]->DoAllSetups();
+            
             break;
         case RenderEnums::PresentationSlot:
             mpRenderLayers[ i ] = new RenderLayer();
             mpRenderLayers[ i ]->SetBeginView( false );
             mpRenderLayers[ i ]->DoAllSetups();
+
             break;
         default:
             mpRenderLayers[i] = new RenderLayer();

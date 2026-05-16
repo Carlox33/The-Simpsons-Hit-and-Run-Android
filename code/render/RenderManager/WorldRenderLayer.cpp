@@ -61,6 +61,13 @@
 #include <render/Loaders/BillboardWrappedLoader.h>
 #include <worldsim/avatarmanager.h>
 
+//NUEVOS INCLUDES
+#include <presentation/presentation.h>
+#include <presentation/fmvplayer/fmvplayer.h>
+//FIN NUEVOS INCLUDES 
+
+
+
 #ifdef RAD_PS2
 #define DEFAULT_R 67;
 #define DEFAULT_G 67;
@@ -187,6 +194,10 @@ static bool simpleShadows = true;
 // Constraints: None.
 //
 //========================================================================
+
+// ESTA ES LA FUNCION ORIGINAL, DA UN PARPADEO MOLESTO CUANDO PASAMOS DE MUNDO 3D A CINEMATICAS 
+// POR ESE MOTIVO VOY A COMENTARLA Y A PROBAR CON ESTA OTRA A VER SI SE SOLUCIONA 
+
 void WorldRenderLayer::Render()
 {
     BEGIN_PROFILE( "WRL Render" );
@@ -194,6 +205,18 @@ void WorldRenderLayer::Render()
     mDebugRenderTime = radTimeGetMicroseconds();
 #endif
     rAssert(!IsDead());
+
+    // nuevos cambios
+    PresentationManager* pm = GetPresentationManager();
+    if( pm && pm->GetFMVPlayer() && pm->GetFMVPlayer()->IsPlaying() )
+    {
+#ifdef DEBUGWATCH
+        mDebugRenderTime = radTimeGetMicroseconds() - mDebugRenderTime;
+#endif
+        END_PROFILE( "WRL Render" );
+        return;
+    }
+    // Fin nuevos cambios
 
     BEGIN_PROFILE( "pddi ZBuf" );
     p3d::pddi->EnableZBuffer(true);
@@ -239,9 +262,9 @@ void WorldRenderLayer::Render()
                 mpView[ view ]->SetClearMask(PDDI_BUFFER_ALL);
             }
 
- 		    BEGIN_PROFILE( "View Begin Render" );
+            BEGIN_PROFILE( "View Begin Render" );
             mpView[ view ]->BeginRender();
-		    END_PROFILE( "View Begin Render" );
+            END_PROFILE( "View Begin Render" );
 
             int i;
             
@@ -253,18 +276,17 @@ void WorldRenderLayer::Render()
                 {
                     mWorldSpheres[i]->Display();
                 }
- 		        BEGIN_PROFILE( "pddi ZBuf" );
+                BEGIN_PROFILE( "pddi ZBuf" );
                 p3d::pddi->EnableZBuffer(true);
- 		        END_PROFILE( "pddi ZBuf" );
+                END_PROFILE( "pddi ZBuf" );
                 END_PROFILE( "Render World Spheres" );
             }
 
-
             BEGIN_PROFILE( "Render WorldScene" );
             mpWorldScene->Render( view );
-    #ifdef DEBUGWATCH
-        mDebugInnerRenderTime = radTimeGetMicroseconds()-mDebugInnerRenderTime;
-    #endif
+#ifdef DEBUGWATCH
+            mDebugInnerRenderTime = radTimeGetMicroseconds()-mDebugInnerRenderTime;
+#endif
             END_PROFILE( "Render WorldScene" );
 
             //p3d::inventory->PushSection();
@@ -280,11 +302,11 @@ void WorldRenderLayer::Render()
             /*
             BEGIN_PROFILE( "Render Shadows" );
             // let's draw ourselves some shadows
-		    mpShadowGenerator->Begin();
-		    mpWorldScene->RenderShadows();
-		    tColour washColour(gWashColourR, gWashColourG, gWashColourB);
-		    mpShadowGenerator->SetWashColour(washColour);
-		    mpShadowGenerator->End();
+            mpShadowGenerator->Begin();
+            mpWorldScene->RenderShadows();
+            tColour washColour(gWashColourR, gWashColourG, gWashColourB);
+            mpShadowGenerator->SetWashColour(washColour);
+            mpShadowGenerator->End();
             END_PROFILE( "Render Shadows" );
             */
             GetFootprintManager()->Render();
@@ -292,31 +314,27 @@ void WorldRenderLayer::Render()
             mpWorldScene->RenderSimpleShadows();
             END_PROFILE( "Render Simple Shadows" );
 
-        //Temp Disable BBQ optimisation for cars, as it may be outstripped by
-        // Kevin's fix to the art
+            //Temp Disable BBQ optimisation for cars, as it may be outstripped by
+            // Kevin's fix to the art
             BEGIN_PROFILE( "Render Shadow Casters" );
-    	    //mpWorldScene->RenderShadowCasters();
+            //mpWorldScene->RenderShadowCasters();
             END_PROFILE( "Render Shadow Casters" );
-
 
             BEGIN_PROFILE( "RenderTranslucent" );
             mpWorldScene->RenderTranslucent();
             END_PROFILE( "RenderTranslucent" );
 
+            BillboardQuadManager::Enable();
+            BEGIN_PROFILE( "BBQ Display All" );
+            GetBillboardQuadManager()->DisplayAll();
+            END_PROFILE( "BBQ Display All" );
+            BillboardQuadManager::Disable();
 
-        BillboardQuadManager::Enable();
-        BEGIN_PROFILE( "BBQ Display All" );
-        GetBillboardQuadManager()->DisplayAll();
-		END_PROFILE( "BBQ Display All" );
-        BillboardQuadManager::Disable();
-
-        BEGIN_PROFILE( "RenderSparkles" );
-        // Render the procedural particle effects:
-        // coin glints, collection/spawn trail sparkles, hit sparks, etc.
-        GetSparkleManager()->Render( Sparkle::SRM_ExcludeSorted );
-
+            BEGIN_PROFILE( "RenderSparkles" );
+            // Render the procedural particle effects:
+            // coin glints, collection/spawn trail sparkles, hit sparks, etc.
+            GetSparkleManager()->Render( Sparkle::SRM_ExcludeSorted );
             END_PROFILE( "RenderSparkles" );
-            //p3d::inventory->PopSection();
             
             //Drawing the characters and stuff after the shadows to attempt to 
             //eliminate the bleeding shadows.
@@ -331,19 +349,19 @@ void WorldRenderLayer::Render()
             GetTriggerVolumeTracker()->Render();
             END_PROFILE( "Render Trigger Volume Tracker" );
         
-    #ifdef DEBUGWATCH
+#ifdef DEBUGWATCH
             BEGIN_PROFILE( "Render Vehicle AI Debug" );
             VehicleAIRender::GetVehicleAIRender()->Display();
             END_PROFILE( "Render Vehicle AI Debug" );
-    #endif
+#endif
 
-		    BEGIN_PROFILE( "Lens Flare Render" );
-		    LensFlareDSG::DisplayAllFlares();
-		    END_PROFILE( "Lens Flare Render" );
+            BEGIN_PROFILE( "Lens Flare Render" );
+            LensFlareDSG::DisplayAllFlares();
+            END_PROFILE( "Lens Flare Render" );
 
-		    BEGIN_PROFILE( "View End Render" );
-		    mpView[ view ]->EndRender();
-		    END_PROFILE( "View End Render" );
+            BEGIN_PROFILE( "View End Render" );
+            mpView[ view ]->EndRender();
+            END_PROFILE( "View End Render" );
 
             if(mirrorPass == 1)
             {
@@ -360,8 +378,8 @@ void WorldRenderLayer::Render()
                 {
                     pddiCompareMode origZCompare = p3d::pddi->GetZCompare();
                     p3d::pddi->SetZCompare(PDDI_COMPARE_ALWAYS);
-                        pIntersectChunk->Display();
-                        pIntersectChunk->DrawTri(pTriPts, tColour(255,0,0));
+                    pIntersectChunk->Display();
+                    pIntersectChunk->DrawTri(pTriPts, tColour(255,0,0));
                     p3d::pddi->SetZCompare(origZCompare);
                 }
             }

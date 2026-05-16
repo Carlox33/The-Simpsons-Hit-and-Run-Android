@@ -124,6 +124,12 @@
 #include <switch.h>
 #endif
 
+
+#ifdef RAD_ANDROID
+#include <android/log.h>
+#endif
+
+
 #include <radload/radload.hpp>
 
 #include <main/errorsWIN32.h>
@@ -131,6 +137,25 @@
 #define _stricmp SDL_strcasecmp
 #define WIN32_SECTION "WIN32_SECTION"
 #define TIMER_LEAVE 1
+
+
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+  #define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
+
 
 //#define PRINT_WINMESSAGES
 
@@ -276,7 +301,7 @@ void Win32Platform::DestroyInstance()
 // Constraints: Must be initialized before the platform.
 //
 //==============================================================================
-bool Win32Platform::InitializeWindow() 
+bool Win32Platform::InitializeWindow()
 {
 #ifdef WIN32
     // check to see if another instance is running...
@@ -307,7 +332,27 @@ bool Win32Platform::InitializeWindow()
 #endif
 
     // These attributes must be set prior to creating the first window
+
 #if RAD_GLES
+
+    // ------------------------------------------------------------
+    // Android: Prefer GLES3, fallback to GLES2 (runtime)
+    // ------------------------------------------------------------
+#ifdef RAD_ANDROID
+
+    // Attempt #1 : GLES3
+#if SDL_MAJOR_VERSION < 3
+    SDL_GL_ResetAttributes();
+#endif
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 0 );
+
+#else // !RAD_ANDROID
+
+    // ------------------------------------------------------------
+    // Existing behavior for non-Android GLES builds
+    // ------------------------------------------------------------
 #if RAD_CG
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
@@ -316,11 +361,17 @@ bool Win32Platform::InitializeWindow()
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, RAD_GLES_VERSION );
 #endif
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 0 );
-#else
+
+#endif // RAD_ANDROID
+
+#else  // !RAD_GLES
+
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY );
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
-#endif
+
+#endif // RAD_GLES
+
 #ifdef __SWITCH__
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 32 );
 #else
@@ -336,15 +387,58 @@ bool Win32Platform::InitializeWindow()
     // Support switching between docked and handheld mode
     flags |= SDL_WINDOW_RESIZABLE;
 #endif
+//#ifdef RAD_ANDROID
+    // Optional: on Android you typically want fullscreen from the start.
+    // If you want to keep fullscreen handling only in InitializePlatform(),
+    // you can remove this line.
+    //flags |= SDL_WINDOW_FULLSCREEN; // lo comento por ahora julioh 
+//#endif
+
     int w, h;
     TranslateResolution( StartingResolution, w, h );
+
 #if SDL_MAJOR_VERSION < 3
-    mWnd = SDL_CreateWindow( ApplicationName, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, flags );
+    mWnd = SDL_CreateWindow( ApplicationName,
+                             SDL_WINDOWPOS_CENTERED,
+                             SDL_WINDOWPOS_CENTERED,
+                             w, h, flags );
 #else
     mWnd = SDL_CreateWindow( ApplicationName, w, h, flags );
 #endif
 
-    rAssert(mWnd != NULL);
+#ifdef RAD_ANDROID
+    // If GLES3 window/context setup fails, fallback to GLES2 and retry once.
+    if( mWnd == NULL )
+    {
+        rDebugPrintf( "SDL_CreateWindow GLES3 failed: %s\n", SDL_GetError() );
+
+        // Attempt #2 : GLES2
+#if SDL_MAJOR_VERSION < 3
+        SDL_GL_ResetAttributes();
+#endif
+        SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
+        SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
+        SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 0 );
+
+#ifdef __SWITCH__
+        SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 32 );
+#else
+        SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
+#endif
+        SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 0 );
+
+#if SDL_MAJOR_VERSION < 3
+        mWnd = SDL_CreateWindow( ApplicationName,
+                                 SDL_WINDOWPOS_CENTERED,
+                                 SDL_WINDOWPOS_CENTERED,
+                                 w, h, flags );
+#else
+        mWnd = SDL_CreateWindow( ApplicationName, w, h, flags );
+#endif
+    }
+#endif // RAD_ANDROID
+
+    rAssertMsg( mWnd != NULL, SDL_GetError() );
 
 #if defined( PRINT_WINMESSAGES ) && defined( RAD_DEBUG )
     SDL_SetHint( SDL_HINT_EVENT_LOGGING, "1" );
@@ -361,6 +455,7 @@ bool Win32Platform::InitializeWindow()
 
     return true;
 }
+
 
 //==============================================================================
 // Win32Platform::InitializeFoundation
@@ -383,6 +478,10 @@ void Win32Platform::InitializeFoundation()
     // obsolete now.. the heaps initialize memory.
     //
     //InitializeMemory();
+#ifdef RAD_ANDROID
+  InitializeMemory();
+#endif
+
 
     //
     // Register an out-of-memory display handler in case something goes bad
@@ -543,6 +642,11 @@ void Win32Platform::InitializePlatform()
     // Add anything here that needs to be before the drive is opened.
     //
     DisplaySplashScreen( Error ); // blank screen
+	
+#ifdef RAD_ANDROID
+	mFullscreen = true; // ESTO ES IMPORTANTE TENERLO EN ANDROID DE OTRA FORMA LAS BARRAS DEL MENU DEL MOVIL COMO LA HORA Y EL VOLVER HACIA ATRAS VIRTUAL TAPAN PARTES DE LA PANTALLA
+     SDL_SetWindowFullscreen( mWnd, mFullscreen ? SDL_WINDOW_FULLSCREEN : 0 );
+#endif
 
 #ifndef __SWITCH__
     //
@@ -789,6 +893,8 @@ void Win32Platform::DisplaySplashScreen( const char* textureName,
 {
 }
 
+// FUNCION ORIGINAL
+
 void Win32Platform::OnControllerError(const char *msg)
 {
     DisplaySplashScreen( Error, msg, 0.7f, 0.0f, 0.0f, tColour(255, 255, 255), 0 );
@@ -798,6 +904,63 @@ void Win32Platform::OnControllerError(const char *msg)
 }
 
 
+// NUEVA FUNCION MISMO COMPORTAMIENTO CON LOGI 
+/*
+void Win32Platform::OnControllerError(const char *msg)
+{
+    LOGI("[Platform]: OnControllerError ENTER msg=%s", msg ? msg : "(null)");
+
+    LOGI("[Platform]: Before DisplaySplashScreen");
+    DisplaySplashScreen( Error, msg, 0.7f, 0.0f, 0.0f, tColour(255, 255, 255), 0 );
+    LOGI("[Platform]: After DisplaySplashScreen");
+
+    LOGI("[Platform]: Before mErrorState = CTL_ERROR");
+    mErrorState = CTL_ERROR;
+    LOGI("[Platform]: After mErrorState = CTL_ERROR");
+
+    LOGI("[Platform]: Before mPauseForError = true");
+    mPauseForError = true;
+    LOGI("[Platform]: After mPauseForError = true");
+}
+*/
+/*
+
+
+// PRUEBA A 
+void Win32Platform::OnControllerError(const char *msg)
+{
+    LOGI("[Platform][TEST A]: ENTER");
+    DisplaySplashScreen( Error, msg, 0.7f, 0.0f, 0.0f, tColour(255, 255, 255), 0 );
+    LOGI("[Platform][TEST A]: EXIT");
+}
+*/
+
+/*
+// PRUEBA B
+void Win32Platform::OnControllerError(const char *msg)
+{
+    LOGI("[Platform][TEST B]: ENTER");
+    mErrorState = CTL_ERROR;
+    mPauseForError = true;
+    LOGI("[Platform][TEST B]: EXIT");
+}
+*/
+/*
+void Win32Platform::OnControllerError(const char *msg)
+{
+    LOGI("[Platform][TEST ORDER]: ENTER");
+
+    DisplaySplashScreen( Error, msg, 0.7f, 0.0f, 0.0f, tColour(255, 255, 255), 0 );
+    LOGI("[Platform][TEST ORDER]: After DisplaySplashScreen");
+
+   
+
+    LOGI("[Platform][TEST ORDER]: Before mErrorState / mPauseForError");
+    mErrorState = CTL_ERROR;
+    mPauseForError = true;
+    LOGI("[Platform][TEST ORDER]: After mErrorState / mPauseForError");
+}
+*/
 //=============================================================================
 // Win32Platform::OnDriveError
 //=============================================================================
@@ -1609,6 +1772,12 @@ void Win32Platform::InitializeContext()
     // anyway for completeness sake.
     //
     TranslateResolution( mResolution, init.xsize, init.ysize );
+	
+	#if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+    rDebugPrintf("[RES] requested init.xsize/init.ysize = %dx%d (mResolution=%d)\n",
+                 init.xsize, init.ysize, (int)mResolution);
+	#endif
+	
 
     //
     // Depth of the rendering buffer.  Again, this value only works in
@@ -1635,11 +1804,34 @@ void Win32Platform::InitializeContext()
         //
         mpPlatform->SetActiveContext( mpContext );
         p3d::pddi->EnableZBuffer( true );
+        #if defined(RAD_ANDROID)
+        // VSYNC on + habilita cap a 60 (m_only60)
+        mpContext->GetDisplay()->SetForceVSync(true, true);
+        // opcional (1 vez): pedir VSYNC al driver
+        SDL_GL_SetSwapInterval(1);
+		
+		// ESTO ES PARA VER LA RESOLUCION ACTUIAL 
+		int realW = mpContext->GetDisplay()->GetWidth();
+        int realH = mpContext->GetDisplay()->GetHeight();
+        rDebugPrintf("[RES] REAL display/backbuffer = %dx%d\n", realW, realH);
+        #endif
     }
     else
     {
         // Update the display settings.
         mpContext->GetDisplay()->InitDisplay( &init );
+        #if defined(RAD_ANDROID)
+        // por si InitDisplay recrea / resetea algo
+        mpContext->GetDisplay()->SetForceVSync(true, true);
+        SDL_GL_SetSwapInterval(1);
+		
+		
+		// aqui lo repito para ver resolucion real
+		int realW = mpContext->GetDisplay()->GetWidth();
+        int realH = mpContext->GetDisplay()->GetHeight();
+        rDebugPrintf("[RES] REAL display/backbuffer = %dx%d\n", realW, realH);
+		
+        #endif
     }
 }
 
@@ -1673,6 +1865,14 @@ void Win32Platform::TranslateResolution( Resolution res, int&x, int&y )
 #elif defined(RAD_VITA)
     x = 960;
     y = 544;
+	
+#elif defined(RAD_ANDROID)
+    // Android: fixed render size for a first working port (720p target).
+    // This keeps behavior predictable across devices and matches the "fixed res per platform" style
+    // already used for Vita and Switch.
+    x = 1280;
+    y = 720;
+
 #else
     switch( res )
     {
@@ -1801,6 +2001,14 @@ void Win32Platform::ResizeWindow()
 
 void Win32Platform::ShowTheCursor( bool show )
 {
+#ifdef RAD_ANDROID
+    //
+    // Android has no traditional mouse cursor.
+    // Keep internal state in sync but don't call SDL cursor APIs.
+    //
+    mShowCursor = show;
+    return;
+#endif
     if( mShowCursor != show )
     {        
         mShowCursor = show;
@@ -1875,10 +2083,12 @@ bool SDLCALL Win32Platform::WndProc( void * userdata, SDL_Event * event )
                     break;
 
                 case SDL_WINDOWEVENT_FOCUS_LOST:  // Window is being hidden (not in focus)
-                    SDL_SetWindowGammaRamp( wnd,
+#ifndef RAD_ANDROID               
+					SDL_SetWindowGammaRamp( wnd,
                         DesktopGammaRamp[0],
                         DesktopGammaRamp[1],
                         DesktopGammaRamp[2] );
+#endif
                     if( pInputManager )
                     {
                         //GetInputManager()->SetRumbleForDevice(0, false);
@@ -1908,7 +2118,9 @@ bool SDLCALL Win32Platform::WndProc( void * userdata, SDL_Event * event )
                             //rDebugPrintf("Force Effects Started!!! \n");
                         }
                     }
+#ifndef RAD_ANDROID
                     SDL_HideCursor();
+#endif
                     break;
 
                 case SDL_EVENT_WINDOW_FOCUS_LOST:  // Window is being hidden (not in focus)
@@ -1917,7 +2129,9 @@ bool SDLCALL Win32Platform::WndProc( void * userdata, SDL_Event * event )
                         //GetInputManager()->SetRumbleForDevice(0, false);
                         //rDebugPrintf("Force Effects Stopped!!! \n");
                     }
+#ifndef RAD_ANDROID	
                     SDL_ShowCursor();
+#endif
                     break;
 
 #ifdef RAD_PC

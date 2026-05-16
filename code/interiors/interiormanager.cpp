@@ -250,20 +250,35 @@ public:
         mLoading = true;
     }
 
-    void SoundLoad(void)
+        void SoundLoad(void)
     {
-        if( binding->soundID != 0 )
+        if(binding->soundID != 0)
         {
-            GetSoundManager()->LoadNISSound( binding->soundID );
-            mSoundLoaded = true;
+            SoundManager* sm = GetSoundManager();
+            if(sm != NULL)
+            {
+                sm->LoadNISSound(binding->soundID);
+                mSoundLoaded = true;
+            }
         }
     }
+
 
     void Unload(void)
     {
         if(draw)
         {
             ((WorldRenderLayer*)GetRenderManager()->mpLayer(RenderEnums::LevelSlot))->pWorldScene()->Remove(draw);
+        }
+
+        if(mActionHandlerRegistered)
+        {
+            Character* pCharacter = GetCharacterManager()->GetCharacter(PLAYER_ONE);
+            if(pCharacter)
+            {
+                pCharacter->RemoveActionButtonHandler(this);
+            }
+            mActionHandlerRegistered = false;
         }
 
         gagPlayer->Stop();
@@ -294,14 +309,20 @@ public:
             collObj = NULL;
         }
 
+        mPendingSafeDetach = false;
+        mPendingSafeTriggerRemove = false;
         mLoaded = false;
     }
 
-    void SoundUnload(void)
+       void SoundUnload(void)
     {
-        if( binding->soundID != 0 )
+        if(binding->soundID != 0)
         {
-            GetSoundManager()->StopAndDumpNISSound( binding->soundID );
+            SoundManager* sm = GetSoundManager();
+            if(sm != NULL)
+            {
+                sm->StopAndDumpNISSound(binding->soundID);
+            }
             mSoundLoaded = false;
         }
     }
@@ -350,9 +371,12 @@ public:
         }
 
         if(!mSoundLoaded && (dist < binding->soundLoadDist))
+    {
+        if(!IsAndroidProblematicGag())
         {
             SoundLoad();
         }
+    }
 
         // only do distance based loading for non interior gags, interior ones are always loaded
         if( binding->interiorUID == static_cast< tUID >( 0 ) )
@@ -388,17 +412,41 @@ public:
         bool finished = (binding->gagFMVFileName[ 0 ] == 0) ? gagPlayer->IsFinished() : !GetPresentationManager()->GetFMVPlayer()->IsPlaying();
         finished = finished && m_isNISSoundComplete;
 
-        if(finished && playing)
+          if(finished && playing)
+    {
+        playing = false;
+        GetEventManager()->TriggerEvent(EVENT_GAG_END, (void*)binding);
+
+        if(binding->coinDelay < 0.0f)
         {
-            playing = false;
-            GetEventManager()->TriggerEvent(EVENT_GAG_END, (void*)binding);
-            if(binding->coinDelay < 0.0f)
+            if(draw)
             {
                 rmt::Vector pos;
                 draw->GetPosition(&pos);
                 GetCoinManager()->SpawnInstantCoins(binding->coins, pos);
             }
         }
+    }
+
+    if(!playing)
+    {
+        if(mPendingSafeTriggerRemove && trigger)
+        {
+            GetTriggerVolumeTracker()->RemoveTrigger(trigger);
+            mPendingSafeTriggerRemove = false;
+        }
+
+        if(mPendingSafeDetach)
+        {
+            Character* pCharacter = GetCharacterManager()->GetCharacter(PLAYER_ONE);
+            if(pCharacter && mActionHandlerRegistered)
+            {
+                pCharacter->RemoveActionButtonHandler(this);
+                mActionHandlerRegistered = false;
+            }
+            mPendingSafeDetach = false;
+        }
+    }
 
         if(binding->retrigger)
         {
@@ -497,6 +545,16 @@ protected:
 
     void Play(void)
     {
+        if(binding == NULL)
+        {
+            return;
+        }
+
+        if(mLoading || !mLoaded || playing)
+        {
+            return;
+        }
+
         rmt::Box3D box;
         rmt::Vector pos;
 
@@ -509,39 +567,29 @@ protected:
             if(!alreadyPlayed)
             {
                 GetCharacterSheetManager()->AddGagViewed(GetGameplayManager()->GetCurrentLevelIndex(), binding->persistIndex);
-
-                GetEventManager()->TriggerEvent( EVENT_GAG_FOUND );
+                GetEventManager()->TriggerEvent(EVENT_GAG_FOUND);
             }
-			else
-			{
-				// We've already played this gag. Don't spawn any more coins. We can safely change this in the
-				//binding because we're dealing with a state that is persistent over the entire game. If this
-				//functionality changes we'll need to set some sort of flag in the the playing gag which the
-				//coin spawning coin can check later on.
-				binding->coins = 0;
-			}
+            else
+            {
+                binding->coins = 0;
+            }
         }
 
-        //
-        // Not getting good position info here.  Play from avatar position
-        //
-        Avatar* avatar = GetAvatarManager()->GetAvatarForPlayer( 0 );
-        rAssert( avatar != NULL );  //NIGEL - I put this assert in for you! love Ian.
+        Avatar* avatar = GetAvatarManager()->GetAvatarForPlayer(0);
+        rAssert(avatar != NULL);
 
-        if( avatar != NULL )
+        if(avatar != NULL)
         {
-            avatar->GetPosition( pos );
-            box.Set( pos, pos );
+            avatar->GetPosition(pos);
+            box.Set(pos, pos);
         }
         else
         {
-            box.Set( rmt::Vector( 0.0f, 0.0f, 0.0f ), rmt::Vector( 0.0f, 0.0f, 0.0f ) );
+            box.Set(rmt::Vector(0.0f, 0.0f, 0.0f), rmt::Vector(0.0f, 0.0f, 0.0f));
         }
 
-        // special case logic for the I&S movie. *sigh*
         if((binding->i_S_Movie == 1) && (!GetCharacterSheetManager()->IsState(1)))
         {
-            //The player is trying to pick up the I&S ticket!
             bool haveAllCards = true;
             for(int level = RenderEnums::L1; level < RenderEnums::numLevels; ++level)
             {
@@ -551,61 +599,70 @@ protected:
                     break;
                 }
             }
+
             if(haveAllCards)
             {
-                // They have all the cards, give them the ticket.
                 GetCharacterSheetManager()->SetState(1, true);
-				GetCharacterSheetManager()->SetFMVUnlocked(RenderEnums::L3);
-                GetInteriorManager()->SetISMovieDialogPlaying( true );
+                GetCharacterSheetManager()->SetFMVUnlocked(RenderEnums::L3);
+                GetInteriorManager()->SetISMovieDialogPlaying(true);
                 PlayDialog(binding->acceptDialogID);
                 binding->retrigger = false;
                 binding->triggered = false;
-                // Do the collection effect.
                 GetInteriorManager()->CollectionEffect("card_collect", binding->triggerPos);
             }
             else
             {
                 if(GetCharacterSheetManager()->IsState(0))
                 {
-                    // Not enough cards.
-                    GetInteriorManager()->SetISMovieDialogPlaying( true );
+                    GetInteriorManager()->SetISMovieDialogPlaying(true);
                     PlayDialog(binding->rejectDialogID);
-//                   GetSoundManager()->PlayNISSound( binding->rejectSoundID, &box );
                 }
                 else
                 {
-                    // Give instructions.
                     GetCharacterSheetManager()->SetState(0, true);
-                    GetInteriorManager()->SetISMovieDialogPlaying( true );
+                    GetInteriorManager()->SetISMovieDialogPlaying(true);
                     PlayDialog(binding->instructDialogID);
-//                    GetSoundManager()->PlayNISSound( binding->instructSoundID, &box );
                 }
             }
         }
         else if(binding->i_S_Movie == 2)
         {
-            // The player is trying to watch the I&S movie.
             if(GetCharacterSheetManager()->QueryFMVUnlocked(RenderEnums::L3))
             {
-                // They have a ticket, play the movie.
-                GetPresentationManager()->PlayFMV( binding->gagFMVFileName );
+                GetPresentationManager()->PlayFMV(binding->gagFMVFileName);
             }
             else
             {
-                // They don't have a ticket.
-                GetInteriorManager()->SetISMovieDialogPlaying( true );
+                GetInteriorManager()->SetISMovieDialogPlaying(true);
                 PlayDialog(binding->rejectDialogID);
             }
+
             gagPlayer->Play();
         }
         else
         {
-            if( !mSoundLoaded )
+            if(!mSoundLoaded && !IsAndroidProblematicGag())
             {
                 SoundLoad();
             }
-            GetSoundManager()->PlayNISSound( binding->soundID, &box, this );
-            m_isNISSoundComplete = false;
+
+            if(binding->soundID != 0)
+            {
+                SoundManager* sm = GetSoundManager();
+                if(sm != NULL && !IsAndroidProblematicGag())
+                {
+                    sm->PlayNISSound(binding->soundID, &box, this);
+                    m_isNISSoundComplete = false;
+                }
+                else
+                {
+                    m_isNISSoundComplete = true;
+                }
+            }
+            else
+            {
+                m_isNISSoundComplete = true;
+            }
 
             if(binding->loopIntro != 0)
             {
@@ -616,15 +673,22 @@ protected:
                 gagPlayer->Play();
             }
 
-            if( binding->gagFMVFileName[ 0 ] != 0 )
+            if(binding->gagFMVFileName[0] != 0)
             {
-                GetPresentationManager()->PlayFMV( binding->gagFMVFileName, NULL, true, false, false );
+                GetPresentationManager()->PlayFMV(binding->gagFMVFileName, NULL, true, false, false);
             }
         }
 
         if(trigger)
         {
-            GetTriggerVolumeTracker()->RemoveTrigger(trigger);
+            if(IsAndroidProblematicGag())
+            {
+                mPendingSafeTriggerRemove = true;
+            }
+            else
+            {
+                GetTriggerVolumeTracker()->RemoveTrigger(trigger);
+            }
         }
 
         if(binding->cameraShake)
@@ -643,7 +707,7 @@ protected:
     }
 
 public:
-    Gag(InteriorManager::GagBinding* b)
+        Gag(InteriorManager::GagBinding* b)
         : binding(NULL), 
           locator(NULL), 
           trigger(NULL),
@@ -658,7 +722,10 @@ public:
           sparkle(false),
           mSoundLoaded(false),
           playing(false),
-          m_isNISSoundComplete(true)
+          m_isNISSoundComplete(true),
+          mActionHandlerRegistered(false),
+          mPendingSafeDetach(false),
+          mPendingSafeTriggerRemove(false)
     {
         binding = b; 
 
@@ -799,8 +866,14 @@ public:
         }
     }
 
-    void Trigger(EventLocator* loc)
+
+        void Trigger(EventLocator* loc)
     {
+        if(binding == NULL || loc == NULL)
+        {
+            return;
+        }
+
         if(((binding->gagFMVFileName[0] != 0) ||  (binding->i_S_Movie != 0)))
         {
             if(!GetGameplayManager()->GetCurrentMission()->IsSundayDrive())
@@ -811,24 +884,40 @@ public:
 
         if(binding->action)
         {
-            Character* pCharacter = GetCharacterManager()->GetCharacter( PLAYER_ONE );
+            Character* pCharacter = GetCharacterManager()->GetCharacter(PLAYER_ONE);
+            if(pCharacter == NULL)
+            {
+                return;
+            }
+
             if(loc->GetPlayerEntered())
             {
-                //
-                // Send a message about an active interactive gag
-                //
                 if(binding->triggered)
                 {
-                    GetEventManager()->TriggerEvent( EVENT_INTERACTIVE_GAG );
+                    GetEventManager()->TriggerEvent(EVENT_INTERACTIVE_GAG);
                 }
 
                 Enter(pCharacter);
-                pCharacter->AddActionButtonHandler(this);
+
+                if(!mActionHandlerRegistered)
+                {
+                    pCharacter->AddActionButtonHandler(this);
+                    mActionHandlerRegistered = true;
+                }
             }
             else
             {
                 Exit(pCharacter);
-                pCharacter->RemoveActionButtonHandler(this);
+
+                if(IsAndroidProblematicGag() && playing)
+                {
+                    mPendingSafeDetach = true;
+                }
+                else if(mActionHandlerRegistered)
+                {
+                    pCharacter->RemoveActionButtonHandler(this);
+                    mActionHandlerRegistered = false;
+                }
             }
         }
         else
@@ -839,9 +928,17 @@ public:
             }
         }
     }
-
 protected:
     friend class GagDrawable;
+
+  bool IsAndroidProblematicGag() const
+{
+#if defined(RAD_ANDROID) && defined(PAL)
+    return (binding != NULL) && (strcmp(binding->gagFileName, "gag_will.p3d") == 0);
+#else
+    return false;
+#endif
+}
 
     InteriorManager::GagBinding* binding;
     EventLocator* locator;
@@ -858,10 +955,17 @@ protected:
     bool mSoundLoaded;
     bool playing;
     bool m_isNISSoundComplete;
-
+    bool mActionHandlerRegistered;
+    bool mPendingSafeDetach;
+    bool mPendingSafeTriggerRemove;
 
     virtual bool OnButtonPressed( Character* pCharacter, Sequencer* pSeq )
     {
+        if(mLoading || !mLoaded || playing)
+        {
+            return true;
+        }
+
         Play();
         return true;
     }
@@ -1532,14 +1636,20 @@ void InteriorManager::HandleEvent( EventEnum id, void* pEventData )
         }
         break;
 
-        case EVENT_LOCATOR + LocatorEvent::GAG:
+                case EVENT_LOCATOR + LocatorEvent::GAG:
         {
             EventLocator* loc = (EventLocator*)pEventData;
+            if(loc == NULL)
+            {
+                break;
+            }
+
             for(int i = 0; i < mGagCount; i++)
             {
-                if(loc->GetUserData() == gags[i])
+                if(gags[i] && loc->GetUserData() == gags[i])
                 {
                     gags[i]->Trigger(loc);
+                    break;
                 }
             }
         }

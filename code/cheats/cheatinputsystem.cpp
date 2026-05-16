@@ -343,6 +343,39 @@ CheatInputSystem::IsCheatEnabled( eCheatID cheatID ) const
 }
 
 //===========================================================================
+// CheatInputSystem::DisableAllCheats
+//===========================================================================
+// Description: 
+//
+// Constraints:	None.
+//
+// Parameters:	None.
+//
+// Return:      
+//
+//===========================================================================
+
+void
+CheatInputSystem::DisableAllCheats()
+{
+    for( int cheatID = 0; cheatID < MAX_NUM_CHEATS; cheatID++ )
+    {
+        eCheatID id = static_cast<eCheatID>( cheatID );
+
+        if( id == CHEAT_ID_DISABLE_ALL_CHEATS )
+        {
+            continue;
+        }
+
+        if( this->IsCheatEnabled( id ) )
+        {
+            this->SetCheatEnabled( id, false );
+        }
+    }
+}
+
+
+//===========================================================================
 // CheatInputSystem::ReceiveInputs
 //===========================================================================
 // Description: 
@@ -370,6 +403,16 @@ CheatInputSystem::ReceiveInputs( eCheatInput* cheatInputs,
     //
     if( cheatID != CHEAT_ID_UNREGISTERED )
     {
+        // comienza nuevo fragmento para tener un cheat que desactive a todos los activados 
+        if( cheatID == CHEAT_ID_DISABLE_ALL_CHEATS )
+        {
+            this->DisableAllCheats();
+            GetEventManager()->TriggerEvent( EVENT_FE_CHEAT_SUCCESS );
+
+            rReleasePrintf( "*** All active cheats disabled!\n" );
+            return;
+        }
+        // termina nuevo fragmento para tener un cheat que desactive a todos los activados 
         // Yay! Successful cheat code entered!!
         //
 #ifdef FINAL

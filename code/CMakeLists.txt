@@ -538,8 +538,15 @@ if(SRR2_REGION STREQUAL "PAL")
 	)
 endif()
 
-add_executable(${PROJECT_NAME} ${SRR2_SOURCES})
-target_link_libraries(${PROJECT_NAME}
+if(ANDROID)
+    add_library(main SHARED ${SRR2_SOURCES})
+    set(SRR2_TARGET main)
+else()
+    add_executable(${PROJECT_NAME} ${SRR2_SOURCES})
+    set(SRR2_TARGET ${PROJECT_NAME})
+endif()
+
+target_link_libraries(${SRR2_TARGET}
 	${SDL_LIBRARY}
 	choreo
 	p3d
@@ -556,18 +563,30 @@ target_link_libraries(${PROJECT_NAME}
 	sim
 	Threads::Threads
 )
+
+# --- Android: OpenAL + libs del sistema ---
+if(ANDROID)
+	target_link_libraries(${SRR2_TARGET}
+		OpenAL        # target de openal-soft (si lo añadiste con add_subdirectory)
+		log
+		android
+		EGL
+		GLESv2
+	)
+endif()
+
 if(SRR2_MICROPROFILE AND WIN32)
 	# needed for microprofile
-	target_link_libraries(${PROJECT_NAME} wsock32)
+	target_link_libraries(${SRR2_TARGET} wsock32)
 endif()
 if(VITA)
 	if(SRR2_USE_VITAGL)
-		target_link_libraries(${PROJECT_NAME}
+		target_link_libraries(${SRR2_TARGET}
 			vitaGL
 			vitashark
 		)
 	endif()
-	target_link_libraries(${PROJECT_NAME}
+	target_link_libraries(${SRR2_TARGET}
 		SceLibKernel_stub
 		ScePvf_stub
 		mathneon
@@ -584,12 +603,25 @@ if(VITA)
 	)
 endif()
 if(SRR2_USE_BINK)
-	target_link_libraries(${PROJECT_NAME} bink)
+    target_link_libraries(${SRR2_TARGET} bink)
 else()
-	target_link_libraries(${PROJECT_NAME} PkgConfig::FFmpeg)
+    if(ANDROID)
+        find_package(ffmpeg CONFIG REQUIRED)
+        target_link_libraries(${SRR2_TARGET}
+            ffmpeg::headers
+            ffmpeg::libavcodec.so
+            ffmpeg::libavformat.so
+            ffmpeg::libavutil.so
+            ffmpeg::libswresample.so
+            ffmpeg::libswscale.so
+        )
+    else()
+        target_link_libraries(${SRR2_TARGET} PkgConfig::FFmpeg)
+    endif()
 endif()
+
 
 option(SRR2_USE_PCH ON)
 if (SRR2_USE_PCH)
-	target_precompile_headers(${PROJECT_NAME} PRIVATE "main/pchsrr2.h")
+	target_precompile_headers(${SRR2_TARGET} PRIVATE "main/pchsrr2.h")
 endif()

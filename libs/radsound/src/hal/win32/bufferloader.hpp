@@ -6,7 +6,10 @@
 #ifndef BUFFERLOADER_HPP
 #define BUFFERLOADER_HPP
 
-#include <al.h>
+#ifdef RAD_ANDROID
+  #include <AL/al.h>
+#endif
+//#include <al.h>
 #include <radfile.hpp>
 #include <radlinkedclass.hpp>
 #include <radsound_hal.hpp>  

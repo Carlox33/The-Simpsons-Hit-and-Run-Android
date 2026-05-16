@@ -191,6 +191,14 @@ class radThread : public IRadThread,
     // Used to obtain the active thread.
     //
     static IRadThread* GetActiveThread( );
+    
+    // Android/ports helper:
+    // Ensure the CURRENT OS thread (e.g., SDLThread) has a radThread wrapper
+    // registered in s_ThreadTable[] so TLS/HeapStack work correctly.
+    //
+    // Returns the attached radThread (or the existing one if already present).
+    //
+    static radThread* AttachCurrentThreadIfNeeded( void );
 
     //
     // Statics to initialize and terminate this system.
@@ -214,6 +222,12 @@ class radThread : public IRadThread,
         
     private:
     
+    //
+    // Tag type + private constructor used ONLY to wrap/attach an existing
+    // OS thread. IMPORTANT: Must NOT write to s_ThreadTable[0].
+    //THIS 2 next lines is for android(SDL thread)
+    struct AttachTag { };
+    explicit radThread( AttachTag );
     //
     // This help member function is invoked to determine if this
     // thread is the currently active thread.

@@ -26,7 +26,12 @@
 #include "radsoundwin.hpp"
 #include "positionalgroup.hpp"
 #include "../common/rolloff.hpp"
-#include <efx.h>
+#ifndef RAD_ANDROID
+  #include <efx.h>
+#endif
+#ifdef RAD_ANDROID
+  #include <AL/efx.h>
+#endif
 
 //============================================================================
 // Component: radSoundHalListener

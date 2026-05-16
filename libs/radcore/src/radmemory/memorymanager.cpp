@@ -42,6 +42,25 @@
 
 #include <memory/leakdetection.h>
 
+#ifdef RAD_ANDROID
+#include <android/log.h>
+#include <unistd.h>
+#endif
+
+//========================================
+// Logging helper (cross-platform)
+//========================================
+#if defined(RAD_ANDROID)
+    #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "SimpsonsHitAndRun", __VA_ARGS__)
+#elif defined(RAD_VITA)
+    #define LOGI(...) sceClibPrintf(__VA_ARGS__), sceClibPrintf("\n")
+#else
+    #define LOGI(...) do { printf(__VA_ARGS__); printf("\n"); fflush(stdout); } while(0)
+#endif
+
+
+
+
 #ifdef RAD_GAMECUBE
     IRadMemoryHeap *vmmHeap = NULL; //This is for exterman linkage...  Shitty.
     extern void MemoryHackCallback();
@@ -930,7 +949,8 @@ IRadMemoryAllocator * radMemoryFindAllocator( void * pMemory )
 
 
 // Functions for SetCurrentAllocator callbacks
-//
+//ORIGINAL FUNCTIONS
+/*
 void radMemorySetAllocatorCallback( IRadMemorySetAllocatorCallback* callback )
 {
     if ( !g_CurrentAllocatorCallback )
@@ -953,6 +973,61 @@ IRadMemorySetAllocatorCallback* radMemoryGetAllocatorCallback ()
 
     return static_cast<IRadMemorySetAllocatorCallback*>(g_CurrentAllocatorCallback->GetValue( ));
 }
+*/
+
+// NEW FUNCTIONS, SAME, BUT WITH LOGI FOR DEBUG ANDROID
+// Functions for SetCurrentAllocator callbacks
+//
+void radMemorySetAllocatorCallback(IRadMemorySetAllocatorCallback* callback)
+{
+//LOGI("[radmem] &g_CurrentAllocatorCallback=%p", (void*)&g_CurrentAllocatorCallback);
+
+    if (!g_CurrentAllocatorCallback)
+    {
+        radThreadCreateLocalStorage(&g_CurrentAllocatorCallback);
+        g_CurrentAllocatorCallback->SetValue(0);
+
+        //LOGI("[radmem] CB-TLS created tid=%d tls=%p init=0",
+          //   (int)gettid(),
+           //  (void*)g_CurrentAllocatorCallback);
+    }
+
+    void* prev = g_CurrentAllocatorCallback->GetValue();
+
+    g_CurrentAllocatorCallback->SetValue((void*)callback);
+
+    //LOGI("[radmem] CALLBACK SET tid=%d tls=%p %p -> %p",
+      //   (int)gettid(),
+        // (void*)g_CurrentAllocatorCallback,
+        // prev,
+        // (void*)callback);
+}
+
+IRadMemorySetAllocatorCallback* radMemoryGetAllocatorCallback()
+{
+    //LOGI("[radmem] &g_CurrentAllocatorCallback=%p", (void*)&g_CurrentAllocatorCallback);
+    if (!g_CurrentAllocatorCallback)
+    {
+        radThreadCreateLocalStorage(&g_CurrentAllocatorCallback);
+        g_CurrentAllocatorCallback->SetValue(0);
+
+        //LOGI("[radmem] CB-TLS created tid=%d tls=%p init=0",
+          //   (int)gettid(),
+            // (void*)g_CurrentAllocatorCallback);
+    }
+
+    void* cb = g_CurrentAllocatorCallback->GetValue();
+
+    //LOGI("[radmem] CALLBACK GET tid=%d tls=%p -> %p",
+       //  (int)gettid(),
+         //(void*)g_CurrentAllocatorCallback,
+         //cb);
+
+    return static_cast<IRadMemorySetAllocatorCallback*>(cb);
+}
+
+
+
 
 
 void radMemorySetActivityCallback( IRadMemoryActivityCallback* callback )
@@ -973,7 +1048,7 @@ void radMemorySetActivityCallback( IRadMemoryActivityCallback* callback )
 // Pure3D is the user of these functions all will dictate that the threading
 // system be initilaized.
 //============================================================================
-
+/*
 radMemoryAllocator radMemoryGetCurrentAllocator( void )
 {
     IRadMemorySetAllocatorCallback* callback = radMemoryGetAllocatorCallback ();
@@ -999,6 +1074,35 @@ radMemoryAllocator radMemoryGetCurrentAllocator( void )
     //
     return( (radMemoryAllocator)(intptr_t) g_CurrentAllocator->GetValue( ) );
 }
+*/
+
+radMemoryAllocator radMemoryGetCurrentAllocator(void)
+{
+    IRadMemorySetAllocatorCallback* callback = radMemoryGetAllocatorCallback();
+    if (callback)
+    {
+        radMemoryAllocator a = callback->GetCurrentAllocator();
+        //LOGI("[radmem] GET tid=%d via CALLBACK cb=%p -> %d (TEMP=%d)",
+          //   (int)gettid(), callback, (int)a, (int)RADMEMORY_ALLOC_TEMP);
+        return a;
+    }
+
+    if (g_CurrentAllocator == NULL)
+    {
+        radThreadCreateLocalStorage(&g_CurrentAllocator);
+        g_CurrentAllocator->SetValue((void*)RADMEMORY_ALLOC_DEFAULT);
+        //LOGI("[radmem] TLS created tid=%d tls=%p init=%d",
+          //   (int)gettid(), g_CurrentAllocator, (int)RADMEMORY_ALLOC_DEFAULT);
+    }
+
+    radMemoryAllocator a =
+        (radMemoryAllocator)(intptr_t)g_CurrentAllocator->GetValue();
+
+    //LOGI("[radmem] GET tid=%d via TLS -> %d (TEMP=%d)",
+      //   (int)gettid(), (int)a, (int)RADMEMORY_ALLOC_TEMP);
+    return a;
+}
+
 
 //============================================================================
 // ::radMemorySetCurrentAllocator
@@ -1011,7 +1115,7 @@ radMemoryAllocator radMemoryGetCurrentAllocator( void )
 // ...do some allocations
 // radMemorySetCurrentAllocator( old );
 //============================================================================
-
+/*
 radMemoryAllocator radMemorySetCurrentAllocator( radMemoryAllocator allocator )
 {
     IRadMemorySetAllocatorCallback* callback = radMemoryGetAllocatorCallback ();
@@ -1041,6 +1145,36 @@ radMemoryAllocator radMemorySetCurrentAllocator( radMemoryAllocator allocator )
 
     return prevAllocator;
 }
+*/
+radMemoryAllocator radMemorySetCurrentAllocator(radMemoryAllocator allocator)
+{
+    IRadMemorySetAllocatorCallback* callback = radMemoryGetAllocatorCallback();
+    if (callback)
+    {
+        radMemoryAllocator old = callback->SetCurrentAllocator(allocator);
+        //LOGI("[radmem] SET tid=%d via CALLBACK cb=%p %d -> %d",
+          //   (int)gettid(), callback, (int)old, (int)allocator);
+        return old;
+    }
+
+    if (g_CurrentAllocator == NULL)
+    {
+        radThreadCreateLocalStorage(&g_CurrentAllocator);
+        g_CurrentAllocator->SetValue((void*)RADMEMORY_ALLOC_DEFAULT);
+        //LOGI("[radmem] TLS created tid=%d tls=%p init=%d",
+          //   (int)gettid(), g_CurrentAllocator, (int)RADMEMORY_ALLOC_DEFAULT);
+    }
+
+    radMemoryAllocator prev =
+        (radMemoryAllocator)(intptr_t)g_CurrentAllocator->GetValue();
+
+    g_CurrentAllocator->SetValue((void*)(intptr_t)allocator);
+
+   // LOGI("[radmem] SET tid=%d via TLS %d -> %d",
+     //    (int)gettid(), (int)prev, (int)allocator);
+    return prev;
+}
+
 
 
 const char * g_pAllocationName = NULL;

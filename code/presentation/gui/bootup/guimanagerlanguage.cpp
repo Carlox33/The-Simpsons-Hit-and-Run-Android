@@ -28,6 +28,25 @@
 
 #include <raddebug.hpp>
 
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+  #define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
+
+
+
 //===========================================================================
 // Global Data, Local Data, Local Classes
 //===========================================================================
@@ -113,6 +132,7 @@ MEMTRACK_POP_GROUP("CGuiManagerLanguage");
 void
 CGuiManagerLanguage::Start( CGuiWindow::eGuiWindowID initialWindow )
 {
+    
     rAssert( m_state == GUI_FE_UNINITIALIZED );
 
     rAssertMsg( initialWindow == CGuiWindow::GUI_WINDOW_ID_UNDEFINED,
@@ -219,6 +239,8 @@ void CGuiManagerLanguage::HandleMessage
 bool
 CGuiManagerLanguage::CheckLanguage()
 {
+
+
     bool isLanguageSupported = true;
 
     switch( Language::GetHardwareLanguage() )

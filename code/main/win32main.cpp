@@ -1,7 +1,7 @@
 //=============================================================================
 // Copyright (C) 2002 Radical Entertainment Ltd.  All rights reserved.
 //
-// File:        xboxmain.cpp
+// File:        win32main.cpp
 //
 // Description: This file contains the main enrty point to the game.
 //
@@ -21,6 +21,12 @@
 #include <stdio.h>
 #include <SDL_main.h>
 
+
+#ifdef RAD_ANDROID
+#include <android/log.h>
+#include <unistd.h>
+#endif
+
 #ifdef __SWITCH__
 #include <switch.h>
 #endif
@@ -29,6 +35,19 @@
 #include <unistd.h>
 #include <psp2/kernel/clib.h>
 unsigned int sceLibcHeapSize = 16 * 1024 * 1024;
+#endif
+
+
+
+//========================================
+// Logging helper (cross-platform)
+//========================================
+#if defined(RAD_ANDROID)
+    #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "SimpsonsHitAndRun", __VA_ARGS__)
+#elif defined(RAD_VITA)
+    #define LOGI(...) sceClibPrintf(__VA_ARGS__), sceClibPrintf("\n")
+#else
+    #define LOGI(...) do { printf(__VA_ARGS__); printf("\n"); fflush(stdout); } while(0)
 #endif
 
 //========================================
@@ -53,6 +72,10 @@ static void LogOutputFunction( void *userdata, int category, SDL_LogPriority pri
 {
 #ifdef RAD_VITA
     sceClibPrintf( "%s\n", message );
+	
+#elif defined(RAD_ANDROID)
+	LOGI("%s", message);
+
 #else
     printf( "%s\n", message );
     fflush( stdout );
@@ -83,9 +106,20 @@ extern "C" int main( int argc, char *argv[] )
 	chdir( "ux0:data/simpsons" );
 #endif
 
-    //
+#ifdef RAD_ANDROID
+	//LOGI( "Android Port Initialized.");
+    #ifdef SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH
+    SDL_SetHint(SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH, "0");//only use touchpad
+#else
+    SDL_SetHint("SDL_ANDROID_SEPARATE_MOUSE_AND_TOUCH", "0");
+#endif
+
+	//LOGI( "Touchpad initialized, mouse disabled.");
+#endif	
+	//
     // Pick out and store command line settings.
     //
+	//LOGI("Initializing command line options...");
     CommandLineOptions::InitDefaults();
     ProcessCommandLineArguments( argc, argv );
     ProcessCommandLineArgumentsFromFile();
@@ -93,6 +127,7 @@ extern "C" int main( int argc, char *argv[] )
     //
     // Initialize SDL subsystems
     //
+//LOGI("Initializing SDL subsystems...");	
 #if SDL_MAJOR_VERSION < 3
     SDL_Init( SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER );
 
@@ -103,11 +138,44 @@ extern "C" int main( int argc, char *argv[] )
     SDL_SetLogOutputFunction( LogOutputFunction, NULL );
 #endif
 
+
+
+// --------------------------------------------------
+// Log SDL version (runtime vs compile-time)
+// --------------------------------------------------
+#if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+#if SDL_MAJOR_VERSION < 3
+    SDL_version compiled;
+    SDL_version linked;
+
+    SDL_VERSION(&compiled);      // headers used at compile time
+    SDL_GetVersion(&linked);     // library used at runtime
+
+    LOGI("SDL (compiled): %d.%d.%d", compiled.major, compiled.minor, compiled.patch);
+    LOGI("SDL (runtime):  %d.%d.%d", linked.major, linked.minor, linked.patch);
+
+    // Extra: which backend driver got picked (useful for ports)
+    LOGI("SDL Video driver: %s", SDL_GetCurrentVideoDriver() ? SDL_GetCurrentVideoDriver() : "(null)");
+    LOGI("SDL Audio driver: %s", SDL_GetCurrentAudioDriver() ? SDL_GetCurrentAudioDriver() : "(null)");
+#else
+    int major, minor, micro;
+    SDL_GetVersion(&major, &minor, &micro);
+
+    LOGI("SDL (runtime):  %d.%d.%d", major, minor, micro);
+
+    // Extra: drivers (SDL3 mantiene funciones similares, pero por si acaso)
+    const char* v = SDL_GetCurrentVideoDriver();
+    const char* a = SDL_GetCurrentAudioDriver();
+    LOGI("SDL Video driver: %s", v ? v : "(null)");
+    LOGI("SDL Audio driver: %s", a ? a : "(null)");
+#endif
+#endif
     //
     // Have to get FTech setup first so that we can use all the memory services.
     // The initialize window call will fail if another Simpsons window exists. In
     // this case, we exit.
     //
+	
     if( !Win32Platform::InitializeWindow() )
     {
         return 0;
@@ -131,6 +199,7 @@ extern "C" int main( int argc, char *argv[] )
     //
     // Instantiate all the singletons before doing anything else.
     //
+	//LOGI( "Creating game singletons...");
     CreateSingletons();
 
     //

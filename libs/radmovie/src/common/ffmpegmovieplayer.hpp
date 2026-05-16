@@ -27,6 +27,7 @@
 
 #ifndef RAD_MOVIEPLAYER_USE_BINK
 
+
 #include <al.h>
 #include <radtime.hpp>
 #include <radmovie2.hpp>
@@ -133,6 +134,16 @@ class radMoviePlayer
         AVFrame * m_pAudioFrame;
 
         ALuint m_AudioSource;
+		
+		// --- ANDROID/FFMPEG timing fixes ---
+		bool m_HasPtsBase;
+		int64_t m_PtsBase;
+		unsigned int m_DefaultFrameDurationMs;
+
+        bool m_ClockSynced;
+        unsigned int m_ClockOffsetMs;
+        // opcional (si lo haces como miembro, mejor que static):
+        bool m_RenderedFirstEarly;
 };
 
 #endif // ! RAD_MOVIEPLAYER_USE_BINK

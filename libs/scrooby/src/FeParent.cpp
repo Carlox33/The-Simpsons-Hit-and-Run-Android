@@ -37,6 +37,50 @@
 
 #include "tLinearTable.h"
 
+
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+  #define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
+
+#ifdef RAD_ANDROID
+#include <dlfcn.h>
+
+static void LogCallerAddrs(void* ra0, void* ra1)
+{
+    Dl_info info0{}, info1{};
+    const char* s0 = "(?)";
+    const char* s1 = "(?)";
+    const char* f0 = "(?)";
+    const char* f1 = "(?)";
+
+    if (ra0 && dladdr(ra0, &info0))
+    {
+        if (info0.dli_sname) s0 = info0.dli_sname;
+        if (info0.dli_fname) f0 = info0.dli_fname;
+    }
+    if (ra1 && dladdr(ra1, &info1))
+    {
+        if (info1.dli_sname) s1 = info1.dli_sname;
+        if (info1.dli_fname) f1 = info1.dli_fname;
+    }
+
+    LOGE("[FeParent] OOB caller ra0=%p (%s @ %s) ra1=%p (%s @ %s)",
+         ra0, s0, f0, ra1, s1, f1);
+}
+#endif
 //===========================================================================
 // Local Constants, Typedefs, and Macros
 //===========================================================================
@@ -251,6 +295,7 @@ FeEntity* FeParent::GetChild( const tUID hashvalue )
 // Return:      a pointer to one of the children
 //
 //===========================================================================
+/*
 FeEntity* FeParent::GetChildIndex( int i ) 
 {
     int childrenCount = GetChildrenCount();
@@ -276,7 +321,70 @@ FeEntity* FeParent::GetChildIndex( int i )
     
     return( entity );
 }
+*/
+/*
+// NEW FUNCTION FOR ANDROID TEMPORAL, FOR DEBUG||| Esta funcion me permite pasar al menu principal(casa de homer) 
+FeEntity* FeParent::GetChildIndex( int i )
+{
+    int childrenCount = GetChildrenCount();
 
+    LOGI("[FeParent::GetChildIndex] ENTER this=%p i=%d childrenCount=%d curIndex=%d iter=%p",
+         this, i, childrenCount, mCurChildIndex, mpChildIter);
+
+    // --- Caso crítico: sin hijos ---
+    if (childrenCount <= 0)
+    {
+        LOGE("[FeParent::GetChildIndex] ERROR: childrenCount=0 this=%p i=%d", this, i);
+        return NULL;
+    }
+
+    // --- Índice fuera de rango ---
+    if (i < 0 || i >= childrenCount)
+    {
+        LOGE("[FeParent::GetChildIndex] OOB index! this=%p i=%d children=%d curIndex=%d",
+             this, i, childrenCount, mCurChildIndex);
+
+        // Clamp temporal para seguir ejecución
+        if (i < 0)
+            i = 0;
+        else
+            i = childrenCount - 1;
+
+        LOGI("[FeParent::GetChildIndex] Clamped i=%d", i);
+    }
+
+    // --- Si vamos hacia atrás, reseteamos iterador ---
+    if (i < mCurChildIndex)
+    {
+        LOGI("[FeParent::GetChildIndex] ResetIter triggered (i=%d < curIndex=%d)",
+             i, mCurChildIndex);
+
+        ResetIter();
+    }
+
+    FeEntity* entity = mpChildIter->Current();
+
+    LOGI("[FeParent::GetChildIndex] Starting iteration at curIndex=%d entity=%p",
+         mCurChildIndex, entity);
+
+    // --- Iteración ---
+    while (entity && mCurChildIndex < i)
+    {
+        entity = mpChildIter->Next();
+        mCurChildIndex++;
+
+        LOGI("[FeParent::GetChildIndex] Iter step -> curIndex=%d entity=%p",
+             mCurChildIndex, entity);
+    }
+
+    LOGI("[FeParent::GetChildIndex] RETURN entity=%p finalCurIndex=%d",
+         entity, mCurChildIndex);
+
+    return entity;
+}
+*/
+
+/*
 //===========================================================================
 // FeParent::GetChildIndex
 //===========================================================================
@@ -315,6 +423,254 @@ const FeEntity* FeParent::GetChildIndex( int i ) const
     
     return( entity );
 }
+*/
+
+// NEW FUNCTIONS FOR ANDROID GetChildIndex(AMBAS) con "const " y sin const 
+
+// ESTA VERSION ES LA "NUEVA Y MEJORADA EN CUANTO A QUE MANTENEMOS COMPORTAMIENTO ORIGINAL PERO HACIENDO RESET ITER EN LUGARES ADECUADOS"
+/*
+FeEntity* FeParent::GetChildIndex( int i )
+{
+    int childrenCount = GetChildrenCount();
+
+    // 1) Caso real: sin hijos -> no hay nada que devolver.
+    if( childrenCount <= 0 )
+    {
+        return NULL;
+    }
+
+    // 2) Contrato original (solo que ahora no explota cuando childrenCount==0)
+    rAssert( i < childrenCount );
+
+    // 3) Comportamiento original en release: clamp si OOB por arriba.
+    if( i >= childrenCount )
+    {
+        i = childrenCount - 1;
+    }
+
+    // (Opcional pero MUY recomendado) Si hay posibilidad de i negativo:
+    // rAssert( i >= 0 );
+    // if( i < 0 ) i = 0;
+
+    // 4) Reset recomendado: iterador en estado inválido aunque haya hijos
+    if( mpChildIter->Current() == NULL )
+    {
+        ResetIter();
+    }
+
+    if( i < mCurChildIndex )
+    {
+        ResetIter();
+    }
+
+    FeEntity* entity = mpChildIter->Current();
+
+    while( entity && mCurChildIndex < i )
+    {
+        entity = mpChildIter->Next();
+        mCurChildIndex++;
+    }
+
+    return entity;
+}
+
+const FeEntity* FeParent::GetChildIndex( int i ) const
+{
+    int childrenCount = GetChildrenCount();
+
+    if( childrenCount <= 0 )
+    {
+        return NULL;
+    }
+
+    rAssert( i < childrenCount );
+
+    if( i >= childrenCount )
+    {
+        i = childrenCount - 1;
+    }
+
+    // rAssert( i >= 0 );
+    // if( i < 0 ) i = 0;
+
+    if( mpChildIter->Current() == NULL )
+    {
+        ResetIter();
+    }
+
+    if( i < mCurChildIndex )
+    {
+        ResetIter();
+    }
+
+    FeEntity* entity = mpChildIter->Current();
+
+    while( entity && mCurChildIndex < i )
+    {
+        entity = mpChildIter->Next();
+        mCurChildIndex++;
+    }
+
+    return entity;
+}
+
+*/
+
+
+// NUEVAS FUNCIONES QUE ESTOY PROBANDO PARA DEBUG(ANDROID), cuando se solucione se supone que deberiamos volver a algo similar a las de justo arriba 
+FeEntity* FeParent::GetChildIndex( int i )
+{
+    int childrenCount = GetChildrenCount();
+
+    // 1) Caso real: sin hijos -> no hay nada que devolver.
+    if( childrenCount <= 0 )
+    {
+//#ifdef RAD_ANDROID
+  //      LOGE("[FeParent] GetChildIndex: childrenCount<=0 this=%p i=%d curIndex=%d iter=%p",
+    //         this, i, mCurChildIndex, mpChildIter);
+//#endif
+        return NULL;
+    }
+
+    // 2) Si OOB (por arriba o por debajo), LOG ANTES del assert
+    //    (así vemos quién llama mal). Luego el assert mantiene el contrato.
+#ifdef RAD_ANDROID
+    if( i < 0 || i >= childrenCount )
+    {
+#if defined(__clang__) || defined(__GNUC__)
+        void* ra0 = __builtin_return_address(0);
+        void* ra1 = __builtin_return_address(1);
+#else
+        void* ra0 = nullptr;
+        void* ra1 = nullptr;
+#endif
+        //LOGE("[FeParent] GetChildIndex OOB this=%p i=%d childrenCount=%d curIndex=%d iter=%p cur=%p ra0=%p ra1=%p",
+          //   this, i, childrenCount, mCurChildIndex, mpChildIter,
+            // mpChildIter ? mpChildIter->Current() : (void*)0,
+             //ra0, ra1);
+
+             //LogCallerAddrs(ra0, ra1);
+    }
+#endif
+
+    // 3) Contrato original (debug rompe aquí si i es inválido)
+    rAssert( i < childrenCount );
+
+    // 4) Comportamiento original: clamp si OOB por arriba (release)
+    if( i >= childrenCount )
+    {
+        i = childrenCount - 1;
+    }
+
+    // (Opcional) si te preocupa i negativo en release:
+    // if( i < 0 ) i = 0;
+
+    // 5) Reset recomendado: iterador en estado inválido aunque haya hijos
+    if( mpChildIter->Current() == NULL )
+    {
+//#ifdef RAD_ANDROID
+  //      LOGI("[FeParent] GetChildIndex: iter current NULL -> ResetIter this=%p i=%d childrenCount=%d curIndex=%d iter=%p",
+    //         this, i, childrenCount, mCurChildIndex, mpChildIter);
+//#endif
+        ResetIter();
+    }
+
+    if( i < mCurChildIndex )
+    {
+//#ifdef RAD_ANDROID
+  //      LOGI("[FeParent] GetChildIndex: i < curIndex -> ResetIter this=%p i=%d curIndex=%d",
+    //         this, i, mCurChildIndex);
+//#endif
+        ResetIter();
+    }
+
+    FeEntity* entity = mpChildIter->Current();
+
+    while( entity && mCurChildIndex < i )
+    {
+        entity = mpChildIter->Next();
+        mCurChildIndex++;
+    }
+
+    return entity;
+}
+
+const FeEntity* FeParent::GetChildIndex( int i ) const
+{
+    int childrenCount = GetChildrenCount();
+
+    if( childrenCount <= 0 )
+    {
+//#ifdef RAD_ANDROID
+  //      LOGE("[FeParent] GetChildIndex(const): childrenCount<=0 this=%p i=%d curIndex=%d iter=%p",
+    //         this, i, mCurChildIndex, mpChildIter);
+//#endif
+        return NULL;
+    }
+
+#ifdef RAD_ANDROID
+    if( i < 0 || i >= childrenCount )
+    {
+#if defined(__clang__) || defined(__GNUC__)
+        void* ra0 = __builtin_return_address(0);
+        void* ra1 = __builtin_return_address(1);
+#else
+        void* ra0 = nullptr;
+        void* ra1 = nullptr;
+#endif
+        /*LOGE("[FeParent] GetChildIndex(const) OOB this=%p i=%d childrenCount=%d curIndex=%d iter=%p cur=%p ra0=%p ra1=%p",
+             this, i, childrenCount, mCurChildIndex, mpChildIter,
+             mpChildIter ? mpChildIter->Current() : (void*)0,
+             ra0, ra1);
+              LogCallerAddrs(ra0, ra1);
+              */
+    }
+#endif
+
+    rAssert( i < childrenCount );
+
+    if( i >= childrenCount )
+    {
+        i = childrenCount - 1;
+    }
+
+    // if( i < 0 ) i = 0; // opcional
+
+    if( mpChildIter->Current() == NULL )
+    {
+ /*     
+#ifdef RAD_ANDROID
+        LOGI("[FeParent] GetChildIndex(const): iter current NULL -> ResetIter this=%p i=%d childrenCount=%d curIndex=%d iter=%p",
+             this, i, childrenCount, mCurChildIndex, mpChildIter);
+#endif
+*/  
+        ResetIter();
+    }
+
+    if( i < mCurChildIndex )
+    {
+         /* 
+#ifdef RAD_ANDROID
+        LOGI("[FeParent] GetChildIndex(const): i < curIndex -> ResetIter this=%p i=%d curIndex=%d",
+             this, i, mCurChildIndex);
+#endif
+*/  
+        ResetIter();
+    }
+
+    FeEntity* entity = mpChildIter->Current();
+
+    while( entity && mCurChildIndex < i )
+    {
+        entity = mpChildIter->Next();
+        mCurChildIndex++;
+    }
+
+    return entity;
+}
+
+
+
 
 //===========================================================================
 // FeParent::GetChildDrawable

@@ -11,6 +11,8 @@
 // when multithreading curernt allcoator must be in thread local storage
 #include <radthread.hpp>
 
+
+
 static IRadThreadLocalStorage* gCurrentAllocType = NULL;
 
 static inline p3d::AllocType GetCurrentAllocator(void) 

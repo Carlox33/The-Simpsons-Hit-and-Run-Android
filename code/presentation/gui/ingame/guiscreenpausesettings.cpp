@@ -36,6 +36,26 @@
 #include <Text.h>
 #include <strings/unicodeString.h>
 
+
+
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+  #define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
+
+
 //===========================================================================
 // Global Data, Local Data, Local Classes
 //===========================================================================
@@ -62,12 +82,12 @@ const char* PAUSE_SETTINGS_MENU_ITEMS[] =
 {
     "Camera",
     "JumpCamera",
-#ifndef RAD_PC
+#if !defined(RAD_PC) //&& !defined(RAD_ANDROID)
     "InvertCamControl",
 #endif
     "IntersectNavSystem",
     "Radar",
-#ifndef RAD_PC
+#if !defined(RAD_PC) //&& !defined(RAD_ANDROID)
     "Vibration",
 #endif
     "Tutorial",
@@ -127,10 +147,12 @@ MEMTRACK_PUSH_GROUP( "CGuiScreenPauseSettings" );
     //
     char itemName[ 32 ];
 
+    // ORIGINAL CODE lo comento y voy a usar otro ahora mismo para debug
+    /*
     for( int i = 0; i < NUM_PAUSE_SETTINGS_MENU_ITEMS; i++ )
     {
         Scrooby::Group* group = pPage->GetGroup( PAUSE_SETTINGS_MENU_ITEMS[ i ] );
-        rAssert( group != NULL );
+        rAssert( group != NULL );// Assert que nos provoca el fallo actualmente 
 
         Scrooby::Text* pText = group->GetText( PAUSE_SETTINGS_MENU_ITEMS[ i ] );
         rAssert( pText != NULL );
@@ -155,6 +177,131 @@ MEMTRACK_PUSH_GROUP( "CGuiScreenPauseSettings" );
                               pRArrow,
                               SELECTION_ENABLED | VALUES_WRAPPED | TEXT_OUTLINE_ENABLED );
     }
+  */   
+ // Buscar el contenedor "Menu" (según el XML: <Group Name="Menu">)
+Scrooby::Group* menu = pPage->GetGroup( "Menu" );
+
+#if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+LOGI("[PauseSettings] page=%p menu=%p", (void*)pPage, (void*)menu);
+#endif
+
+rAssert( menu != NULL );
+                    for( int i = 0; i < NUM_PAUSE_SETTINGS_MENU_ITEMS; i++ )
+                    {
+                        const char* item = PAUSE_SETTINGS_MENU_ITEMS[ i ];
+
+                    #if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+                        LOGI("[PauseSettings] item=%d name='%s' page=%p", i, item, (void*)pPage);
+                    #endif
+
+                       Scrooby::Group* group = menu->GetGroup( item );
+
+                    #if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+                        if( group == NULL )
+                        {
+                            LOGE("[PauseSettings] MISSING GROUP item=%d name='%s' page=%p screen=%p",
+                                i, item, (void*)pPage, (void*)m_pScroobyScreen);
+                        }
+                        else
+                        {
+                            // Size() existe (lo estás usando en RestoreButtons), nos da pista de layout
+                            LOGI("[PauseSettings] group found item=%d name='%s' group=%p size=%u",
+                                i, item, (void*)group, (unsigned)group->Size());
+                        }
+                    #endif
+
+                    // COdigo extra debug 
+
+#if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+if( group == NULL )
+{
+    const unsigned int n = (unsigned int)menu->Size();
+    LOGE("[PauseSettings] Dump Menu children: menu=%p size=%u", (void*)menu, n);
+
+    for( unsigned int c = 0; c < n; ++c )
+    {
+        // OJO: aquí depende de tu API real.
+        // Prueba primero con GetChildDrawable(c) si existe (suele existir en FeParent/Group).
+        Scrooby::Drawable* d = menu->GetChildDrawable( c );
+        if( d )
+        {
+            // si Drawable tiene GetName() o GetID() úsalo
+            LOGE("[PauseSettings]  child[%u]=%p", c, (void*)d);
+        }
+        else
+        {
+            LOGE("[PauseSettings]  child[%u]=NULL", c);
+        }
+    }
+}
+#endif
+
+                    //FIN Codigo extra debug
+                       // rAssert( group != NULL ); //AQUI Se produce el mismo assert, esto nos lo saltamos para poder acceder al mundo3D, habra que revisarlo luego, tiene que ver con que en el Cmake del Code, no se incluye el archivo para settings
+if( group == NULL )
+{
+#if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+    LOGE("[PauseSettings] SKIP missing group '%s' (item=%d). Likely wrong PauseSettings layout for this build.", item, i);
+#endif
+    continue; // temporal para seguir arrancando
+}
+                        Scrooby::Text* pText = group->GetText( item );
+
+                    #if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+                        if( pText == NULL )
+                        {
+                            LOGE("[PauseSettings] MISSING TEXT label item=%d name='%s' group=%p",
+                                i, item, (void*)group);
+                        }
+                    #endif
+
+                        rAssert( pText != NULL );
+                        pText->SetTextMode( Scrooby::TEXT_WRAP );
+
+                        // Value text
+                        sprintf( itemName, "%s_Value", item );
+                        Scrooby::Text* pTextValue = group->GetText( itemName );
+
+                   #if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+                        if( pTextValue == NULL )
+                        {
+                            LOGE("[PauseSettings] MISSING TEXT value item=%d valueName='%s' base='%s' group=%p",
+                                i, itemName, item, (void*)group);
+                        }
+                    #endif
+
+                        rAssert( pTextValue != NULL );
+                        pTextValue->SetTextMode( Scrooby::TEXT_WRAP );
+
+                        // Left arrow (puede ser NULL “legalmente” según layout, así que LOGI opcional)
+                        sprintf( itemName, "%s_LArrow", item );
+                        Scrooby::Sprite* pLArrow = group->GetSprite( itemName );
+
+                    #if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+                        LOGI("[PauseSettings] arrows item=%d base='%s' L='%s' ptr=%p",
+                            i, item, itemName, (void*)pLArrow);
+                    #endif
+
+                        // Right arrow
+                        sprintf( itemName, "%s_RArrow", item );
+                        Scrooby::Sprite* pRArrow = group->GetSprite( itemName );
+
+                    #if defined(RAD_ANDROID) && defined(RAD_DEBUG)
+                        LOGI("[PauseSettings] arrows item=%d base='%s' R='%s' ptr=%p",
+                            i, item, itemName, (void*)pRArrow);
+                    #endif
+
+                        m_pMenu->AddMenuItem( pText,
+                                            pTextValue,
+                                            NULL,
+                                            NULL,
+                                            pLArrow,
+                                            pRArrow,
+                                            SELECTION_ENABLED | VALUES_WRAPPED | TEXT_OUTLINE_ENABLED );
+                    }
+
+
+
 
 #ifdef RAD_GAMECUBE
     // change "Vibration" text to "Rumble"

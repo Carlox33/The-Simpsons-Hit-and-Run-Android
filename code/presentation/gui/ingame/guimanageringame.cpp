@@ -89,6 +89,27 @@
 #include <Page.h>
 #include <Screen.h>
 
+
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+  #define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
+
+
+
+
 //===========================================================================
 // Global Data, Local Data, Local Classes
 //===========================================================================
@@ -1037,6 +1058,13 @@ void CGuiManagerInGame::HandleMessage
         case GUI_MSG_INGAME_DISPLAY_PROMPT:
         {
             int ingameMessageIndex = NUM_PROMPT_QUESTIONS + static_cast<int>( param1 );
+            #ifdef RAD_ANDROID
+            // necesitamos aqui sumar exactamente 6 al indice porque ejecutamos como consola y como PC.
+            //PC tiene en el archivo guiscreenprompt.h 6 extra, por lo que en android quedaba desalineado 
+            //porque estamos usando los assets de pc los cuales tienen esos 6 extra en el archivo srr2.p3d con respect a consolas  
+            //y mostraba prompt de error de windows  en lugar de un mensaje normal del juego,como compra este vehiculo para realizar esta mision 
+            ingameMessageIndex +=6; 
+            #endif
             this->DisplayPrompt( ingameMessageIndex, s_currentHUD, PROMPT_TYPE_CONTINUE );
 
             rAssert( GetGameFlow()->GetCurrentContext() == CONTEXT_GAMEPLAY );
@@ -1053,6 +1081,9 @@ void CGuiManagerInGame::HandleMessage
 
             }
 
+            //CODIGO ORIGINAL EL CUAL NOS OBLIGA A PULSAR EL BOTON START AL RECONECTAR EL MANDO
+            // ESTO YA ESTA ANTICUADO Y QUEREMOS QUE AL RECONECTAR EL MANDO PODAMOS VOLVER A JUGAR SIN PULSAR START
+            /*
             if (m_controllerPromptShown) // don't pass event if controller error
             { 
                 if (message==GUI_MSG_CONTROLLER_START)  // start trigger reconnection
@@ -1062,6 +1093,35 @@ void CGuiManagerInGame::HandleMessage
 
                 break;
             }
+                */
+
+                // NUEVO FRAGMENTO PARA QUE AL RECONECTAR EL MANDO PODAMOS JUGAR SIN TENER QUE PULSAR START
+                // FRAGMENTO ORIGINAL JUSTO ARRIBA 
+                if( m_controllerPromptShown ) // while controller error is active
+{
+    if( message == GUI_MSG_UPDATE )
+    {
+        int controllerID = GetInputManager()->GetControllerIDforPlayer( 0 );
+
+        if( controllerID >= 0 )
+        {
+            UserController* controller = GetInputManager()->GetController( controllerID );
+            if( controller != NULL && controller->IsConnected() )
+            {
+                this->OnControllerConnected( controllerID );
+            }
+        }
+    }
+    else if( message == GUI_MSG_CONTROLLER_CONNECT ||
+             message == GUI_MSG_CONTROLLER_START )
+    {
+        this->OnControllerConnected( static_cast<int>( param1 ) );
+    }
+
+    break;
+}
+
+// FIN NUEVO FRAGMENTO
             
             if( m_state != GUI_FE_UNINITIALIZED &&
                 m_currentScreen != CGuiWindow::GUI_WINDOW_ID_UNDEFINED )
@@ -1440,9 +1500,19 @@ CGuiManagerInGame::OnControllerDisconnected( int controllerID )
 */
  
         m_controllerPromptShown = true;
+        //LINEAS ORIGINALES
         char str_buffer[256];
         CGuiScreenMessage::GetControllerDisconnectedMessage(controllerID, str_buffer,  255);
-        GetGame()->GetPlatform()->OnControllerError(str_buffer);
+        //FIN LINEAS
+
+        // TEST TEMPORAL
+        //LOGI("[GuiManagerInGame]: OnControllerDisconnected ENTER controllerID=%d promptShown=%d", controllerID, m_controllerPromptShown);
+        //LOGI("[GuiManagerInGame]: Controller error message: %s", str_buffer);
+        //LOGI("[GuiManagerInGame]: About to call OnControllerError");
+
+        // COMENTAR ESTA LINEA ES IMPORTANTE, para que el juego no se quede congelado si el mando se desconecta 
+        
+       // GetGame()->GetPlatform()->OnControllerError(str_buffer);
 
 }
 

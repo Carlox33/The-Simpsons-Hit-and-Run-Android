@@ -24,7 +24,7 @@
 
 #include <radobjectbtree.hpp>
 #include <radlinkedclass.hpp>
-#include <radnamespace.hpp>
+//#include <radnamespace.hpp> //THis is weird a include of the same file 
 #include <radtypeinfo.hpp>
 
 
@@ -33,6 +33,17 @@
 //============================================================================
 
 struct IRadNameSpace;
+
+// i add this here for fix problems with android compilation
+// 
+
+//template<>
+//IRadNameSpace* radLinkedClass< IRadNameSpace >::s_pLinkedClassHead = NULL;
+
+//template<>
+//IRadNameSpace* radLinkedClass< IRadNameSpace >::s_pLinkedClassTail = NULL;
+
+
 
 //============================================================================
 // Factories and functions

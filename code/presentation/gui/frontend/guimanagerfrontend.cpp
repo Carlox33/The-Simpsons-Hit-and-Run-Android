@@ -84,6 +84,27 @@
     #endif
 #endif
 
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+  #define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
+
+
+
+
+
 //#define SKIP_INTRO_MOVIE_IF_GAME_LOADED
 
 //===========================================================================
@@ -468,9 +489,21 @@ CGuiManagerFrontEnd::OnControllerDisconnected( int controllerID )
  //       this->DisplayMessage( CGuiScreenMessage::MSG_ID_CONTROLLER_DISCONNECTED_GC + PLATFORM_TEXT_INDEX );
         char str_buffer[256];
         CGuiScreenMessage::GetControllerDisconnectedMessage(controllerID, str_buffer,  255);
-        GetGame()->GetPlatform()->OnControllerError(str_buffer);
+
+
+        // TEST TEMPORAL
+    
+//LOGI("[GuiManagerFrontEnd]: OnControllerDisconnected ENTER controllerID=%d promptShown=%d", controllerID, m_controllerPromptShown);
+//LOGI("[GuiManagerFrontEnd]: Controller error message: %s", str_buffer);
+//LOGI("[GuiManagerFrontEnd]: About to call OnControllerError");
+
+        // COMENTAR ESTA LINEA ES IMPORTANTE, para que el juego no se quede congelado si el mando se desconecta 
+        //GetGame()->GetPlatform()->OnControllerError(str_buffer);
     }
 }
+
+
+
 
 //===========================================================================
 // CGuiManagerFrontEnd::HandleMessage
@@ -744,7 +777,9 @@ void CGuiManagerFrontEnd::HandleMessage
                 rAssert( userInputHandler != NULL );
                 userInputHandler->SetEnabled( m_wasFMVInputHandlerEnabled );
             }
-
+//CODIGO ORIGINAL EL CUAL NOS OBLIGA A PULSAR EL BOTON START AL RECONECTAR EL MANDO
+            // ESTO YA ESTA ANTICUADO Y QUEREMOS QUE AL RECONECTAR EL MANDO PODAMOS VOLVER A JUGAR SIN PULSAR START
+            /*
             if( m_controllerPromptShown )
             {
                 if (message==GUI_MSG_CONTROLLER_START)  // start trigger reconnection
@@ -753,6 +788,33 @@ void CGuiManagerFrontEnd::HandleMessage
                 }
                 break;  // don't pass event if controller error
             }
+*/
+           // NUEVO FRAGMENTO PARA QUE AL RECONECTAR EL MANDO PODAMOS JUGAR SIN TENER QUE PULSAR START
+                // FRAGMENTO ORIGINAL JUSTO ARRIBA 
+                if( m_controllerPromptShown ) // while controller error is active
+{
+    if( message == GUI_MSG_UPDATE )
+    {
+        int controllerID = GetInputManager()->GetControllerIDforPlayer( 0 );
+
+        if( controllerID >= 0 )
+        {
+            UserController* controller = GetInputManager()->GetController( controllerID );
+            if( controller != NULL && controller->IsConnected() )
+            {
+                this->OnControllerConnected( controllerID );
+            }
+        }
+    }
+    else if( message == GUI_MSG_CONTROLLER_CONNECT ||
+             message == GUI_MSG_CONTROLLER_START )
+    {
+        this->OnControllerConnected( static_cast<int>( param1 ) );
+    }
+
+    break;
+}
+
 
             if( m_state != GUI_FE_UNINITIALIZED && m_currentScreen != CGuiWindow::GUI_WINDOW_ID_UNDEFINED )
             {

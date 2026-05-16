@@ -7,6 +7,9 @@
 #include "pch.hpp"
 #include <raddebug.hpp>
 #include "platalloc.hpp"
+#include <cstdlib>   // malloc, free, posix_memalign
+#include <stdlib.h>  // también válido en NDK
+#include <cerrno>    // opcional
 
 #if defined RAD_PS2
 
@@ -134,34 +137,33 @@ void radMemoryPlatFree( void * pMemory )
 //============================================================================
 // ::radMemoryPlatAllocAligned
 //============================================================================
-
-void * radMemoryPlatAllocAligned( unsigned int numberOfBytes, unsigned int alignment )
+void* radMemoryPlatAllocAligned(unsigned int numberOfBytes, unsigned int alignment)
 {
-	#ifndef WIN32
+#if defined(WIN32)
+    return _aligned_malloc(numberOfBytes, alignment);
+#else
+    // Android/Linux: use posix_memalign (aligned_alloc may not exist on NDK/minSdk)
+    if (alignment < sizeof(void*)) alignment = sizeof(void*);
 
-		return ::aligned_alloc( alignment, numberOfBytes );
+    void* p = nullptr;
 
-	#else
+    // posix_memalign requires alignment to be power-of-two AND multiple of sizeof(void*)
+    int rc = posix_memalign(&p, alignment, numberOfBytes);
+    if (rc != 0) return nullptr;
 
-        return _aligned_malloc( numberOfBytes, alignment );
-
-	#endif
+    return p;
+#endif
 }
 
 //============================================================================
 // ::radMemoryPlatFreeAligned
 //============================================================================
-
-void radMemoryPlatFreeAligned( void * pAlignedMemory )
+void radMemoryPlatFreeAligned(void* pAlignedMemory)
 {
-
-	#ifndef WIN32
-		
-		free( pAlignedMemory );
-	
-	#else
-
-        _aligned_free( pAlignedMemory );
-
-	#endif
+#if defined(WIN32)
+    _aligned_free(pAlignedMemory);
+#else
+    free(pAlignedMemory);
+#endif
 }
+

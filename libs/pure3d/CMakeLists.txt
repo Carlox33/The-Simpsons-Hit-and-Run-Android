@@ -188,10 +188,32 @@ target_include_directories(p3d
 	PUBLIC "."
 	PRIVATE ".." # wtf
 )
-target_link_libraries(p3d
-	PNG::PNG
-	pddi
-	radcore
-	radcontent
-	radmath
-)
+
+
+
+if(ANDROID)
+    # headers para que encuentre <png.h>
+    target_include_directories(p3d PRIVATE ${PNG_INCLUDE_DIR})
+
+    # link para resolver símbolos PNG + zlib
+    target_link_libraries(p3d
+        ${PNG_LIBRARY}
+        ${ZLIB_LIB}
+        pddi
+        radcore
+        radcontent
+        radmath
+    )
+
+    message(STATUS "Android: PNG linked for p3d (libpng + zlib)")
+else()
+    target_link_libraries(p3d
+        PNG::PNG
+        pddi
+        radcore
+        radcontent
+        radmath
+    )
+    message(STATUS "Desktop: PNG linked for p3d")
+endif()
+

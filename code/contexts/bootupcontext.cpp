@@ -9,11 +9,22 @@
 //
 //=============================================================================
 
+// COMPORTAMIENTO ORIGINAL CINEMATICAS
+/*
 #ifdef RAD_RELEASE
     #ifndef RAD_E3
         #define SHOW_MOVIES
     #endif
 #endif
+
+*/
+
+
+// COMO EL ARRANQUE DE CINEMATICAS INICIALES DA CRASH EN ANDROID POR AHORA LO SALTAMOS
+#if defined(RAD_RELEASE) && !defined(RAD_E3) && !defined(RAD_ANDROID)
+    #define SHOW_MOVIES
+#endif
+
 
 //========================================
 // System Includes
@@ -219,6 +230,7 @@ void BootupContext::StartMovies()
             pEvent->SetClearWhenDone( true );
 
             GetRenderManager()->mpLayer( RenderEnums::GUI )->Chill();
+			
         }
 #else
         // Switch to frontend context.
@@ -551,8 +563,8 @@ void BootupContext::OnPresentationEventEnd( PresentationEvent* pEvent )
 {
     if( GetPresentationManager()->IsQueueEmpty() )
     {
+		
         GetRenderManager()->mpLayer( RenderEnums::GUI )->Warm();
-
         // Switch to frontend context.
         GetGameFlow()->SetContext( CONTEXT_FRONTEND );
     }

@@ -35,6 +35,21 @@
 #define strcmpi strcasecmp
 #endif
 
+
+#ifdef RAD_ANDROID
+#include <android/log.h>
+#endif
+#if defined(RAD_ANDROID)
+  #include <unistd.h>
+  #include <sys/syscall.h>
+  static inline int mytid() { return (int)syscall(SYS_gettid); }
+#else
+  static inline int mytid() { return 0; }
+#endif
+#if defined(RAD_ANDROID)
+    #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "SimpsonsHitAndRun", __VA_ARGS__)
+#endif
+
 #ifdef RAD_GAMECUBE
 #include <ctype.h>
 int strcmpi(const char *a, const char *b)
@@ -361,6 +376,10 @@ tLoadRequest::tLoadRequest(tFile* f) :
     dummy(false)
 {
     radMemoryAllocator current = ::radMemoryGetCurrentAllocator();
+	//LOGI("[p3d] loadmanager before assert tid=%d current=%d", mytid(), (int)current);
+    //LOGI("[p3d] current=%d RADMEMORY_ALLOC_TEMP=%d", 
+     //(int)::radMemoryGetCurrentAllocator(),
+     //(int)RADMEMORY_ALLOC_TEMP);
     rAssert( current == RADMEMORY_ALLOC_TEMP );
     // loads go into the default section (not the "current" section) unless requested otherwise
     section = tEntity::MakeUID(P3D_DEFAULT_INV_SECTION);

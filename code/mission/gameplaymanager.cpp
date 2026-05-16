@@ -961,7 +961,13 @@ void GameplayManager::PauseForFadeFromBlack( float speedMod )
 
     if (mbManualControlFade == true || mBlackScreenTimer > 0)
     {
-        return;
+        
+        if (mBlackScreenTimer > 0)
+            {
+                AbortFade();// solucion a un molesto bug en android de pantalla negra infinita tras acabas la mision del mundo 6-3
+            }
+        
+        //return; Linea original que habia dentro de este if
     }
     GetEventManager()->AddListener( this, EVENT_GUI_FADE_IN_DONE );
     GetGameFlow()->GetContext( CONTEXT_GAMEPLAY )->Suspend();

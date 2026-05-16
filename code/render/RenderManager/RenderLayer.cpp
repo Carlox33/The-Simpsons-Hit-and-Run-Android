@@ -103,6 +103,8 @@ RenderLayer::~RenderLayer()
 // Constraints: 
 //
 //========================================================================
+// FUNCION ORIGINAL 
+
 void RenderLayer::Render()
 {
     BEGIN_PROFILE( "UNKNOWN Render" );
@@ -130,6 +132,48 @@ void RenderLayer::Render()
     }
     END_PROFILE( "UNKNOWN Render" );
 }
+
+
+
+// NUEVA FUNCION ANDROID (Esto esta dando problemas el hotfix porque lo hicimos para ir probando )
+
+/**
+void RenderLayer::Render()
+{
+    BEGIN_PROFILE( "UNKNOWN Render" );
+
+    for( unsigned int view = 0; view < mNumViews; view++ )
+    {
+        // 🔥 Hotfix: si esta capa NO hace BeginView, tampoco debe limpiar.
+        // (En tu proyecto, PresentationSlot suele ir con SetBeginView(false))
+        if( !mIsBeginView && mpView[view] )
+        {
+            mpView[view]->SetClearMask(0);
+        }
+
+        if( mIsBeginView )
+        {
+            mpView[ view ]->BeginRender();
+        }
+
+        rAssert(!IsDead());
+
+        for(int i = mpGuts.mUseSize-1; i>-1; i-- )
+        {
+            mpGuts[i]->Display();
+        }
+
+        if( mIsBeginView )
+        {
+            mpView[ view ]->EndRender();
+        }
+    }
+
+    END_PROFILE( "UNKNOWN Render" );
+}
+
+*/
+
 
 //************************************************************************
 // Exported Class/State Manipulators

@@ -31,6 +31,29 @@
 #ifdef RAD_WIN32
 #include <input/inputmanager.h>
 #endif
+#ifdef RAD_ANDROID
+#include <presentation/fmvplayer/fmvplayer.h>
+#endif
+
+
+#if defined(RAD_ANDROID)
+  #include <android/log.h>
+#include "RenderManager.h"
+
+#define LOG_TAG "SimpsonsHitAndRun"
+  #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+  #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+#elif defined(RAD_VITA)
+  #include <psp2/kernel/clib.h>
+  #define LOGI(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+  #define LOGE(...) do { sceClibPrintf(__VA_ARGS__); sceClibPrintf("\n"); } while(0)
+
+#else
+  #include <cstdio>
+  #define LOGI(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+  #define LOGE(...) do { std::printf(__VA_ARGS__); std::printf("\n"); std::fflush(stdout); } while(0)
+#endif
 //************************************************************************
 //
 // Global Data, Local Data, Local Classes
@@ -118,6 +141,9 @@ void FrontEndRenderLayer::DrawCoinObject()
 // Constraints: 
 //
 //========================================================================
+
+// FUNCION ORIGINAL DA PROBLEMAS EN ANDROID 64 bits por un problema de orden de render de capas, la capa gui se pinta por encima tapando el video 
+/*
 void FrontEndRenderLayer::Render()
 {
     BEGIN_PROFILE( "FE Render" );
@@ -160,6 +186,146 @@ void FrontEndRenderLayer::Render()
 
     END_PROFILE( "FE Render" );
 }
+
+*/
+
+
+
+
+// ESTA FUNCION ES LA DEFINITIVA(6/03/2026 19:00)  (Esta es la que actualmente funciona las cinematicas in game con parpadeo )
+
+/*
+void FrontEndRenderLayer::Render()
+{
+    BEGIN_PROFILE( "FE Render" );
+
+#ifdef DEBUGWATCH
+    mDebugRenderTime = radTimeGetMicroseconds();
+#endif
+
+    bool fmvPlaying = false;
+    PresentationManager* pm = GetPresentationManager();
+    if( pm && pm->GetFMVPlayer() )
+    {
+        fmvPlaying = pm->GetFMVPlayer()->IsPlaying();
+    }
+
+    for( unsigned int view = 0; view < mNumViews; view++ )
+    {
+        rAssert(!IsDead());
+
+        // nuevos cambios
+
+        if( mpView[ view ] == NULL )
+        {
+            continue;
+        }
+
+        mpView[ view ]->BeginRender();
+
+        if( !fmvPlaying )
+        {
+            HeapMgr()->PushHeap( GMA_TEMP );
+
+            if( !GetCoinManager()->DrawAfterGui() )
+                DrawCoinObject();
+
+            if( mpScroobyApp != NULL )
+            {
+                mpScroobyApp->DrawFrame( static_cast<float>( g_scroobySimulationTime ) );
+            }
+
+#ifdef RAD_PC
+            GetInputManager()->GetFEMouse()->Update();
+#endif
+
+            if( GetCoinManager()->DrawAfterGui() )
+                DrawCoinObject();
+
+            HeapMgr()->PopHeap( GMA_TEMP );
+        }
+
+        mpView[ view ]->EndRender();
+
+        //Fin nuevos cambios
+    }
+
+#ifdef DEBUGWATCH
+    mDebugRenderTime = radTimeGetMicroseconds() - mDebugRenderTime;
+#endif
+
+    END_PROFILE( "FE Render" );
+}
+*/
+
+
+// PRUEBO ESTA NUEVA VERSION 
+
+void FrontEndRenderLayer::Render()
+{
+    BEGIN_PROFILE( "FE Render" );
+
+#ifdef DEBUGWATCH
+    mDebugRenderTime = radTimeGetMicroseconds();
+#endif
+
+    bool fmvPlaying = false;
+    PresentationManager* pm = GetPresentationManager();
+    if( pm && pm->GetFMVPlayer() )
+    {
+        fmvPlaying = pm->GetFMVPlayer()->IsPlaying();
+    }
+
+    if( fmvPlaying )
+    {
+#ifdef DEBUGWATCH
+        mDebugRenderTime = radTimeGetMicroseconds() - mDebugRenderTime;
+#endif
+        END_PROFILE( "FE Render" );
+        return;
+    }
+
+    for( unsigned int view = 0; view < mNumViews; view++ )
+    {
+        rAssert( !IsDead() );
+
+        if( mpView[ view ] == NULL )
+        {
+            continue;
+        }
+
+        mpView[ view ]->BeginRender();
+
+        HeapMgr()->PushHeap( GMA_TEMP );
+
+        if( !GetCoinManager()->DrawAfterGui() )
+            DrawCoinObject();
+
+        if( mpScroobyApp != NULL )
+        {
+            mpScroobyApp->DrawFrame( static_cast<float>( g_scroobySimulationTime ) );
+        }
+
+#ifdef RAD_PC
+        GetInputManager()->GetFEMouse()->Update();
+#endif
+
+        if( GetCoinManager()->DrawAfterGui() )
+            DrawCoinObject();
+
+        HeapMgr()->PopHeap( GMA_TEMP );
+
+        mpView[ view ]->EndRender();
+    }
+
+#ifdef DEBUGWATCH
+    mDebugRenderTime = radTimeGetMicroseconds() - mDebugRenderTime;
+#endif
+
+    END_PROFILE( "FE Render" );
+}
+
+
 
 //************************************************************************
 // Resource Interface

@@ -24,6 +24,8 @@
 #include <radnamespace.hpp>
 
 
+
+
 //============================================================================
 // Component: RadNameSpace
 //============================================================================
@@ -37,8 +39,13 @@
 //
 // By default there are no namespaces
 //
-template<> IRadNameSpace* radLinkedClass< IRadNameSpace >::s_pLinkedClassHead = NULL;
-template<> IRadNameSpace* radLinkedClass< IRadNameSpace >::s_pLinkedClassTail = NULL;
+
+// I comment this because i put in radnamespace.hpp
+//one day later,i put here again
+//template<> IRadNameSpace* radLinkedClass< IRadNameSpace >::s_pLinkedClassHead = NULL;
+//template<> IRadNameSpace* radLinkedClass< IRadNameSpace >::s_pLinkedClassTail = NULL;
+
+// Definición genérica de los estáticos del template:
 
 
 //=============================================================================

@@ -10,17 +10,36 @@ set_property(CACHE SRR2_REGION PROPERTY STRINGS "NTSC" "PAL")
 
 option(SRR2_USE_DLMALLOC "Use Doug Lea's memory allocator for fixed-size heaps" OFF)
 option(SRR2_REROUTE_ALL_HEAP_ALLOCATIONS "Reroute all memory allocations by new operator to internal heaps" OFF)
-option(SRR2_USE_BINK "Use RAD Game Tools Bink SDK instead of FFmpeg" OFF)
+option(SRR2_USE_BINK "Use RAD Game Tools Bink SDK instead of FFmpeg" OFF) #lo vuelvo a poner a off
 option(SRR2_BUILD_TESTS "Build sample programs for internal libraries" ON)
 option(SRR2_MICROPROFILE "Use microprofile instead of the internal profiler" OFF)
 option(SRR2_P3D_CG "Use CG shaders rather than GLSL for OpenGL ES" OFF)
-set(SRR2_P3D_PDDI "OpenGL" CACHE STRING "Pure3D PDDI implementation")
+
+
+
+# Ahora detectamos la plataforma y ponemos el valor correcto por defecto
+if(ANDROID)
+	set(SRR2_P3D_PDDI "GLES2" CACHE STRING "Pure3D PDDI implementation")
+	#set(SRR2_USE_BINK ON CACHE BOOL "Use RAD Game Tools Bink SDK instead of FFmpeg" FORCE)
+	message(STATUS "Android detected - PDDI set to GLES2")
+elseif(VITA)
+	set(SRR2_P3D_PDDI "GXM" CACHE STRING "Pure3D PDDI implementation")
+	message(STATUS "Vita detected - PDDI set to GXM")
+else()
+	set(SRR2_P3D_PDDI "OpenGL" CACHE STRING "Pure3D PDDI implementation")
+	message(STATUS "Desktop detected - PDDI set to OpenGL")
+endif()
+
+
+
 if(VITA)
 	option(SRR2_USE_VITAGL "Use VitaGL as an OpenGL (ES) implementation" ON)
 	set_property(CACHE SRR2_P3D_PDDI PROPERTY STRINGS "OpenGL" "GLES1" "GLES2" "GXM")
 else()
 	set_property(CACHE SRR2_P3D_PDDI PROPERTY STRINGS "OpenGL" "GLES1" "GLES2")
 endif()
+
+
 
 if(VITA)
 	include("${VITASDK}/share/vita.cmake" REQUIRED)
@@ -36,26 +55,73 @@ if(VITA)
 	set(VITA_VERSION ${SRR2_VERSION})
 endif()
 
+# Android (define BEFORE add_subdirectory so libs/code see it)
+if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+	add_definitions(-DRAD_ANDROID)
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -llog -landroid -lEGL -lGLESv2")
+endif()
+
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
 endif()
 
-if(NOT VITA)
-	find_package(SDL3)
-endif()
-if(SDL3_FOUND)
-	get_target_property(SDL_INCLUDE_DIR SDL3::Headers INTERFACE_INCLUDE_DIRECTORIES)
-	include_directories(${SDL_INCLUDE_DIR}/SDL3)
-	set(SDL_LIBRARY SDL3::SDL3)
+
+# SDL - Configuración por plataforma
+if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+    # Android: compilar SDL2 desde libs/SDL2
+    message(STATUS "Android detected - Compilando SDL2 desde libs/SDL2")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL2/CMakeLists.txt")
+        add_subdirectory(libs/SDL2 SDL2_Build EXCLUDE_FROM_ALL)
+        set(SDL_LIBRARY SDL2::SDL2)
+    else()
+        message(FATAL_ERROR "SDL2 not found in libs/SDL2/CMakeLists.txt")
+    endif()
 else()
-	find_package(SDL2 REQUIRED)
-	set(SDL_LIBRARY SDL2::SDL2 SDL2::SDL2main)
+    # Desktop/Vita/etc: primero probar SDL3, si no, SDL2
+    if(NOT VITA)
+        find_package(SDL3 QUIET)
+    endif()
+
+    if(SDL3_FOUND)
+        get_target_property(SDL_INCLUDE_DIR SDL3::Headers INTERFACE_INCLUDE_DIRECTORIES)
+        include_directories(${SDL_INCLUDE_DIR}/SDL3)
+        set(SDL_LIBRARY SDL3::SDL3)
+        message(STATUS "SDL3 found in system")
+    else()
+        find_package(SDL2 REQUIRED)
+        set(SDL_LIBRARY SDL2::SDL2 SDL2::SDL2main)
+        message(STATUS "SDL2 found in system")
+    endif()
 endif()
-find_package(PNG REQUIRED)
+
+
+
+
+# PNG / libpng
+if(ANDROID)
+    # Compilar libpng desde tu carpeta
+    add_subdirectory(libs/libpng EXCLUDE_FROM_ALL)
+	
+	add_subdirectory(libs/openal-soft EXCLUDE_FROM_ALL)
+    # zlib viene en Android (NDK)
+    find_library(ZLIB_LIB z)
+
+    # Variables "compat" por si tus cmakes antiguos usan estas
+    set(PNG_LIBRARY png_static)
+    set(PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libs/libpng")
+else()
+    find_package(PNG REQUIRED)
+endif()
+
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-find_package(OpenAL REQUIRED)
+
+if(NOT ANDROID)
+  find_package(OpenAL REQUIRED)
+endif()
+
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	add_compile_options(-fvisibility=hidden)
@@ -94,18 +160,36 @@ endif()
 if(SRR2_REROUTE_ALL_HEAP_ALLOCATIONS)
 	add_definitions(-DREROUTE_ALL_HEAP_ALLOCATIONS)
 endif()
+
 if(SRR2_USE_BINK)
 	add_definitions(-DRAD_MOVIEPLAYER_USE_BINK)
 else()
-	find_package(PkgConfig REQUIRED)
-	pkg_check_modules(FFmpeg REQUIRED IMPORTED_TARGET
-			libavformat
-			libavcodec
-			libavutil
-			libswresample
-			libswscale
-	)
+	if(NOT ANDROID)
+		find_package(PkgConfig REQUIRED)
+		pkg_check_modules(FFmpeg REQUIRED IMPORTED_TARGET
+				libavformat
+				libavcodec
+				libavutil
+				libswresample
+				libswscale
+		)
+	else()
+		# ✅ ANDROID: obtener FFmpeg desde Prefab (AAR com.fpliu...:ffmpeg)
+    # Prefab expone un paquete CMake. Normalmente se encuentra con find_package().
+    find_package(ffmpeg CONFIG REQUIRED)
+
+    # ✅ Creamos una "lista" de targets/librerías para linkear después donde toque.
+    # Nota: los nombres exactos pueden variar según el paquete; si falla, te digo cómo inspeccionarlos.
+    set(SRR2_FFMPEG_LIBS
+        ffmpeg::avcodec
+        ffmpeg::avformat
+        ffmpeg::avutil
+        ffmpeg::swresample
+        ffmpeg::swscale
+		)
+	endif()
 endif()
+
 if(SRR2_MICROPROFILE)
 	add_definitions(-DMICROPROFILE_ENABLED)
 endif()
@@ -176,6 +260,8 @@ if(VITA)
 		)
 	endif()
 endif()
+
+
 
 if(CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
 	nx_generate_nacp(OUTPUT ${PROJECT_NAME}.nacp

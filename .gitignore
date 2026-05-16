@@ -1,8 +1,48 @@
-.vs/
-out/
+# Android Studio / Gradle / CMake generated files
+.gradle/
+**/.gradle/
+
 build/
-switch/
-romfs/
-module/
-art/
-CMakeSettings.json
+**/build/
+
+.cxx/
+**/.cxx/
+
+.externalNativeBuild/
+**/.externalNativeBuild/
+
+# Native/CMake/Ninja generated files
+**/CMakeFiles/
+**/.ninja_deps
+**/.ninja_log
+**/build.ninja
+**/cmake_install.cmake
+**/CMakeCache.txt
+
+# Local Android config
+local.properties
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# APKs and release files
+APKs/
+*.apk
+*.aab
+
+# Signing keys
+*.jks
+*.keystore
+*.pem
+*.p12
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
