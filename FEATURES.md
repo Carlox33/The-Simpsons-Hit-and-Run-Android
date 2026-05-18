@@ -11,7 +11,7 @@
 
 ## 📊 Características del Port
 
-## Features versión **0.85**
+## Features versión **0.86**
 
 ---
 
@@ -34,16 +34,13 @@
 
 ---
 
-- ✔ **El juego se ejecuta a la resolución nativa del dispositivo Android**.
+- ✔ **Soporte para resoluciones adaptativas personalizadas**
 
-  Si desconoces cuál es la resolución de tu dispositivo, puedes comprobarla utilizando la aplicación:
+  El juego permite configurar una resolución interna de renderizado adaptativa, respetando automáticamente la relación de aspecto de cada dispositivo Android.
 
-  **"Device Info HW"**
+  Para obtener más información sobre esta funcionalidad y aprender cómo cambiar la resolución, revisa el archivo:
 
-  Esta aplicación:
-
-  - ocupa menos de **4 MB**
-  - proporciona **información detallada del hardware del dispositivo**
+  [Cómo instalar](INSTALLATION.md)
 
 ---
 
@@ -95,7 +92,7 @@ Se ha incorporado **vibraci&#x00F3;n para mandos**, solo en **64 bits**, ya que 
 
 ## 📊 Port Features 
 
-## Features version **0.85**
+## Features version **0.86**
 
 ---
 
@@ -119,16 +116,13 @@ Se ha incorporado **vibraci&#x00F3;n para mandos**, solo en **64 bits**, ya que 
 
 ---
 
-- ✔ **The game runs at the native resolution of the Android device**.
+- ✔ **Support for custom adaptive resolutions**
 
-  If you do not know your device's resolution, you can check it using the application:
+  The game allows you to configure an adaptive internal render resolution, automatically preserving the aspect ratio of each Android device.
 
-  **"Device Info HW"**
+  For more information about this feature and to learn how to change the resolution, check the file:
 
-  This application:
-
-  - takes up less than **4 MB**
-  - provides **detailed hardware information about the device**
+  [How to install](INSTALLATION.md)
 
 ---
 
@@ -179,7 +173,7 @@ Se ha incorporado **vibraci&#x00F3;n para mandos**, solo en **64 bits**, ya que 
 
 ## 📊 Fonctionnalit&#x00E9;s du Port
 
-## Fonctionnalit&#x00E9;s version **0.85**
+## Fonctionnalit&#x00E9;s version **0.86**
 
 ---
 
@@ -201,16 +195,13 @@ Se ha incorporado **vibraci&#x00F3;n para mandos**, solo en **64 bits**, ya que 
 
 ---
 
-- ✔ **Le jeu s&#x2019;ex&#x00E9;cute &#x00E0; la r&#x00E9;solution native de l&#x2019;appareil Android**.
+- ✔ **Prise en charge des résolutions adaptatives personnalisées**
 
-  Si vous ne connaissez pas la r&#x00E9;solution de votre appareil, vous pouvez la v&#x00E9;rifier avec l&#x2019;application :
+  Le jeu permet de configurer une résolution interne de rendu adaptative, en préservant automatiquement le rapport d’aspect de chaque appareil Android.
 
-  **"Device Info HW"**
+  Pour plus d’informations sur cette fonctionnalité et pour apprendre à changer la résolution, consultez le fichier :
 
-  Cette application :
-
-  - occupe moins de **4 MB**
-  - fournit des **informations mat&#x00E9;rielles d&#x00E9;taill&#x00E9;es sur l&#x2019;appareil**
+  [Comment installer](INSTALLATION.md)
 
 ---
 
@@ -261,7 +252,7 @@ Se ha incorporado **vibraci&#x00F3;n para mandos**, solo en **64 bits**, ya que 
 
 ## 📊 Port-Funktionalit&#x00E4;ten
 
-## Features Version **0.85**
+## Features Version **0.86**
 
 ---
 
@@ -284,16 +275,13 @@ Se ha incorporado **vibraci&#x00F3;n para mandos**, solo en **64 bits**, ya que 
 
 ---
 
-- ✔ **Das Spiel l&#x00E4;uft in der nativen Aufl&#x00F6;sung des Android-Ger&#x00E4;ts**.
+- ✔ **Unterstützung für benutzerdefinierte adaptive Auflösungen**
 
-  Wenn du die Aufl&#x00F6;sung deines Ger&#x00E4;ts nicht kennst, kannst du sie mit der folgenden App &#x00FC;berpr&#x00FC;fen:
+  Das Spiel ermöglicht die Konfiguration einer adaptiven internen Renderauflösung, wobei das Seitenverhältnis jedes Android-Geräts automatisch beibehalten wird.
 
-  **"Device Info HW"**
+  Weitere Informationen zu dieser Funktion und dazu, wie die Auflösung geändert werden kann, findest du in der Datei:
 
-  Diese App:
-
-  - ben&#x00F6;tigt weniger als **4 MB**
-  - liefert **detaillierte Hardware-Informationen zum Ger&#x00E4;t**
+  [Installationsanleitung](INSTALLATION.md)
 
 ---
 

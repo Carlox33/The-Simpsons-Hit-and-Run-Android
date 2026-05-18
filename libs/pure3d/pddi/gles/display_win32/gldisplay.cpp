@@ -12,6 +12,79 @@
 #include<string.h>
 #include<math.h>
 
+#if defined(RAD_ANDROID)
+#include <jni.h>
+
+static int gSHARAndroidRenderWidth = 0;
+static int gSHARAndroidRenderHeight = 0;
+
+static int gSHARLastLoggedDisplayWidth = 0;
+static int gSHARLastLoggedDisplayHeight = 0;
+
+extern "C" JNIEXPORT void JNICALL
+Java_org_libsdl_app_SDLSurface_nativeSetSHARRenderResolution(
+    JNIEnv* env,
+    jclass clazz,
+    jint width,
+    jint height
+)
+{
+    if (width <= 0 || height <= 0)
+        return;
+
+    const bool changed =
+        gSHARAndroidRenderWidth != (int)width ||
+        gSHARAndroidRenderHeight != (int)height;
+
+    gSHARAndroidRenderWidth = (int)width;
+    gSHARAndroidRenderHeight = (int)height;
+
+    if (changed) {
+        SDL_Log(
+            "SHAR Android Java render resolution received: %dx%d",
+            gSHARAndroidRenderWidth,
+            gSHARAndroidRenderHeight
+        );
+    }
+}
+
+static bool
+GetSHARAndroidRenderResolution(int* width, int* height)
+{
+    if (width == NULL || height == NULL)
+        return false;
+
+    if (gSHARAndroidRenderWidth <= 0 || gSHARAndroidRenderHeight <= 0)
+        return false;
+
+    *width = gSHARAndroidRenderWidth;
+    *height = gSHARAndroidRenderHeight;
+
+    return true;
+}
+
+static void
+LogSHARDisplayResolutionIfChanged(const char* reason, int width, int height)
+{
+    if (width <= 0 || height <= 0)
+        return;
+
+    if (gSHARLastLoggedDisplayWidth == width &&
+        gSHARLastLoggedDisplayHeight == height)
+        return;
+
+    gSHARLastLoggedDisplayWidth = width;
+    gSHARLastLoggedDisplayHeight = height;
+
+    SDL_Log(
+        "SHAR Android PDDI display resolution [%s]: %dx%d",
+        reason ? reason : "unknown",
+        width,
+        height
+    );
+}
+#endif
+
 bool pglDisplay::CheckExtension( const char *extName )
 {
     return SDL_GL_ExtensionSupported(extName);
@@ -58,23 +131,87 @@ long pglDisplay ::ProcessWindowMessage(SDL_Window* win, const SDL_WindowEvent* e
     switch(event->event)
     {
         case SDL_WINDOWEVENT_SIZE_CHANGED:
-            SDL_GL_GetDrawableSize( win, &winWidth, &winHeight );
+        {
+#if defined(RAD_ANDROID)
+            int renderW = 0;
+            int renderH = 0;
+
+            /*
+             * On Android, Java/SDLSurface is the source of truth for the
+             * internal render resolution. Do not let SDL report the physical
+             * drawable size as the PDDI render size.
+             */
+            if (GetSHARAndroidRenderResolution(&renderW, &renderH)) {
+                winWidth = renderW;
+                winHeight = renderH;
+
+                LogSHARDisplayResolutionIfChanged(
+                    "window-size-changed-java",
+                    winWidth,
+                    winHeight
+                );
+            } else
+#endif
+            {
+                SDL_GL_GetDrawableSize(win, &winWidth, &winHeight);
+
+#if defined(RAD_ANDROID)
+                LogSHARDisplayResolutionIfChanged(
+                    "window-size-changed-sdl-fallback",
+                    winWidth,
+                    winHeight
+                );
+#endif
+            }
             break;
+        }
 
         case SDL_WINDOWEVENT_CLOSE:
             /* release and free the device context and rendering context */
             SDL_GL_DeleteContext(hRC);
             break;
 
-		default:
+        default:
             return 0;
     }
 #else
     switch(event->type)
     {
         case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-            SDL_GetWindowSizeInPixels( win, &winWidth, &winHeight );
+        {
+#if defined(RAD_ANDROID)
+            int renderW = 0;
+            int renderH = 0;
+
+            /*
+             * On Android, Java/SDLSurface is the source of truth for the
+             * internal render resolution. Do not let SDL report the physical
+             * pixel size as the PDDI render size.
+             */
+            if (GetSHARAndroidRenderResolution(&renderW, &renderH)) {
+                winWidth = renderW;
+                winHeight = renderH;
+
+                LogSHARDisplayResolutionIfChanged(
+                    "window-pixel-size-changed-java",
+                    winWidth,
+                    winHeight
+                );
+            } else
+#endif
+            {
+                SDL_GetWindowSizeInPixels(win, &winWidth, &winHeight);
+
+#if defined(RAD_ANDROID)
+                LogSHARDisplayResolutionIfChanged(
+                    "window-pixel-size-changed-sdl-fallback",
+                    winWidth,
+                    winHeight
+                );
+#endif
+            }
             break;
+        }
 
         case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
             /* release and free the device context and rendering context */
@@ -89,7 +226,6 @@ long pglDisplay ::ProcessWindowMessage(SDL_Window* win, const SDL_WindowEvent* e
     /* return 1 if handled message, 0 if not */
     return 1;
 }
-
 
 void pglDisplay ::SetWindow(SDL_Window* wnd)
 {
@@ -174,11 +310,51 @@ bool pglDisplay ::InitDisplay(const pddiDisplayInit* init)
 #ifndef __SWITCH__
     SDL_SetWindowFullscreen(win, mode == PDDI_DISPLAY_FULLSCREEN ? SDL_WINDOW_FULLSCREEN : 0);
 #endif
+
+#if defined(RAD_ANDROID) || defined(__ANDROID__)
+    /*
+     * Android adaptive render resolution:
+     *
+     * SDLSurface.java has already calculated the internal Surface buffer size
+     * and sent it through nativeSetSHARRenderResolution().
+     *
+     * Use that size as PDDI display size so pglContext::SetupHardwareProjection()
+     * later uses the adaptive resolution for glViewport/projection/scissor.
+     */
+    {
+        int renderW = 0;
+        int renderH = 0;
+
+        if (GetSHARAndroidRenderResolution(&renderW, &renderH)) {
+            winWidth = renderW;
+            winHeight = renderH;
+
+            LogSHARDisplayResolutionIfChanged(
+                "init-display-java",
+                winWidth,
+                winHeight
+            );
+        } else {
+#if SDL_MAJOR_VERSION < 3
+            SDL_GL_GetDrawableSize(win, &winWidth, &winHeight);
+#else
+            SDL_GetWindowSizeInPixels(win, &winWidth, &winHeight);
+#endif
+            LogSHARDisplayResolutionIfChanged(
+                "init-display-sdl-fallback",
+                winWidth,
+                winHeight
+            );
+        }
+    }
+#else
 #if SDL_MAJOR_VERSION < 3
     SDL_GL_GetDrawableSize( win, &winWidth, &winHeight );
 #else
     SDL_GetWindowSizeInPixels( win, &winWidth, &winHeight );
 #endif
+#endif
+
     winBitDepth = bpp;
 
     if (hRC)
@@ -344,7 +520,7 @@ void pglDisplay::SwapBuffers(void)
     reset = false;
     #ifdef RAD_ANDROID
     // --- FPS CAP 60 (muy ligero) ---
-    // Si además quieres, condiciona esto a m_only60 o a GetForceVSync().
+    
     if (m_only60)
     {
         static const double TARGET_MS = 1000.0 / 60.0;  // 16.666...

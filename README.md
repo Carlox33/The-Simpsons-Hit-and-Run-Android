@@ -56,12 +56,13 @@ Este proyecto continúa el trabajo de la comunidad con el objetivo de llevar **T
 
 ## Estado del proyecto
 
-Versión actual: **0.85**
+Versión actual: **0.86**
 
 - ✔ Modo historia jugable de principio a fin.
 - ✔ Cinemáticas funcionando correctamente durante el juego.
 - ✔ Soporte para mandos (controladores externos).
 - ✔ 60 FPS estables con Vsycn.
+- ✔ Soporte para multiples resoluciones de forma adaptativa (Revisar el archivo [Cómo instalar](INSTALLATION.md) para saber como cambiar la resolucion)
 
 ---
 
@@ -153,12 +154,13 @@ This project continues the community effort with the goal of bringing **The Simp
 
 ## Project Status
 
-Current version: **0.85**
+Current version: **0.86**
 
 - ✔ Story mode playable from start to finish  
 - ✔ Cutscenes working correctly during gameplay  
 - ✔ Controller (external gamepad) support  
-- ✔ Stable 60 FPS with VSync  
+- ✔ Stable 60 FPS with VSync
+- ✔ Support for multiple adaptive resolutions (Check the [How to install](INSTALLATION.md) file to learn how to change the resolution)
 
 ---
 
@@ -250,12 +252,13 @@ Ce projet poursuit le travail de la communauté avec l'objectif d'amener **The S
 
 ## État du projet
 
-Version actuelle : **0.85**
+Version actuelle : **0.86**
 
 - ✔ Mode histoire jouable du début à la fin  
 - ✔ Cinématiques fonctionnelles pendant le jeu  
 - ✔ Support des manettes (contrôleurs externes)  
-- ✔ 60 FPS stables avec VSync  
+- ✔ 60 FPS stables avec VSync
+- ✔ Prise en charge de plusieurs résolutions adaptatives (Consultez le fichier [Comment installer](INSTALLATION.md) pour savoir comment changer la résolution)  
 
 ---
 
@@ -346,12 +349,13 @@ Dieses Projekt führt die Arbeit der Community fort, mit dem Ziel, **The Simpson
 
 ## Projektstatus
 
-Aktuelle Version: **0.85**
+Aktuelle Version: **0.86**
 
 - ✔ Story-Modus von Anfang bis Ende spielbar  
 - ✔ Zwischensequenzen funktionieren korrekt während des Spiels  
 - ✔ Controller-Unterstützung (externe Gamepads)  
-- ✔ Stabile 60 FPS mit VSync  
+- ✔ Stabile 60 FPS mit VSync
+- ✔ Unterstützung für mehrere adaptive Auflösungen (Siehe die Datei [Installationsanleitung](INSTALLATION.md), um zu erfahren, wie die Auflösung geändert wird)
 
 ---
 

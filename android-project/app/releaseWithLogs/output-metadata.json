@@ -4,15 +4,15 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "org.libsdl.app",
+  "applicationId": "com.c4rlox.simpsons",
   "variantName": "releaseWithLogs",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 85,
-      "versionName": "0.85",
+      "versionCode": 86,
+      "versionName": "0.86",
       "outputFile": "app-releaseWithLogs.apk"
     }
   ],

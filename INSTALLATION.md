@@ -15,7 +15,7 @@ Hola, esto es un **port del videojuego *The Simpsons: Hit & Run* para Android**.
 Por favor, lee este pequeño documento en tu idioma correspondiente **de principio a fin**, ya que es de **vital importancia para una correcta instalación**.
 
  
-**Actualmente solo es jugable con mando externo.**(**Version 0.85**)
+**Actualmente solo es jugable con mando externo.**(**Version 0.86**)
 
 En el futuro se incorporarán **controles táctiles con sus respectivos iconos**.
 
@@ -58,6 +58,33 @@ Si no sabes qué versión de assets tienes, puedes diferenciarlos fácilmente po
 * Si tus assets contienen un archivo llamado **dialogf.rcf** → tienes **assets PAL en francés**.
 * Si tus assets contienen un archivo llamado **dialogg.rcf** → tienes **assets PAL en alemán**.
 
+### Resolución de renderizado adaptativa
+
+El port incluye un sistema de **resolución de renderizado adaptativa** para Android.
+
+Una vez instalada la aplicación y después de abrirla al menos una vez, la app generará automáticamente un archivo llamado:
+
+`Simpsons_resolution.txt`
+
+Este archivo se generará en la siguiente ruta:
+
+`Android/data/com.c4rlox.simpsons/files`
+
+Desde este archivo puedes cambiar la resolución interna de renderizado del juego **antes de iniciarlo**.
+
+Solo necesitas modificar el valor:
+
+`target_height`
+
+La anchura de renderizado se calcula automáticamente para respetar la relación de aspecto del dispositivo.
+
+Valores recomendados:
+
+* `720`
+* `800`
+* `850`
+* `900`
+* `1080`
 ---
 
 Espero que disfrutes el port.
@@ -113,6 +140,35 @@ If you are not sure which version of assets you have, you can identify them thro
 * If your assets contain a file named **dialogs.rcf** → you have **PAL Spanish assets**.
 * If your assets contain a file named **dialogf.rcf** → you have **PAL French assets**.
 * If your assets contain a file named **dialogg.rcf** → you have **PAL German assets**.
+
+### Adaptive render resolution
+
+The port includes an **adaptive render resolution** system for Android.
+
+Once the application is installed and opened at least once, the app will automatically generate a file named:
+
+`Simpsons_resolution.txt`
+
+This file will be generated in the following path:
+
+`Android/data/com.c4rlox.simpsons/files`
+
+From this file, you can change the game’s internal render resolution **before launching it**.
+
+You only need to modify the value:
+
+`target_height`
+
+The render width is calculated automatically to preserve the device aspect ratio.
+
+Recommended values:
+
+* `720`
+* `800`
+* `850`
+* `900`
+* `1080`
+
 
 ---
 
@@ -170,6 +226,36 @@ Si vous ne savez pas quelle version d'assets vous avez, vous pouvez l'identifier
 * Si vos assets contiennent un fichier nommé **dialogf.rcf** → vous avez des **assets PAL français**.
 * Si vos assets contiennent un fichier nommé **dialogg.rcf** → vous avez des **assets PAL allemands**.
 
+
+
+### Résolution de rendu adaptative
+
+Le port inclut un système de **résolution de rendu adaptative** pour Android.
+
+Une fois l’application installée et ouverte au moins une fois, elle générera automatiquement un fichier nommé :
+
+`Simpsons_resolution.txt`
+
+Ce fichier sera généré dans le chemin suivant :
+
+`Android/data/com.c4rlox.simpsons/files`
+
+Depuis ce fichier, vous pouvez modifier la résolution interne de rendu du jeu **avant de le lancer**.
+
+Il vous suffit de modifier la valeur :
+
+`target_height`
+
+La largeur de rendu est calculée automatiquement afin de préserver le rapport d’aspect de l’appareil.
+
+Valeurs recommandées :
+
+* `720`
+* `800`
+* `850`
+* `900`
+* `1080`
+
 ---
 
 Profitez bien du port.
@@ -225,6 +311,34 @@ Wenn du nicht sicher bist, welche Asset-Version du hast, kannst du sie über die
 * Wenn deine Assets eine Datei namens **dialogs.rcf** enthalten → hast du **PAL-Assets auf Spanisch**.
 * Wenn deine Assets eine Datei namens **dialogf.rcf** enthalten → hast du **PAL-Assets auf Französisch**.
 * Wenn deine Assets eine Datei namens **dialogg.rcf** enthalten → hast du **PAL-Assets auf Deutsch**.
+
+### Adaptive Renderauflösung
+
+Der Port enthält ein System für **adaptive Renderauflösung** auf Android.
+
+Nachdem die Anwendung installiert und mindestens einmal geöffnet wurde, erstellt sie automatisch eine Datei mit dem Namen:
+
+`Simpsons_resolution.txt`
+
+Diese Datei wird im folgenden Pfad erstellt:
+
+`Android/data/com.c4rlox.simpsons/files`
+
+Über diese Datei kannst du die interne Renderauflösung des Spiels **vor dem Starten** ändern.
+
+Du musst nur den folgenden Wert ändern:
+
+`target_height`
+
+Die Renderbreite wird automatisch berechnet, um das Seitenverhältnis des Geräts beizubehalten.
+
+Empfohlene Werte:
+
+* `720`
+* `800`
+* `850`
+* `900`
+* `1080`
 
 ---
 
