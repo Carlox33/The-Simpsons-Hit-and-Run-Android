@@ -29,9 +29,6 @@
 
   En dispositivos más modestos el juego **seguirá siendo 100% jugable de forma cómoda**, aunque el rendimiento puede variar dependiendo del hardware.
 
-  ⚠ **Nota sobre tablets:**  
-  Actualmente el juego se ejecuta **únicamente a resolución nativa**, por lo que algunas tablets con resoluciones muy altas podrían exigir demasiado a su GPU/CPU.
-
 ---
 
 - ✔ **Soporte para resoluciones adaptativas personalizadas**
@@ -111,9 +108,6 @@ Se ha incorporado **vibraci&#x00F3;n para mandos**, solo en **64 bits**, ya que 
 
   On more modest devices, the game will **still be 100% comfortably playable**, although performance may vary depending on the hardware.
 
-  ⚠ **Note about tablets:**  
-  Currently, the game runs **only at native resolution**, so some tablets with very high resolutions may put excessive load on the GPU/CPU.
-
 ---
 
 - ✔ **Support for custom adaptive resolutions**
@@ -189,9 +183,6 @@ Se ha incorporado **vibraci&#x00F3;n para mandos**, solo en **64 bits**, ya que 
   (environ **ann&#x00E9;e 2020 ou plus r&#x00E9;cent**).
 
   Sur des appareils plus modestes, le jeu restera **100% jouable confortablement**, bien que les performances puissent varier selon le mat&#x00E9;riel.
-
-  ⚠ **Remarque concernant les tablettes :**  
-  Actuellement, le jeu fonctionne **uniquement &#x00E0; la r&#x00E9;solution native**, ce qui peut solliciter fortement le GPU/CPU sur certaines tablettes &#x00E0; tr&#x00E8;s haute r&#x00E9;solution.
 
 ---
 
@@ -270,8 +261,6 @@ Se ha incorporado **vibraci&#x00F3;n para mandos**, solo en **64 bits**, ya que 
 
   Auf schw&#x00E4;cheren Ger&#x00E4;ten bleibt das Spiel **weiterhin zu 100% komfortabel spielbar**, obwohl die Leistung je nach Hardware variieren kann.
 
-  ⚠ **Hinweis zu Tablets:**  
-  Derzeit l&#x00E4;uft das Spiel **ausschlie&#x00DF;lich in nativer Aufl&#x00F6;sung**, weshalb einige Tablets mit sehr hohen Aufl&#x00F6;sungen die GPU/CPU stark belasten k&#x00F6;nnen.
 
 ---
 
