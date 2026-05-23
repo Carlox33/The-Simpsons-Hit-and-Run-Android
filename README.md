@@ -27,7 +27,7 @@ Para más información consulta el archivo **[INSTALLATION.md](INSTALLATION.md)*
 Este proyecto ha sido desarrollado **completamente por mí en solitario**.  
 Debido a ello, es posible que todavía existan **errores menores o comportamientos inesperados** que no haya detectado durante las pruebas.
 
-Para facilitar el reporte de problemas y crear una comunidad alrededor del proyecto, he creado un **[servidor de Discord](ENLACE_DISCORD_AQUI)** donde podréis:
+Para facilitar el reporte de problemas y crear una comunidad alrededor del proyecto, he creado un **[servidor de Discord](https://discord.gg/6Gw6jTJv8w)** donde podréis:
 
 - Reportar errores o problemas que encontréis para ayudar a mejorar el port.
 - Compartir experiencias de juego, capturas de pantalla y charlar con otros usuarios.
@@ -124,7 +124,7 @@ For more information, see **[INSTALLATION.md](INSTALLATION.md)**.
 This project has been developed **entirely by myself**.  
 Because of this, there may still be **minor bugs or unexpected behaviors** that were not discovered during testing.
 
-To make reporting issues easier and to build a community around the project, I created a **[Discord server](DISCORD_LINK_HERE)** where you can:
+To make reporting issues easier and to build a community around the project, I created a **[Discord server](https://discord.gg/6Gw6jTJv8w)** where you can:
 
 - Report bugs or issues you encounter to help improve the port
 - Share gameplay experiences, screenshots, and chat with other users
@@ -222,7 +222,7 @@ Pour plus d'informations, consultez **[INSTALLATION.md](INSTALLATION.md)**.
 Ce projet a été développé **entièrement par moi-même**.  
 Pour cette raison, il peut encore exister **des bugs mineurs ou des comportements inattendus** qui n'ont pas été détectés pendant les tests.
 
-Pour faciliter le signalement des problèmes et créer une communauté autour du projet, j'ai créé un **[serveur Discord](LIEN_DISCORD_ICI)** où vous pouvez :
+Pour faciliter le signalement des problèmes et créer une communauté autour du projet, j'ai créé un **[serveur Discord](https://discord.gg/6Gw6jTJv8w)** où vous pouvez :
 
 - Signaler les bugs ou problèmes rencontrés afin d'améliorer le port  
 - Partager vos expériences de jeu, captures d'écran et discuter avec d'autres utilisateurs  
@@ -319,7 +319,7 @@ Weitere Informationen findest du in **[INSTALLATION.md](INSTALLATION.md)**.
 Dieses Projekt wurde **vollständig von mir allein entwickelt**.  
 Daher kann es noch **kleinere Fehler oder unerwartete Verhaltensweisen** geben, die während der Tests nicht entdeckt wurden.
 
-Um das Melden von Problemen zu erleichtern und eine Community rund um das Projekt aufzubauen, habe ich einen **[Discord-Server](DISCORD_LINK_HIER)** erstellt, auf dem du:
+Um das Melden von Problemen zu erleichtern und eine Community rund um das Projekt aufzubauen, habe ich einen **[Discord-Server](https://discord.gg/6Gw6jTJv8w)** erstellt, auf dem du:
 
 - Fehler oder Probleme melden kannst, um den Port zu verbessern  
 - Spielerfahrungen teilen, Screenshots posten und mit anderen Nutzern sprechen kannst  
