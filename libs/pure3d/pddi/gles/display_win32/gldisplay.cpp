@@ -611,12 +611,22 @@ void pglDisplay::SwapBuffers(void)
     static Uint32 lastTick = 0;
 
     Uint32 t = SDL_GetTicks();
-    if (lastTick == 0) lastTick = t;
+
+    if (lastTick == 0)
+    {
+        lastTick = t;
+    }
 
     frames++;
-    if (t - lastTick >= 1000)
+
+    Uint32 elapsed = t - lastTick;
+
+    if (elapsed >= 1000)
     {
-        SDL_Log("[FPS] %d", frames);
+        double fps = (double)frames * 1000.0 / (double)elapsed;
+
+        SDL_Log("[FPS] %.2f", fps);
+
         frames = 0;
         lastTick = t;
     }

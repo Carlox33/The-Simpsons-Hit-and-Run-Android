@@ -444,7 +444,7 @@ CGuiScreenMiniMenu::CGuiScreenMiniMenu
 
 #ifdef RAD_WIN32
     Scrooby::Sprite* optionsIcon = m_optionsButton->GetSprite( "Options" );
-    if( optionsText != NULL )
+    if( optionsIcon != NULL ) // bug original if( optionsText != NULL )
     {
         optionsIcon->ScaleAboutCenter( BUTTON_SCALE );
     }
