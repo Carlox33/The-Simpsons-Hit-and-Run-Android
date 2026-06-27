@@ -63,11 +63,7 @@ bool TouchHudRenderer::Initialize()
     mInitialized = true;
     mEnabled = true;
 
-    TOUCH_HUD_RENDERER_LOGI(
-        "[TouchHudRenderer] Initialized. opacity=%.2f pressedOpacity=%.2f",
-        mOpacity,
-        mPressedOpacity
-    );
+   
 
     return true;
 }
@@ -81,9 +77,6 @@ void TouchHudRenderer::Shutdown()
 
     mInitialized = false;
 
-    TOUCH_HUD_RENDERER_LOGI(
-        "[TouchHudRenderer] Shutdown."
-    );
 }
 
 

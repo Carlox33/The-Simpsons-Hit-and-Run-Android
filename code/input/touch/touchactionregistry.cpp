@@ -72,6 +72,10 @@
     #define TOUCH_IM_CAMERA_CAR_LOOK_BACK    InputManager::CameraCarLookBack
     #define TOUCH_IM_CAMERA_TOGGLE           InputManager::CameraToggle
 
+    //Minigame
+    #define TOUCH_IM_SUPERSPRINT_CAMERA_TOGGLE  Input::INVALID_CONTROLLERID
+
+
     #define TOUCH_IM_FE_BACK                 InputManager::feBack
     #define TOUCH_IM_FE_MOVE_UP              InputManager::feMoveUp
     #define TOUCH_IM_FE_MOVE_DOWN            InputManager::feMoveDown
@@ -153,7 +157,9 @@
     #define TOUCH_IM_CAMERA_CAR_LOOK_UP      Input::INVALID_CONTROLLERID
     #define TOUCH_IM_CAMERA_CAR_LOOK_BACK    Input::INVALID_CONTROLLERID
     #define TOUCH_IM_CAMERA_TOGGLE           Input::INVALID_CONTROLLERID
-
+    //MINIGAME CAMERA TOGGLE 
+    #define TOUCH_IM_SUPERSPRINT_CAMERA_TOGGLE  InputManager::Black
+ 
     #define TOUCH_IM_FE_BACK                 InputManager::Back
     #define TOUCH_IM_FE_MOVE_UP              InputManager::DPadUp
     #define TOUCH_IM_FE_MOVE_DOWN            InputManager::DPadDown
@@ -561,6 +567,15 @@ static const TouchActionDefinition sTouchActions[] =
     // ---------------------------------------------------------------------
     // PC / SuperSprint special actions
     // ---------------------------------------------------------------------
+    {
+    TOUCH_ACTION_SUPERSPRINT_CAMERA_TOGGLE,
+    "SuperSprintCameraToggle",
+    TOUCH_IM_SUPERSPRINT_CAMERA_TOGGLE,
+    TOUCH_ACTION_CATEGORY_CAMERA,
+    TOUCH_PROFILE_MINIGAME_VEHICLE,
+    TOUCH_CONTROL_BUTTON,
+    true
+    },
     {
         TOUCH_ACTION_P1_KBD_START,
         "P1_KBD_Start",

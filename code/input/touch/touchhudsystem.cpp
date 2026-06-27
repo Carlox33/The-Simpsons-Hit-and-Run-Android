@@ -1142,6 +1142,96 @@ void TouchHudSystem::InitializeDefaultControls()
         true,
         "CinematicSkip"
     );
+
+    // -------------------------------------------------------------------------
+    // Minigame vehicle buttons - SuperSprint
+    // 
+
+    AddControl(
+        TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_START,
+        TOUCH_PROFILE_MINIGAME_VEHICLE,
+        TOUCH_ACTION_FE_SELECT,
+        TouchRect( 0.015f, 0.02f, 0.09f, 0.18f ),
+        true,
+        "MinigameVehicleStart"
+    );
+
+    AddControl(
+        TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_CAMERA_TOGGLE,
+        TOUCH_PROFILE_MINIGAME_VEHICLE,
+        TOUCH_ACTION_SUPERSPRINT_CAMERA_TOGGLE,
+        TouchRect( 0.06f, 0.42f, 0.08f, 0.16f ), // Originalmente TouchRect( 0.01f, 0.30f, 0.065f, 0.13f )
+        true,
+        "MinigameVehicleCameraToggle"
+    );
+
+    // Vehicle steering uses two buttons, not a joystick.
+    AddControl(
+        TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_STEER_LEFT,
+        TOUCH_PROFILE_MINIGAME_VEHICLE,
+        TOUCH_ACTION_STEER_LEFT,
+        TouchRect( 0.06f, 0.68f, 0.12f, 0.22f ),
+        true,
+        "MinigameVehicleSteerLeft"
+    );
+
+    AddControl(
+        TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_STEER_RIGHT,
+        TOUCH_PROFILE_MINIGAME_VEHICLE,
+        TOUCH_ACTION_STEER_RIGHT,
+        TouchRect( 0.20f, 0.68f, 0.12f, 0.22f ),
+        true,
+        "MinigameVehicleSteerRight"
+    );
+
+    AddControl(
+        TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_ACCELERATE,
+        TOUCH_PROFILE_MINIGAME_VEHICLE,
+        TOUCH_ACTION_ACCELERATE,
+        TouchRect( 0.80f, 0.58f, 0.13f, 0.27f ),
+        true,
+        "MinigameVehicleAccelerate"
+    );
+
+    AddControl(
+        TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_REVERSE,
+        TOUCH_PROFILE_MINIGAME_VEHICLE,
+        TOUCH_ACTION_REVERSE,
+        TouchRect( 0.69f, 0.71f, 0.11f, 0.22f ), // Originalmente TouchRect( 0.69f, 0.72f, 0.11f, 0.20f ),
+        true,
+        "MinigameVehicleReverse"
+    );
+
+    AddControl(
+        TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_HAND_BRAKE,
+        TOUCH_PROFILE_MINIGAME_VEHICLE,
+        TOUCH_ACTION_HAND_BRAKE,
+        TouchRect( 0.69f, 0.49f, 0.11f, 0.20f ), 
+        true,
+        "MinigameVehicleHandBrake"
+    );
+
+    AddControl(
+        TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_HORN,
+        TOUCH_PROFILE_MINIGAME_VEHICLE,
+        TOUCH_ACTION_HORN,
+        TouchRect( 0.797f, 0.325f, 0.127f, 0.230f ), // anterior  TouchRect( 0.805f, 0.34f, 0.11f, 0.20f )
+        true,
+        "MinigameVehicleHorn"
+        );
+
+    // -------------------------------------------------------------------------
+    // Minigame summary button - SuperSprint
+    //
+    
+    AddControl(
+        TOUCH_HUD_CONTROL_FRONTEND_MINIGAME_SUMMARY_SELECT,
+        TOUCH_PROFILE_MINIGAME_SUMMARY,
+        TOUCH_ACTION_JUMP,
+        TouchRect( 0.78f, 0.68f, 0.12f, 0.22f ),
+        true,
+        "MinigameFrontendSelect"
+    );
 }
 
 bool TouchHudSystem::AddControl

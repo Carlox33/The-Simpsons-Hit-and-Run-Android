@@ -8,6 +8,10 @@
 #include <mission/mission.h>
 #include <mission/missionstage.h>
 #include <mission/objectives/missionobjective.h>
+
+// includes para contextos del minijuego
+#include <gameflow/gameflow.h>
+#include <contexts/supersprint/supersprintcontext.h>
 //=============================================================================
 // Singleton access
 //=============================================================================
@@ -31,7 +35,8 @@ mForcedProfile( TOUCH_PROFILE_HIDDEN ),
 mMissionBriefingActive( false ),
 mGameplayConversationActive( false ),
 mPurchaseRewardConversationActive( false ),
-mLanguageSelectionActive( false )
+mLanguageSelectionActive( false ),
+mSuspendedSuperSprintProfile( TOUCH_PROFILE_FRONTEND )
 {
 }
 
@@ -65,6 +70,39 @@ TouchProfile TouchContextResolver::Resolve() const
     {
         return mForcedProfile;
     }
+
+    GameFlow* gameFlow = GetGameFlow();
+
+if ( gameFlow != 0 )
+{
+    const int currentContext = gameFlow->GetCurrentContext();
+
+    switch ( currentContext )
+    {
+        case CONTEXT_SUPERSPRINT_FE:
+        {
+            return TOUCH_PROFILE_FRONTEND;
+        }
+
+        case CONTEXT_SUPERSPRINT:
+        {
+            SuperSprintContext* superSprintContext =
+                static_cast<SuperSprintContext*>( gameFlow->GetContext( CONTEXT_SUPERSPRINT ) );
+
+            if ( superSprintContext != 0 && superSprintContext->IsSuspended() )
+            {
+                return mSuspendedSuperSprintProfile;
+            }
+
+            return TOUCH_PROFILE_MINIGAME_VEHICLE;
+        }
+
+        default:
+        {
+            break;
+        }
+    }
+}
 
     switch ( mContextArea )
     {
@@ -207,6 +245,16 @@ void TouchContextResolver::UpdateFromGameState
             break;
         }
     }
+}
+
+void TouchContextResolver::SetSuspendedSuperSprintProfile( TouchProfile profile )
+{
+    mSuspendedSuperSprintProfile = profile;
+}
+
+void TouchContextResolver::ClearSuspendedSuperSprintProfile()
+{
+    mSuspendedSuperSprintProfile = TOUCH_PROFILE_FRONTEND;
 }
 
 void TouchContextResolver::SetMissionBriefingActive( bool active )

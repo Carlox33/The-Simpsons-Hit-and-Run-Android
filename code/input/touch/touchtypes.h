@@ -20,6 +20,8 @@ enum TouchProfile
     TOUCH_PROFILE_FRONTEND,
     TOUCH_PROFILE_CHARACTER,
     TOUCH_PROFILE_VEHICLE,
+    TOUCH_PROFILE_MINIGAME_VEHICLE,
+    TOUCH_PROFILE_MINIGAME_SUMMARY,
     TOUCH_PROFILE_CINEMATIC,
     TOUCH_PROFILE_SPECIAL
 };
@@ -82,7 +84,8 @@ enum TouchActionId
     TOUCH_ACTION_CAMERA_CAR_LOOK_UP,
     TOUCH_ACTION_CAMERA_CAR_LOOK_BACK,
     TOUCH_ACTION_CAMERA_TOGGLE,
-
+    // Special toggle minigame
+    TOUCH_ACTION_SUPERSPRINT_CAMERA_TOGGLE,
     // Frontend actions
     TOUCH_ACTION_FE_BACK,
     TOUCH_ACTION_FE_MOVE_UP,
@@ -196,6 +199,10 @@ inline const char* TouchProfileToString( TouchProfile profile )
             return "Character";
         case TOUCH_PROFILE_VEHICLE:
             return "Vehicle";
+        case TOUCH_PROFILE_MINIGAME_VEHICLE:
+            return "MinigameVehicle";
+        case TOUCH_PROFILE_MINIGAME_SUMMARY:
+            return "MinigameSummary";
         case TOUCH_PROFILE_CINEMATIC:
             return "Cinematic";
         case TOUCH_PROFILE_SPECIAL:

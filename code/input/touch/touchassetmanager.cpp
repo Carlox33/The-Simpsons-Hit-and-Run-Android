@@ -504,6 +504,63 @@ tSprite* TouchAssetManager::GetSpriteForControl( TouchHudControlId controlId ) c
             return GetSprite( TOUCH_ASSET_FRONTEND_RIGHT  );
         }
 
+        // -------------------------------------------------------------
+        // MINIGAME GAMEPLAY
+        // -------------------------------------------------------------
+        case TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_STEER_LEFT:
+        {
+            // Temporary fallback until you add dedicated vehicle steering icons.
+            return GetSprite( TOUCH_ASSET_FRONTEND_LEFT );
+        }
+
+        case TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_STEER_RIGHT:
+        {
+            // Temporary fallback until you add dedicated vehicle steering icons.
+            return GetSprite( TOUCH_ASSET_FRONTEND_RIGHT );
+        }
+
+        case TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_ACCELERATE:
+        {
+            return GetSprite( TOUCH_ASSET_VEHICLE_ACCELERATE );
+        }
+
+        case TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_REVERSE:
+        {
+            return GetSprite( TOUCH_ASSET_VEHICLE_BRAKE );
+        }
+
+        case TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_HAND_BRAKE:
+        {
+            return GetSprite( TOUCH_ASSET_VEHICLE_HANDBRAKE );
+        }
+
+
+        case TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_HORN:
+        {
+            return GetSprite( TOUCH_ASSET_VEHICLE_HORN );
+        }
+
+        case TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_CAMERA_TOGGLE:
+        {
+            return GetSprite(TOUCH_ASSET_VEHICLE_CAMERA_TOGGLE);
+        }
+
+        case TOUCH_HUD_CONTROL_VEHICLE_MINIGAME_START:
+        {
+            return GetSprite( TOUCH_ASSET_FRONTEND_START );
+        }
+
+
+
+
+        // -------------------------------------------------------------
+        // MINIGAME SUMMARY
+        // -------------------------------------------------------------
+        case TOUCH_HUD_CONTROL_FRONTEND_MINIGAME_SUMMARY_SELECT:
+        {
+            return GetSpriteForControl( TOUCH_HUD_CONTROL_FRONTEND_SELECT );
+        }
+
         case TOUCH_HUD_CONTROL_NONE:
         default:
         {

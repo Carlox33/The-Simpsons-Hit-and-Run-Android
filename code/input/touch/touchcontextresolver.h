@@ -82,6 +82,10 @@ public:
     bool HasForcedProfile() const;
     TouchProfile GetForcedProfile() const;
 
+    // Minijuego
+    void SetSuspendedSuperSprintProfile( TouchProfile profile );
+    void ClearSuspendedSuperSprintProfile();
+
 // Para detectar dialogos de personajes que te venden 1 coche por nivel 
     void SetPurchaseRewardConversationActive( bool active );
     bool IsPurchaseRewardConversationActive() const;
@@ -126,6 +130,8 @@ private:
 
     bool mHasForcedProfile;
     TouchProfile mForcedProfile;
+
+    TouchProfile mSuspendedSuperSprintProfile;
 
     bool mMissionBriefingActive;
     bool mGameplayConversationActive;

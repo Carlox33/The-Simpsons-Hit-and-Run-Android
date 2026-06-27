@@ -35,6 +35,10 @@
 
 #include <supersprint/supersprintmanager.h>
 
+#if defined(RAD_ANDROID)
+#include <input/touch/touchcontextresolver.h>
+#endif
+
 //===========================================================================
 // Global Data, Local Data, Local Classes
 //===========================================================================
@@ -330,6 +334,11 @@ void CGuiScreenMiniSummary::HandleMessage
 //===========================================================================
 void CGuiScreenMiniSummary::InitIntro()
 {
+    #if defined(RAD_ANDROID)
+    TouchContextResolver::GetInstance().SetSuspendedSuperSprintProfile(
+        TOUCH_PROFILE_MINIGAME_SUMMARY
+    );
+    #endif
     this->ResetCurrentRankings();
 
     // rank players by points and wins
@@ -387,6 +396,9 @@ void CGuiScreenMiniSummary::InitRunning()
 //===========================================================================
 void CGuiScreenMiniSummary::InitOutro()
 {
+#if defined(RAD_ANDROID)
+    TouchContextResolver::GetInstance().ClearSuspendedSuperSprintProfile();
+#endif
 #ifdef RAD_PC
     GetInputManager()->GetFEMouse()->SetInGameMode( false );
 #endif
