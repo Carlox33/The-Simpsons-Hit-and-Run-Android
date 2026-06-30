@@ -60,11 +60,16 @@ void TouchContextResolver::Reset()
 
 TouchProfile TouchContextResolver::Resolve() const
 {
-    // para activar layout menu en pantalla de selección de idiomas
-    if ( IsLanguageSelectionActive() )
-    {
-        return TOUCH_PROFILE_FRONTEND;
-    }
+    /*
+     * Forced profile keeps maximum priority.
+     *
+     * After that, resolution order is:
+     *
+     * 1. Normal gameplay.
+     * 2. SuperSprint / minigame.
+     * 3. Language selection screen.
+     * 4. Other context areas.
+     */
 
     if ( mHasForcedProfile )
     {
@@ -73,18 +78,96 @@ TouchProfile TouchContextResolver::Resolve() const
 
     GameFlow* gameFlow = GetGameFlow();
 
-if ( gameFlow != 0 )
-{
-    const int currentContext = gameFlow->GetCurrentContext();
+    int currentContext = -1;
 
-    switch ( currentContext )
+    if ( gameFlow != 0 )
     {
-        case CONTEXT_SUPERSPRINT_FE:
+        currentContext = gameFlow->GetCurrentContext();
+    }
+
+    TouchContextArea resolveCase = TOUCH_CONTEXT_AREA_HIDDEN;
+
+    if
+    (
+        mContextArea == TOUCH_CONTEXT_AREA_GAMEPLAY &&
+        currentContext != CONTEXT_SUPERSPRINT &&
+        currentContext != CONTEXT_SUPERSPRINT_FE
+    )
+    {
+        resolveCase = TOUCH_CONTEXT_AREA_GAMEPLAY;
+    }
+    else if ( currentContext == CONTEXT_SUPERSPRINT_FE )
+    {
+        resolveCase = TOUCH_CONTEXT_AREA_SUPERSPRINT_FE;
+    }
+    else if ( currentContext == CONTEXT_SUPERSPRINT )
+    {
+        resolveCase = TOUCH_CONTEXT_AREA_SUPERSPRINT;
+    }
+    else if ( IsLanguageSelectionActive() )
+    {
+        resolveCase = TOUCH_CONTEXT_AREA_LANGUAGE_SELECTION;
+    }
+    else
+    {
+        switch ( mContextArea )
+        {
+            case TOUCH_CONTEXT_AREA_HIDDEN:
+            {
+                resolveCase = TOUCH_CONTEXT_AREA_HIDDEN;
+                break;
+            }
+
+            case TOUCH_CONTEXT_AREA_FRONTEND:
+            {
+                resolveCase = TOUCH_CONTEXT_AREA_FRONTEND;
+                break;
+            }
+
+            case TOUCH_CONTEXT_AREA_GAMEPLAY:
+            {
+                resolveCase = TOUCH_CONTEXT_AREA_GAMEPLAY;
+                break;
+            }
+
+            case TOUCH_CONTEXT_AREA_CINEMATIC:
+            {
+                resolveCase = TOUCH_CONTEXT_AREA_CINEMATIC;
+                break;
+            }
+
+            case TOUCH_CONTEXT_AREA_SPECIAL:
+            {
+                resolveCase = TOUCH_CONTEXT_AREA_SPECIAL;
+                break;
+            }
+
+            default:
+            {
+                resolveCase = TOUCH_CONTEXT_AREA_HIDDEN;
+                break;
+            }
+        }
+    }
+
+    switch ( resolveCase )
+    {
+        case TOUCH_CONTEXT_AREA_GAMEPLAY:
+        {
+            if ( IsValidGameplayProfile( mGameplayProfile ) )
+            {
+                return mGameplayProfile;
+            }
+
+            return TOUCH_PROFILE_CHARACTER;
+        }
+
+        case TOUCH_CONTEXT_AREA_SUPERSPRINT_FE:
         {
             return TOUCH_PROFILE_FRONTEND;
         }
 
-        case CONTEXT_SUPERSPRINT:
+        case TOUCH_CONTEXT_AREA_SUPERSPRINT:
         {
             SuperSprintContext* superSprintContext =
                 static_cast<SuperSprintContext*>( gameFlow->GetContext( CONTEXT_SUPERSPRINT ) );
@@ -97,15 +180,11 @@ if ( gameFlow != 0 )
             return TOUCH_PROFILE_MINIGAME_VEHICLE;
         }
 
-        default:
+        case TOUCH_CONTEXT_AREA_LANGUAGE_SELECTION:
         {
-            break;
+            return TOUCH_PROFILE_FRONTEND;
         }
-    }
-}
 
-    switch ( mContextArea )
-    {
         case TOUCH_CONTEXT_AREA_HIDDEN:
         {
             return TOUCH_PROFILE_HIDDEN;
@@ -114,16 +193,6 @@ if ( gameFlow != 0 )
         case TOUCH_CONTEXT_AREA_FRONTEND:
         {
             return TOUCH_PROFILE_FRONTEND;
-        }
-
-        case TOUCH_CONTEXT_AREA_GAMEPLAY:
-        {
-            if ( IsValidGameplayProfile( mGameplayProfile ) )
-            {
-                return mGameplayProfile;
-            }
-
-            return TOUCH_PROFILE_CHARACTER;
         }
 
         case TOUCH_CONTEXT_AREA_CINEMATIC:
