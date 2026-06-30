@@ -14,6 +14,8 @@
 
 ## Características última versión
 
+
+* ✔ **Habilitado mini-juego (partida extra)**. 
 ---
 
 * ✔ **Controles táctiles integrados a la perfección**, utilizando las propias herramientas del juego y proporcionando así el mayor rendimiento posible. [**Controles táctiles**](TOUCH_CONTROLS.md)
@@ -126,6 +128,8 @@
 ## 📊 Port Features
 
 ## Features Latest Version
+
+* ✔ **Mini-game enabled (extra match)**.
 
 ---
 
@@ -241,6 +245,8 @@
 
 ## Fonctionnalités Dernière version
 
+
+* ✔ **Mini-jeu activé (partie supplémentaire)**.
 ---
 
 * ✔ **Commandes tactiles parfaitement intégrées**, en utilisant les propres outils du jeu et en offrant ainsi les meilleures performances possibles.[**Commandes tactiles**](TOUCH_CONTROLS.md)
@@ -355,6 +361,8 @@
 
 ## Features Neueste Version
 
+
+* ✔ **Minispiel aktiviert (zusätzliche Runde)**.
 ---
 
 * ✔ **Touch-Steuerung perfekt integriert**, unter Verwendung der spieleigenen Werkzeuge und dadurch mit der bestmöglichen Leistung. [**Touch-Steuerung**](TOUCH_CONTROLS.md)

@@ -18,9 +18,6 @@ Si encontráis errores que no estén en este documento y queréis que se puedan 
 
 [Discord](https://discord.gg/6Gw6jTJv8w)
 
-## 💥 Crashes
-
-* **En el menú principal**, la opción **Partida Extra** —el circuito con el coche de carreras desde la casa de Homer— provocará un **crash**, ya que **esta opción aún no está disponible**.
 
 ---
 
@@ -58,9 +55,6 @@ If you find bugs that are not listed in this document and you want them to be fi
 
 [Discord](https://discord.gg/6Gw6jTJv8w)
 
-## 💥 Crashes
-
-* **In the main menu**, the **Bonus Game** option —the race circuit with the race car from Homer’s house— will cause a **crash**, because **this option is not available yet**.
 
 ---
 
@@ -96,9 +90,6 @@ Si vous trouvez des bugs qui ne figurent pas dans ce document et que vous souhai
 
 [Discord](https://discord.gg/6Gw6jTJv8w)
 
-## 💥 Crashs
-
-* **Dans le menu principal**, l’option **Partie bonus** —le circuit avec la voiture de course depuis la maison d’Homer— provoquera un **crash**, car **cette option n’est pas encore disponible**.
 
 ---
 
@@ -135,9 +126,6 @@ Wenn ihr Fehler findet, die nicht in diesem Dokument aufgeführt sind, und möch
 
 [Discord](https://discord.gg/6Gw6jTJv8w)
 
-## 💥 Abstürze
-
-* **Im Hauptmenü** wird die Option **Bonus-Spiel** —die Rennstrecke mit dem Rennwagen vom Haus von Homer aus— einen **Absturz verursachen**, da **diese Option noch nicht verfügbar ist**.
 
 ---
 

@@ -8,6 +8,9 @@
 
 # 🇪🇸 Español
 
+## Versión 0.91 - Minijuego partida extra habilitado
+La versión **0.91** habilita el minijuego partida extra, permitiendo disfrutarlo teniendo un layuout táctil dentro de este minijuego adaptado para el mismo.
+
 ## Versión 0.90 - Cinemáticas corregidas y 60 FPS estable
 
 La versión **0.90** es una actualización importante centrada en mejorar el rendimiento general y la fidelidad del port Android respecto al comportamiento original del juego.
@@ -317,6 +320,9 @@ La versión **0.87** es un paso enorme para hacer que el port sea mucho más có
 ---
 
 # 🇬🇧 English
+
+## Version 0.91 - Extra match mini-game enabled
+Version **0.91** enables the extra match mini-game, allowing you to enjoy it with a touch layout adapted for this mini-game.
 
 ## Version 0.90 — Fixed cutscenes and stable 60 FPS
 
@@ -632,6 +638,9 @@ Version **0.87** is a huge step toward making the port feel much more comfortabl
 
 # 🇫🇷 Français
 
+## Version 0.91 - Mini-jeu partie supplémentaire activé
+La version **0.91** active le mini-jeu partie supplémentaire, permettant d’en profiter avec une disposition tactile adaptée à ce mini-jeu.
+
 ## Version 0.90 — Cinématiques corrigées et 60 FPS stables
 
 La version **0.90** est une mise à jour importante axée sur l’amélioration des performances générales et de la fidélité du portage Android par rapport au comportement original du jeu.
@@ -943,6 +952,9 @@ La version **0.87** est une énorme avancée pour rendre le port beaucoup plus c
 ---
 
 # 🇩🇪 Deutsch
+
+## Version 0.91 - Minispiel Extrarunde aktiviert
+Version **0.91** aktiviert das Minispiel Extrarunde und ermöglicht es, es mit einem für dieses Minispiel angepassten Touch-Layout zu genießen.
 
 ## Version 0.90 — Zwischensequenzen korrigiert und stabile 60 FPS
 
