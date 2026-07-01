@@ -52,7 +52,7 @@ public:
    // This member is called whenever the timer expires.
    void OnTimerDone( unsigned int iElapsedTime, void* pUserData );
 
-#ifdef RAD_WIN32
+#if defined(RAD_WIN32) || defined(RAD_ANDROID)
    float GetGamma() const;
    void SetGamma( float gamma );
 #endif
@@ -79,7 +79,7 @@ private:
     pddiExtGammaControl* mpDebugXBoxGamma;
     float mDebugGammaR, mDebugGammaG, mDebugGammaB;
 #endif
-#ifdef RAD_WIN32
+#if defined(RAD_WIN32) || defined(RAD_ANDROID)
     pddiExtGammaControl* mpGammaControl;
     float mGamma;
 #endif

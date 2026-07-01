@@ -242,44 +242,55 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
     );
 
     GLuint fragmentShader = pglProgram::CompileShader( GL_FRAGMENT_SHADER,
-        "precision mediump float;\n"
-        "varying vec2 tc;\n"
-        "varying vec4 cpri;\n"
-        "varying vec4 csec;\n"
+    "precision mediump float;\n"
+    "varying vec2 tc;\n"
+    "varying vec4 cpri;\n"
+    "varying vec4 csec;\n"
+    // uniform gamma: recibe el exponente de corrección por canal (1/r, 1/g, 1/b)
+    "uniform vec3 gamma;\n"
 
-        "void main() {\n"
-        "    gl_FragColor = cpri + csec;\n"
-        "}\n"
-    );
+    "void main() {\n"
+    "    vec4 c = cpri + csec;\n"
+    // aplico pow() canal por canal para corregir el gamma antes de mostrar el píxel
+    "    gl_FragColor = vec4(pow(c.rgb, gamma), c.a);\n"
+    "}\n"
+);
 
     GLuint textureShader = pglProgram::CompileShader(GL_FRAGMENT_SHADER,
-        "precision mediump float;\n"
-        "varying vec2 tc;\n"
-        "varying vec4 cpri;\n"
-        "varying vec4 csec;\n"
+    "precision mediump float;\n"
+    "varying vec2 tc;\n"
+    "varying vec4 cpri;\n"
+    "varying vec4 csec;\n"
 
-        "uniform sampler2D tex;\n"
+    "uniform sampler2D tex;\n"
+    // mismo uniform gamma que en el fragmentShader
+    "uniform vec3 gamma;\n"
 
-        "void main() {\n"
-        "    gl_FragColor = texture2D(tex, tc) * cpri + csec;\n"
-        "}\n"
-    );
+    "void main() {\n"
+    "    vec4 c = texture2D(tex, tc) * cpri + csec;\n"
+    // aplico la corrección gamma al color final con textura
+    "    gl_FragColor = vec4(pow(c.rgb, gamma), c.a);\n"
+    "}\n"
+);
 
     GLuint alphaTestShader = pglProgram::CompileShader(GL_FRAGMENT_SHADER,
-        "precision mediump float;\n"
-        "varying vec2 tc;\n"
-        "varying vec4 cpri;\n"
-        "varying vec4 csec;\n"
+    "precision mediump float;\n"
+    "varying vec2 tc;\n"
+    "varying vec4 cpri;\n"
+    "varying vec4 csec;\n"
 
-        "uniform float alpharef;\n"
-        "uniform sampler2D tex;\n"
+    "uniform float alpharef;\n"
+    "uniform sampler2D tex;\n"
+    // mismo uniform gamma
+    "uniform vec3 gamma;\n"
 
-        "void main() {\n"
-        "    vec4 c = texture2D(tex, tc) * cpri + csec;\n"
-        "    if (c.a < alpharef) discard;\n"
-        "    gl_FragColor = c;\n"
-        "}\n"
-    );
+    "void main() {\n"
+    "    vec4 c = texture2D(tex, tc) * cpri + csec;\n"
+    // el alpha test se hace antes de aplicar gamma porque el alpha no se corrige
+    "    if (c.a < alpharef) discard;\n"
+    "    gl_FragColor = vec4(pow(c.rgb, gamma), c.a);\n"
+    "}\n"
+);
 #endif
 
     colorProgram = pglProgram::CreateProgram(vertexShader, fragmentShader);
@@ -304,6 +315,12 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
     defaultShader = new pglMat(this);
     defaultShader->AddRef();
     SetShaderProgram(colorProgram);
+
+    // gamma a 1.0 en los 3 shaders (sin corrección)
+    // se actualizará cuando el juego llame a SetGamma
+    colorProgram->SetGamma(1.0f, 1.0f, 1.0f);
+    textureProgram->SetGamma(1.0f, 1.0f, 1.0f);
+    alphaTestProgram->SetGamma(1.0f, 1.0f, 1.0f);
 }
 
 pglContext::~pglContext()
@@ -1199,4 +1216,21 @@ void pglContext::SetTextureEnvironment(const pglTextureEnv* texEnv)
     else
         SetShaderProgram(colorProgram);
     currentProgram->SetTextureEnvironment(texEnv);
+}
+void pglContext::SetGammaUniform(float r, float g, float b)
+{
+    // activamos cada programa y seteamos el uniform gamma
+    // hay que activar el programa antes de poder setear su uniform
+    colorProgram->UseProgram();
+    colorProgram->SetGamma(r, g, b);
+
+    textureProgram->UseProgram();
+    textureProgram->SetGamma(r, g, b);
+
+    alphaTestProgram->UseProgram();
+    alphaTestProgram->SetGamma(r, g, b);
+
+    // restauramos el programa que estaba activo antes
+    if(currentProgram)
+        currentProgram->UseProgram();
 }

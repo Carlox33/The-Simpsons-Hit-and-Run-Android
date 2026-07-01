@@ -305,6 +305,8 @@ bool pglProgram::LinkProgram(GLuint vertexShader, GLuint fragmentShader)
     scm = glGetUniformLocation(program, "scm");
     ecm = glGetUniformLocation(program, "ecm");
     srm = glGetUniformLocation(program, "srm");
+    // registro la ubicación del uniform gamma
+    gamma = glGetUniformLocation(program, "gamma");
 
 #ifndef RAD_VITAGL
     // Always detach shaders after a successful link
@@ -399,4 +401,11 @@ pglProgram* pglProgram::CreateProgram(GLuint vertexShader, GLuint fragmentShader
         return nullptr;
     }
     return program;
+}
+void pglProgram::SetGamma(float r, float g, float b)
+{
+    // seteo el uniform gamma en el shader activo
+    // gamma >= 0 significa que el uniform existe en este shader
+    if(gamma >= 0)
+        glUniform3f(gamma, r, g, b);
 }
