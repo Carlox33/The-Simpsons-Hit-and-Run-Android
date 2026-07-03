@@ -56,6 +56,9 @@ void TouchContextResolver::Reset()
     mForcedProfile = TOUCH_PROFILE_HIDDEN;
     mMissionBriefingActive = false;
     mGameplayConversationActive = false;
+    mPurchaseRewardConversationActive = false;
+    mLanguageSelectionActive = false;
+    mSuspendedSuperSprintProfile = TOUCH_PROFILE_FRONTEND;
 }
 
 TouchProfile TouchContextResolver::Resolve() const
@@ -64,7 +67,7 @@ TouchProfile TouchContextResolver::Resolve() const
      * Forced profile keeps maximum priority.
      *
      * After that, resolution order is:
-     *
+     * 0. Check forced Profile 
      * 1. Normal gameplay.
      * 2. SuperSprint / minigame.
      * 3. Language selection screen.
@@ -540,6 +543,9 @@ bool TouchContextResolver::IsValidProfile( TouchProfile profile ) const
         case TOUCH_PROFILE_VEHICLE:
         case TOUCH_PROFILE_CINEMATIC:
         case TOUCH_PROFILE_SPECIAL:
+        case TOUCH_PROFILE_MINIGAME_VEHICLE:
+        case TOUCH_PROFILE_MINIGAME_SUMMARY:
+        case TOUCH_PROFILE_SCRAPBOOK_CONTENTS:
         {
             return true;
         }

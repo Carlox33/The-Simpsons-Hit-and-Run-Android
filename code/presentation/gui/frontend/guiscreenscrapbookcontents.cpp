@@ -44,6 +44,10 @@
 //
 #include <raddebug.hpp>
 
+#if defined(RAD_ANDROID)
+#include <input/touch/touchcontextresolver.h>
+#endif
+
 //===========================================================================
 // Global Data, Local Data, Local Classes
 //===========================================================================
@@ -233,6 +237,10 @@ CGuiScreenScrapBookContents::CGuiScreenScrapBookContents
 //===========================================================================
 CGuiScreenScrapBookContents::~CGuiScreenScrapBookContents()
 {
+    #if defined(RAD_ANDROID)
+    TouchContextResolver::GetInstance().ClearForcedProfile();
+    #endif
+
     if( m_pMenu != NULL )
     {
         delete m_pMenu;
@@ -450,6 +458,11 @@ void CGuiScreenScrapBookContents::SetLevelBarVisible( bool isVisible )
 //===========================================================================
 void CGuiScreenScrapBookContents::InitIntro()
 {
+    #if defined(RAD_ANDROID)
+    TouchContextResolver::GetInstance().SetForcedProfile(
+        TOUCH_PROFILE_SCRAPBOOK_CONTENTS
+    );
+    #endif
     // this is needed here to update all the unlocked n/N values
     //
     this->OnLevelSelectionChange( 0 );
@@ -500,6 +513,9 @@ void CGuiScreenScrapBookContents::InitRunning()
 //===========================================================================
 void CGuiScreenScrapBookContents::InitOutro()
 {
+    #if defined(RAD_ANDROID)
+    TouchContextResolver::GetInstance().ClearForcedProfile();
+    #endif
 }
 
 //---------------------------------------------------------------------

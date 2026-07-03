@@ -88,6 +88,8 @@
     #define TOUCH_IM_FE_MOUSE_RIGHT          InputManager::feMouseRight
     #define TOUCH_IM_FE_MOUSE_UP             InputManager::feMouseUp
     #define TOUCH_IM_FE_MOUSE_DOWN           InputManager::feMouseDown
+    #define TOUCH_IM_FE_L1                   Input::INVALID_CONTROLLERID
+    #define TOUCH_IM_FE_R1                   Input::INVALID_CONTROLLERID
 
     #define TOUCH_IM_P1_KBD_START            InputManager::P1_KBD_Start
     #define TOUCH_IM_P1_KBD_GAS              InputManager::P1_KBD_Gas
@@ -166,6 +168,8 @@
     #define TOUCH_IM_FE_MOVE_LEFT            InputManager::DPadLeft
     #define TOUCH_IM_FE_MOVE_RIGHT           InputManager::DPadRight
     #define TOUCH_IM_FE_SELECT               InputManager::Start
+    #define TOUCH_IM_FE_L1                   InputManager::Black
+    #define TOUCH_IM_FE_R1                   InputManager::White
 
     #define TOUCH_IM_FE_FUNCTION_1           InputManager::A
     #define TOUCH_IM_FE_FUNCTION_2           InputManager::B
@@ -562,6 +566,25 @@ static const TouchActionDefinition sTouchActions[] =
         TOUCH_PROFILE_FRONTEND,
         TOUCH_CONTROL_DRAG_AREA,
         false
+    },
+
+    {
+    TOUCH_ACTION_FE_L1,
+    "feL1",
+    TOUCH_IM_FE_L1,
+    TOUCH_ACTION_CATEGORY_FRONTEND,
+    TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
+    TOUCH_CONTROL_BUTTON,
+    false
+    },
+    {
+    TOUCH_ACTION_FE_R1,
+    "feR1",
+    TOUCH_IM_FE_R1,
+    TOUCH_ACTION_CATEGORY_FRONTEND,
+    TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
+    TOUCH_CONTROL_BUTTON,
+    false
     },
 
     // ---------------------------------------------------------------------
