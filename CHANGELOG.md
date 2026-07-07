@@ -8,6 +8,14 @@
 
 # 🇪🇸 Español
 
+## Versión 0.91.0.1 - Navegación táctil en el libro de estadísticas
+
+La versión **0.91.0.1** añade la posibilidad de navegar de forma correcta  en la pantalla del libro de estadísticas por nivel, permitiendo cambiar entre niveles pulsando la mitad derecha o izquierda de la pantalla.
+
+Ahora, al pulsar la **mitad derecha**, se muestran las estadísticas del siguiente nivel, mientras que al pulsar la **mitad izquierda**, se muestran las estadísticas del nivel anterior.
+
+Esto anteriormente no estaba disponible, ya que este menú utiliza los botones L1/LT y R1/RT para moverse en el menú.
+
 ## Versión 0.91 - Minijuego partida extra habilitado
 La versión **0.91** habilita el minijuego partida extra, permitiendo disfrutarlo teniendo un layuout táctil dentro de este minijuego adaptado para el mismo.
 
@@ -320,6 +328,12 @@ La versión **0.87** es un paso enorme para hacer que el port sea mucho más có
 ---
 
 # 🇬🇧 English
+
+## Version 0.91.0.1 - Touch Navigation in the Statistics Book
+
+Version **0.91.0.1** adds the ability to navigate correctly on the level statistics book screen, allowing you to switch between levels by tapping the right or left half of the screen.
+
+Now, tapping the **right half** displays the statistics for the next level, while tapping the **left half** displays the statistics for the previous level.
 
 ## Version 0.91 - Extra match mini-game enabled
 Version **0.91** enables the extra match mini-game, allowing you to enjoy it with a touch layout adapted for this mini-game.
@@ -638,6 +652,12 @@ Version **0.87** is a huge step toward making the port feel much more comfortabl
 
 # 🇫🇷 Français
 
+## Version 0.91.0.1 - Navigation tactile dans le livre des statistiques
+
+La version **0.91.0.1** ajoute la possibilité de naviguer correctement dans l'écran du livre des statistiques par niveau, permettant de passer d'un niveau à l'autre en appuyant sur la moitié droite ou gauche de l'écran.
+
+Désormais, en appuyant sur la **moitié droite**, les statistiques du niveau suivant s'affichent, tandis qu'en appuyant sur la **moitié gauche**, les statistiques du niveau précédent s'affichent.
+
 ## Version 0.91 - Mini-jeu partie supplémentaire activé
 La version **0.91** active le mini-jeu partie supplémentaire, permettant d’en profiter avec une disposition tactile adaptée à ce mini-jeu.
 
@@ -952,6 +972,12 @@ La version **0.87** est une énorme avancée pour rendre le port beaucoup plus c
 ---
 
 # 🇩🇪 Deutsch
+
+## Version 0.91.0.1 - Touch-Navigation im Statistikbuch
+
+Version **0.91.0.1** fügt die Möglichkeit hinzu, korrekt auf dem Bildschirm des Statistikbuchs pro Level zu navigieren, sodass man zwischen den Levels wechseln kann, indem man auf die rechte oder linke Hälfte des Bildschirms tippt.
+
+Wenn man nun auf die **rechte Hälfte** tippt, werden die Statistiken des nächsten Levels angezeigt, während beim Tippen auf die **linke Hälfte** die Statistiken des vorherigen Levels angezeigt werden.
 
 ## Version 0.91 - Minispiel Extrarunde aktiviert
 Version **0.91** aktiviert das Minispiel Extrarunde und ermöglicht es, es mit einem für dieses Minispiel angepassten Touch-Layout zu genießen.
