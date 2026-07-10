@@ -123,35 +123,7 @@ MEMTRACK_PUSH_GROUP( "CGUIScreenPauseOptions" );
                               pRArrow );
     }
 
-    // NUEVO BLOQUE PARA ELIMINAR opciones->configuracion para android y asi evitar un crash accidental
-    /** 
-#ifdef RAD_ANDROID
-    Scrooby::Text* pSettings = menu->GetText( "Settings" );
-    if( pSettings != NULL )
-    {
-        pSettings->SetVisible( false );
-    }
-
-    Scrooby::Text* pSettingsValue = pPage->GetText( "Settings_Value" );
-    if( pSettingsValue != NULL )
-    {
-        pSettingsValue->SetVisible( false );
-    }
-
-    Scrooby::Sprite* pSettingsLArrow = pPage->GetSprite( "Settings_LArrow" );
-    if( pSettingsLArrow != NULL )
-    {
-        pSettingsLArrow->SetVisible( false );
-    }
-
-    Scrooby::Sprite* pSettingsRArrow = pPage->GetSprite( "Settings_RArrow" );
-    if( pSettingsRArrow != NULL )
-    {
-        pSettingsRArrow->SetVisible( false );
-    }
-#endif
-*/
-    // FIN NUEVO BLOQUE 
+    
 
 #ifndef RAD_PC
     Scrooby::Text* pText = menu->GetText( "Display" );
