@@ -213,8 +213,7 @@ bool TouchControlsConfigurationManager::Save()
     fprintf( file, "# version=%s\n\n", TOUCH_CONTROLS_CONFIGURATION_VERSION );
 
     fprintf( file, "[GENERAL]\n" );
-    fprintf( file, "version=%s\n", TOUCH_CONTROLS_CONFIGURATION_VERSION );
-    fprintf( file, "# Default values: opactity-> 0.25 pressed_opacity-> 0.85\n" );
+    fprintf( file, "# Default values: opactity-> 0.25 pressed_opacity-> 0.85\n\n" );
     fprintf( file, "opacity=%.3f\n", mOpacity );
     fprintf( file, "pressed_opacity=%.3f\n\n", mPressedOpacity );
 
