@@ -17,7 +17,10 @@
 #endif
 
 // Increase this when you change bundled touch PNGs and want to force recopy.
-static const char* TOUCH_ASSET_VERSION = "1";
+//Version 1 fue los controles táctiles al completo 
+//Version 2 (actual) es controles tactiles + iconos para la edición
+
+static const char* TOUCH_ASSET_VERSION = "2";
 
 
 static const char* TOUCH_ASSET_FILES[] =
@@ -49,7 +52,15 @@ static const char* TOUCH_ASSET_FILES[] =
     "touch_controls/vehicle/freno.png",
     "touch_controls/vehicle/puertaSalir.png",
     "touch_controls/vehicle/reset.png",
-    "touch_controls/vehicle/camara.png"
+    "touch_controls/vehicle/camara.png",
+
+    // editor touch_controls 
+    "touch_controls/editor/1De3.png",
+    "touch_controls/editor/2De3.png",
+    "touch_controls/editor/3De3.png",
+    "touch_controls/editor/moverControlesTactiles.png",
+    "touch_controls/editor/RESET.png"
+
 };
 
 static const unsigned int TOUCH_ASSET_FILE_COUNT =

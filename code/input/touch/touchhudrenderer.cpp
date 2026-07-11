@@ -8,7 +8,7 @@
 #include <pddi/pdditype.hpp>
 #include <pddi/pddi.hpp>
 #include <math.h>
-
+#include <input/touch/touchcontrolsconfigurationmanager.h>
 #if defined(RAD_ANDROID)
 #include <android/log.h>
 
@@ -63,6 +63,15 @@ bool TouchHudRenderer::Initialize()
     mInitialized = true;
     mEnabled = true;
 
+
+    TouchControlsConfigurationManager& configManager =
+    TouchControlsConfigurationManager::GetInstance();
+
+    if ( configManager.IsInitialized() )
+    {
+        mOpacity = configManager.GetOpacity();
+        mPressedOpacity = configManager.GetPressedOpacity();
+    }
    
 
     return true;
@@ -378,7 +387,9 @@ void TouchHudRenderer::RenderControlDefinition
         return;
     }
 
-    if ( control.profile != currentProfile )
+    TouchHudSystem& hudSystem = TouchHudSystem::GetInstance();
+
+    if ( !hudSystem.ShouldControlBeUsedForProfile( control.id, currentProfile ) )
     {
         return;
     }
@@ -390,11 +401,15 @@ void TouchHudRenderer::RenderControlDefinition
 
     TouchAssetManager& assetManager = TouchAssetManager::GetInstance();
 
-    TouchHudSystem& hudSystem = TouchHudSystem::GetInstance();
-
     tSprite* sprite = 0;
 
-    if ( control.id == TOUCH_HUD_CONTROL_CHARACTER_CONTEXT_ACTION )
+    if ( control.id == TOUCH_HUD_CONTROL_EDITOR_NEXT_LAYOUT )
+    {
+        sprite = assetManager.GetSpriteForEditorNextLayout(
+            hudSystem.GetCurrentEditableLayout()
+        );
+    }
+    else if ( control.id == TOUCH_HUD_CONTROL_CHARACTER_CONTEXT_ACTION )
     {
         sprite = assetManager.GetSpriteForInteractionIcon(
             hudSystem.GetCurrentInteractionIcon()
@@ -417,12 +432,23 @@ void TouchHudRenderer::RenderControlDefinition
     }
     
     const bool pressed = hudSystem.IsControlPressed( control.id );
-    const float opacity = pressed ? mPressedOpacity : mOpacity;
+    float opacity = pressed ? mPressedOpacity : mOpacity;
 
-    const float rectX = control.rect.x * renderWidth;
-    const float rectY = control.rect.y * renderHeight;
-    const float rectW = control.rect.width * renderWidth;
-    const float rectH = control.rect.height * renderHeight;
+    if ( control.id == TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME || control.id == TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU )
+    {
+        opacity = pressed ? 0.5f : 0.85f;
+    }
+    else if ( hudSystem.IsTouchControlsEditModeActive() )
+    {
+        opacity = 1.0f;
+    }
+
+    const TouchRect effectiveRect = hudSystem.GetEffectiveControlRect( control.id );
+
+    const float rectX = effectiveRect.x * renderWidth;
+    const float rectY = effectiveRect.y * renderHeight;
+    const float rectW = effectiveRect.width * renderWidth;
+    const float rectH = effectiveRect.height * renderHeight;
 
     RenderSpriteInPixelRect(
         sprite,

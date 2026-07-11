@@ -34,6 +34,10 @@
 #include <Group.h>
 #include <Text.h>
 
+#ifdef RAD_ANDROID
+#include <input/touch/touchhudsystem.h>
+#endif
+
 #ifdef RAD_PS2
     #include <main/ps2platform.h>
 #endif
@@ -176,6 +180,9 @@ MEMTRACK_POP_GROUP( "CGUIScreenOptions" );
 //===========================================================================
 CGuiScreenOptions::~CGuiScreenOptions()
 {
+    #ifdef RAD_ANDROID
+    TouchHudSystem::GetInstance().SetTouchControlsEditorMainMenuEntryAllowed( false );
+    #endif 
     if( m_pMenu != NULL )
     {
         delete m_pMenu;
@@ -464,6 +471,10 @@ void CGuiScreenOptions::InitIntro()
     GetCheatInputSystem()->SetEnabled( true );
 #endif
 
+    #ifdef RAD_ANDROID
+    TouchHudSystem::GetInstance().SetTouchControlsEditorMainMenuEntryAllowed( true );
+    #endif
+
     rAssert( m_pMenu != NULL );
     if( m_pMenu->GetSelection() == MENU_ITEM_DISPLAY_MODE )
     {
@@ -512,6 +523,10 @@ void CGuiScreenOptions::InitOutro()
 {
 #ifndef RAD_E3
     GetCheatInputSystem()->SetEnabled( false );
+#endif
+
+#ifdef RAD_ANDROID
+TouchHudSystem::GetInstance().SetTouchControlsEditorMainMenuEntryAllowed( false );
 #endif
 }
 

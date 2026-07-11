@@ -47,6 +47,13 @@ enum TouchAssetId
     TOUCH_ASSET_VEHICLE_RESET,
     TOUCH_ASSET_VEHICLE_CAMERA_TOGGLE,
 
+    // Editor
+    TOUCH_ASSET_EDITOR_MOVE_CONTROLS,
+    TOUCH_ASSET_EDITOR_LAYOUT_1_3,
+    TOUCH_ASSET_EDITOR_LAYOUT_2_3,
+    TOUCH_ASSET_EDITOR_LAYOUT_3_3,
+    TOUCH_ASSET_EDITOR_RESET,
+
     TOUCH_ASSET_COUNT
 };
 
@@ -71,6 +78,7 @@ public:
 
     tSprite* GetSpriteForControl( TouchHudControlId controlId ) const;
     tSprite* GetSpriteForInteractionIcon( TouchInteractionIcon icon ) const;
+    tSprite* GetSpriteForEditorNextLayout( TouchEditableLayout layout ) const;
 
 private:
     TouchAssetManager();

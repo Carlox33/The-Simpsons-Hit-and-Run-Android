@@ -19,8 +19,8 @@ android {
                 arguments "-DANDROID_PLATFORM=android-24",
                         //"-DANDROID_STL=c++_static",
                         "-DANDROID_STL=c++_shared",
-                        "-DANDROID=ON"
-                        //"-DSRR2_REGION=PAL" // si quitamos esta linea para que no sea PAL, el juego correra la rama NTSC ya que está por defecto
+                        "-DANDROID=ON",
+                        "-DSRR2_REGION=PAL" // si quitamos esta linea para que no sea PAL, el juego correra la rama NTSC ya que está por defecto
                 abiFilters 'armeabi-v7a', 'arm64-v8a'
 
             }

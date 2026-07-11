@@ -211,11 +211,43 @@ allLoaded = LoadSpriteForAsset(
     "vehicle/camara.png",
     "tv_camera"
 ) && allLoaded;
-    TOUCH_ASSET_MANAGER_LOGI(
+   
+
+// Editor
+allLoaded = LoadSpriteForAsset(
+    TOUCH_ASSET_EDITOR_MOVE_CONTROLS,
+    "editor/moverControlesTactiles.png",
+    "te_move_controls"
+) && allLoaded;
+
+allLoaded = LoadSpriteForAsset(
+    TOUCH_ASSET_EDITOR_LAYOUT_1_3,
+    "editor/1De3.png",
+    "te_layout_1_3"
+) && allLoaded;
+
+allLoaded = LoadSpriteForAsset(
+    TOUCH_ASSET_EDITOR_LAYOUT_2_3,
+    "editor/2De3.png",
+    "te_layout_2_3"
+) && allLoaded;
+
+allLoaded = LoadSpriteForAsset(
+    TOUCH_ASSET_EDITOR_LAYOUT_3_3,
+    "editor/3De3.png",
+    "te_layout_3_3"
+) && allLoaded;
+
+allLoaded = LoadSpriteForAsset(
+    TOUCH_ASSET_EDITOR_RESET,
+    "editor/RESET.png",
+    "te_reset"
+) && allLoaded;
+
+ TOUCH_ASSET_MANAGER_LOGI(
         "[TouchAssetManager] LoadAllSprites finished. allLoaded=%d",
         allLoaded ? 1 : 0
     );
-
     return allLoaded;
 #endif
 }
@@ -601,6 +633,28 @@ tSprite* TouchAssetManager::GetSpriteForControl( TouchHudControlId controlId ) c
             return GetSpriteForControl( TOUCH_HUD_CONTROL_FRONTEND_SELECT );
         }
 
+        // -------------------------------------------------------------
+        // Touch controls editor
+        // -------------------------------------------------------------
+
+        case TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME:
+        case TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU:
+        {
+            return GetSprite( TOUCH_ASSET_EDITOR_MOVE_CONTROLS );
+        }
+
+        case TOUCH_HUD_CONTROL_EDITOR_RESET:
+        {
+            return GetSprite( TOUCH_ASSET_EDITOR_RESET );
+        }
+
+        case TOUCH_HUD_CONTROL_EDITOR_NEXT_LAYOUT:
+        {
+            // This one is dynamic. Renderer should call
+            // GetSpriteForEditorNextLayout().
+            return GetSprite( TOUCH_ASSET_EDITOR_LAYOUT_1_3 );
+        }
+
         case TOUCH_HUD_CONTROL_NONE:
         default:
         {
@@ -863,6 +917,34 @@ fileData = 0;
 
     return sprite;
 #endif
+}
+
+tSprite* TouchAssetManager::GetSpriteForEditorNextLayout ( TouchEditableLayout layout ) const
+{
+    switch ( layout )
+    {
+        case TOUCH_EDITABLE_LAYOUT_CHARACTER:
+        {
+            return GetSprite( TOUCH_ASSET_EDITOR_LAYOUT_1_3 );
+        }
+
+        case TOUCH_EDITABLE_LAYOUT_VEHICLE:
+        {
+            return GetSprite( TOUCH_ASSET_EDITOR_LAYOUT_2_3 );
+        }
+
+        case TOUCH_EDITABLE_LAYOUT_FRONTEND:
+        {
+            return GetSprite( TOUCH_ASSET_EDITOR_LAYOUT_3_3 );
+        }
+
+        default:
+        {
+            break;
+        }
+    }
+
+    return GetSprite( TOUCH_ASSET_EDITOR_LAYOUT_1_3 );
 }
 
 void TouchAssetManager::ReleaseSprite( tSprite*& sprite )

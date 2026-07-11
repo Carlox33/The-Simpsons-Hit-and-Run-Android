@@ -140,6 +140,25 @@ enum TouchInteractionIcon
     TOUCH_INTERACTION_ICON_ENTER_CAR
 };
 
+//=============================================================================
+// Touch controls customization / editor
+//=============================================================================
+
+enum TouchEditableLayout
+{
+    TOUCH_EDITABLE_LAYOUT_CHARACTER = 0,
+    TOUCH_EDITABLE_LAYOUT_VEHICLE,
+    TOUCH_EDITABLE_LAYOUT_FRONTEND,
+
+    TOUCH_EDITABLE_LAYOUT_COUNT
+};
+
+enum TouchControlSizeStep
+{
+    TOUCH_CONTROL_SIZE_MIN_STEP = 0,
+    TOUCH_CONTROL_SIZE_BASE_STEP = 5,
+    TOUCH_CONTROL_SIZE_MAX_STEP = 10
+};
 
 
 struct TouchVector2
@@ -175,6 +194,28 @@ struct TouchRect
     float y;
     float width;
     float height;
+};
+
+struct TouchControlCustomization
+{
+    TouchControlCustomization()
+        :
+        offsetX( 0.0f ),
+        offsetY( 0.0f ),
+        sizeStep( TOUCH_CONTROL_SIZE_BASE_STEP )
+    {
+    }
+
+    void Reset()
+    {
+        offsetX = 0.0f;
+        offsetY = 0.0f;
+        sizeStep = TOUCH_CONTROL_SIZE_BASE_STEP;
+    }
+
+    float offsetX;
+    float offsetY;
+    int sizeStep;
 };
 
 inline const char* TouchInputModeToString( TouchInputMode mode )
@@ -296,5 +337,24 @@ inline TouchInteractionIcon TouchInteractionTypeToIcon( TouchInteractionType typ
         }
     }
 }
+
+inline float TouchControlSizeStepToScale( int sizeStep )
+{
+    if ( sizeStep < TOUCH_CONTROL_SIZE_MIN_STEP )
+    {
+        sizeStep = TOUCH_CONTROL_SIZE_MIN_STEP;
+    }
+
+    if ( sizeStep > TOUCH_CONTROL_SIZE_MAX_STEP )
+    {
+        
+        sizeStep = TOUCH_CONTROL_SIZE_MAX_STEP;
+    }
+
+    // Representamos un aumento del 10%, no me gusta tener ese 0.1 sin una variable, lo cambiaré después, esto indica que cada toque aumentará un 10% su tamaño
+    return 0.5f + ( static_cast<float>( sizeStep ) * 0.1f );
+}
+
+
 
 #endif // TOUCHTYPES_H_

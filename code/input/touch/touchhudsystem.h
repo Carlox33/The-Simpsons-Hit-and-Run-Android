@@ -14,7 +14,8 @@ enum TouchHudFingerRole
     TOUCH_HUD_FINGER_ROLE_NONE = 0,
     TOUCH_HUD_FINGER_ROLE_MOVEMENT,
     TOUCH_HUD_FINGER_ROLE_CAMERA,
-    TOUCH_HUD_FINGER_ROLE_BUTTON
+    TOUCH_HUD_FINGER_ROLE_BUTTON,
+    TOUCH_HUD_FINGER_ROLE_EDIT_CONTROL
 };
 
 enum TouchHudControlId
@@ -93,6 +94,14 @@ enum TouchHudControlId
      // ScrapBookContents invisible half-screen zones
     TOUCH_HUD_CONTROL_SCRAPBOOK_L1_ZONE,
     TOUCH_HUD_CONTROL_SCRAPBOOK_R1_ZONE,
+
+     // Touch controls editor
+    TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME, // Icono flechas en menu opciones in-game
+    TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU, // mismo icono flechas pero en menu principañ 
+    TOUCH_HUD_CONTROL_EDITOR_NEXT_LAYOUT, // 1/3, 2/3, 3/3 
+    TOUCH_HUD_CONTROL_EDITOR_RESET, //icono RESET
+
+    TOUCH_HUD_CONTROL_COUNT
 
 };
 
@@ -217,6 +226,20 @@ public:
 
     bool IsControlVisible( TouchHudControlId controlId ) const;
 
+    TouchRect GetEffectiveControlRect( TouchHudControlId controlId ) const;
+
+    void SetTouchControlsEditorEntryAllowed( bool allowed );
+    bool IsTouchControlsEditorEntryAllowed() const;
+
+    void SetTouchControlsEditorMainMenuEntryAllowed( bool allowed );
+    bool IsTouchControlsEditorMainMenuEntryAllowed() const;
+
+    bool IsTouchControlsEditModeActive() const;
+    TouchEditableLayout GetCurrentEditableLayout() const;
+
+    bool IsEditorControl( TouchHudControlId controlId ) const;
+
+    bool ShouldControlBeUsedForProfile( TouchHudControlId controlId, TouchProfile profile ) const;
 private:
     TouchHudSystem();
     ~TouchHudSystem();
@@ -251,6 +274,11 @@ private:
     bool mTouchInputWasSuppressed;
     bool RejectTouchInputIfSuppressed();
     
+    bool mTouchControlsEditorEntryAllowed;
+    bool mTouchControlsEditModeActive;
+    TouchEditableLayout mCurrentEditableLayout;
+
+    bool mTouchControlsEditorMainMenuEntryAllowed;
     
     float Clamp01( float value ) const;
 
@@ -297,6 +325,42 @@ private:
     void ApplyMovementActions();
     void ClearMovementActions();
 
+    void BeginTouchControlsEditMode();
+    void EndTouchControlsEditMode();
+    void AdvanceTouchControlsEditLayout();
+    void ResetCurrentTouchControlsEditLayout();
+
+    TouchProfile GetProfileForEditableLayout( TouchEditableLayout layout ) const;
+
+    bool IsControlEditableInCurrentLayout( TouchHudControlId controlId ) const;
+
+    void BeginEditControl
+    (
+        TouchHudFingerState* finger,
+        const TouchHudControlDefinition* control,
+        float x,
+        float y
+    );
+
+    void UpdateEditControl
+    (
+        TouchHudFingerState* finger,
+        float x,
+        float y
+    );
+
+    void EndEditControl( TouchHudFingerState* finger );
+
+    void ApplyCharacterEditMovementRestriction
+    (
+        TouchHudControlId controlId
+    );
+
+    bool IsFrontendArrowControl( TouchHudControlId controlId ) const;
+    bool IsFrontendArrowGroupTouch( float x, float y ) const;
+
+    void MoveFrontendArrowGroup( float deltaX, float deltaY );
+
 private:
     bool mEnabled;
     TouchProfile mCurrentProfile;
@@ -315,7 +379,15 @@ private:
     
     TouchInteractionType mCurrentInteractionType;
     TouchInteractionIcon mCurrentInteractionIcon;
+
     
+    TouchHudControlId mEditingControlId;
+    bool mEditingControlWasDragged;
+    bool mEditingFrontendArrowGroup;
+
+    TouchVector2 mEditingStartPosition;
+    TouchVector2 mEditingLastPosition;
+        
 };
 
 #endif // TOUCHHUDSYSTEM_H_

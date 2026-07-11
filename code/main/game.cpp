@@ -64,6 +64,7 @@
 #include <input/touch/touchassetmanager.h>
 #include <input/touch/touchhudrenderer.h>
 #include <data/config/androidconfigurationmanager.h>
+#include <input/touch/touchcontrolsconfigurationmanager.h>
 #endif
 
 #if defined(RAD_ANDROID)
@@ -703,11 +704,16 @@ void Game::Initialize()
     TouchAssetExtractor::GetInstance().EnsureAssetsExtracted();
     // Realizamos la carga con pure3d de los iconos extraidos anteriormente 
     TouchAssetManager::GetInstance().Initialize();
+    // Cargamos la configuración personalizada de controles táctiles del jugador (en caso de que exista) antes de inicializar el sistema de renderizado de iconos 
+    TouchControlsConfigurationManager::GetInstance().Initialize();
+
     // Realizamos inicializacion del render, pero aqui no es donde solicitamos el renderizado,solo iniciamos el sistema de render
     TouchHudRenderer::GetInstance().Initialize();
 
     // hacemos que se utilice en el ciclo del juego al arrancar la configuración del archivo Simpsons_configuration.txt
     GetAndroidConfigurationManager()->Initialize();
+
+
     #endif
 
     //

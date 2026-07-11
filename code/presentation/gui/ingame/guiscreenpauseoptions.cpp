@@ -27,6 +27,10 @@
 #include <Page.h>
 #include <Text.h>
 
+#ifdef RAD_ANDROID
+#include <input/touch/touchhudsystem.h>
+#endif
+
 //===========================================================================
 // Global Data, Local Data, Local Classes
 //===========================================================================
@@ -165,6 +169,10 @@ MEMTRACK_POP_GROUP("CGUIScreenPauseOptions");
 //===========================================================================
 CGuiScreenPauseOptions::~CGuiScreenPauseOptions()
 {
+    #ifdef RAD_ANDROID
+    TouchHudSystem::GetInstance().SetTouchControlsEditorEntryAllowed( false );
+    #endif
+
     if( m_pMenu != NULL )
     {
         delete m_pMenu;
@@ -289,6 +297,10 @@ void CGuiScreenPauseOptions::InitIntro()
 #ifndef RAD_E3
     GetCheatInputSystem()->SetEnabled( true );
 #endif
+
+#ifdef RAD_ANDROID
+    TouchHudSystem::GetInstance().SetTouchControlsEditorEntryAllowed( true );
+#endif
 }
 
 
@@ -325,6 +337,10 @@ void CGuiScreenPauseOptions::InitOutro()
 {
 #ifndef RAD_E3
     GetCheatInputSystem()->SetEnabled( false );
+#endif
+
+#ifdef RAD_ANDROID
+    TouchHudSystem::GetInstance().SetTouchControlsEditorEntryAllowed( false );
 #endif
 }
 
