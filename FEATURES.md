@@ -14,7 +14,8 @@
 
 ## Características última versión
 
-
+* ✔ **Nuevo menú para personalizar controles táctiles de forma sencilla e intutiva por el usuario final pudiendo modificar tamaño, posición y opacidad**. [**Controles táctiles**](TOUCH_CONTROLS.md)
+---
 * ✔ **Habilitado mini-juego (partida extra)**. 
 ---
 
@@ -129,6 +130,8 @@
 
 ## Features Latest Version
 
+* ✔ **New menu that allows end users to customize touch controls easily and intuitively by modifying their size, position, and opacity**. [**Touch controls**](TOUCH_CONTROLS.md)
+---
 * ✔ **Mini-game enabled (extra match)**.
 
 ---
@@ -246,6 +249,9 @@
 ## Fonctionnalités Dernière version
 
 
+* ✔ **Nouveau menu permettant à l’utilisateur final de personnaliser facilement et intuitivement les commandes tactiles en modifiant leur taille, leur position et leur opacité**. [**Commandes tactiles**](TOUCH_CONTROLS.md)
+
+---
 * ✔ **Mini-jeu activé (partie supplémentaire)**.
 ---
 
@@ -361,6 +367,8 @@
 
 ## Features Neueste Version
 
+* ✔ **Neues Menü, mit dem Endbenutzer die Touch-Steuerung einfach und intuitiv anpassen können, indem sie Größe, Position und Deckkraft ändern**. [**Touch-Steuerung**](TOUCH_CONTROLS.md)
+---
 
 * ✔ **Minispiel aktiviert (zusätzliche Runde)**.
 ---

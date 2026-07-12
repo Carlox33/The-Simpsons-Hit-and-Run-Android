@@ -8,6 +8,101 @@
 
 # 🇪🇸 Español
 
+## Versión 0.92 - Nuevo menú personalización controles táctiles.
+
+Esta  version **0.92** se añadió la posibilidad de poder personalizar los controles táctiles dentro del juego de forma sencilla e intuitiva para el usuario final, pudiendo modificar tanto el tamaño, como la posición de los botones dentro del juego, por otro lado la opacidad (transparencia) de los botones táctiles puede ser modificada a través del archivo:
+
+```txt
+Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+
+## Acceso al menú de personalización
+
+El botón para acceder a este nuevo menú se encuentra disponible en los siguientes lugares:
+
+- En el menú principal de opciones, dentro de la **casa de Homer**.
+- En el menú de pausa del **mundo 3D**, dentro del apartado **Opciones**.
+
+
+> Este menú ha sido creado completamente mediante controles táctiles, por lo que solamente estará disponible cuando **NO haya ningún mando externo conectado**.
+
+## Funcionamiento general
+
+Al acceder al menú de personalización, aparecerán dos botones en la parte superior central de la pantalla:
+
+### Guardar y continuar
+
+El botón situado a la izquierda permite:
+
+1. Guardar los cambios realizados en el diseño actual de los controles táctiles.
+2. Avanzar al siguiente diseño de controles.
+
+Los diseños se muestran en el siguiente orden:
+
+1. **Controles a pie**
+2. **Controles del vehículo**
+3. **Controles del menú**
+
+Después de completar el tercer diseño, se habrán configurado todos los grupos de controles táctiles disponibles.
+
+### Restablecer controles
+
+El botón **RESET**, situado también en la parte superior central, permite restaurar la configuración predeterminada del diseño que se esté visualizando en ese momento.
+
+El restablecimiento únicamente afecta al diseño actual.
+
+Por ejemplo, si estamos modificando los **controles del vehículo** y pulsamos **RESET**, solamente se restaurarán los controles del vehículo. Los controles a pie y los controles del menú conservarán su configuración actual.
+
+## Mover los controles
+
+Los diferentes iconos pueden desplazarse libremente por la pantalla mediante el siguiente gesto:
+
+- Mantén pulsado el icono.
+- Arrástralo hasta la posición deseada.
+- Suelta el icono para colocarlo en su nueva posición.
+
+Este sistema permite adaptar la distribución de los controles a las preferencias y necesidades de cada usuario.
+
+## Modificar el tamaño de los controles
+
+El tamaño de cada botón puede modificarse mediante pulsaciones rápidas sobre su icono.
+
+Cada botón dispone de **11 niveles de tamaño**, numerados desde el nivel `0` hasta el nivel `10`.
+
+El nivel predeterminado es:
+
+```txt
+Nivel 5
+```
+
+Con cada pulsación rápida, el tamaño del botón aumentará un **10 %**, siempre que el nivel actual sea inferior a `10`.
+
+El comportamiento es cíclico:
+
+```txt
+0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 0 → 1...
+```
+
+Por tanto:
+
+- Si el botón se encuentra en un nivel inferior a `10`, avanzará al nivel siguiente.
+- Si el botón se encuentra en el nivel `10`, la siguiente pulsación lo devolverá al nivel `0`.
+
+
+## Comportamiento especial de las flechas del menú
+
+Las cuatro flechas que forman la cruceta del diseño correspondiente a los controles del menú disponen de un comportamiento adicional.
+
+Podemos moverlas de dos formas diferentes:
+
+- **Mover toda la cruceta:** arrastrando el espacio central formado por las cuatro flechas.
+- **Mover una flecha individualmente:** arrastrando directamente la flecha que queremos modificar.
+
+De esta forma, es posible desplazar las cuatro flechas como un único conjunto o ajustar individualmente la posición de cada una.
+
+---
+
 ## Versión 0.91.0.1 - Navegación táctil en el libro de estadísticas
 
 La versión **0.91.0.1** añade la posibilidad de navegar de forma correcta  en la pantalla del libro de estadísticas por nivel, permitiendo cambiar entre niveles pulsando la mitad derecha o izquierda de la pantalla.
@@ -328,6 +423,103 @@ La versión **0.87** es un paso enorme para hacer que el port sea mucho más có
 ---
 
 # 🇬🇧 English
+
+## Version 0.92 - New touch control customization menu.
+
+Version **0.92** adds the ability for end users to customize the in-game touch controls easily and intuitively. Both the size and position of the in-game buttons can be modified, while the opacity (transparency) of the touch buttons can be adjusted through the following file:
+
+```txt
+Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+
+## Accessing the customization menu
+
+The button used to access this new menu is available in the following locations:
+
+- In the main options menu, inside **Homer's house**.
+- In the **3D world** pause menu, under **Options**.
+
+
+> This menu has been created entirely using touch controls, so it will only be available when **NO external controller is connected**.
+
+## General operation
+
+After entering the customization menu, two buttons will appear at the top center of the screen:
+
+### Save and continue
+
+The button on the left allows you to:
+
+1. Save the changes made to the current touch control layout.
+2. Move on to the next control layout.
+
+The layouts are displayed in the following order:
+
+1. **On-foot controls**
+2. **Vehicle controls**
+3. **Menu controls**
+
+After completing the third layout, all available touch control groups will have been configured.
+
+### Reset controls
+
+The **RESET** button, also located at the top center of the screen, restores the default configuration of the layout currently being displayed.
+
+Resetting only affects the current layout.
+
+For example, if you are editing the **vehicle controls** and press **RESET**, only the vehicle controls will be restored to their default configuration. The on-foot controls and menu controls will retain their current configuration.
+
+## Moving the controls
+
+The different icons can be moved freely around the screen using the following gesture:
+
+- Press and hold the icon.
+- Drag it to the desired position.
+- Release the icon to place it in its new position.
+
+This system allows each user to adapt the control layout to their own preferences and needs.
+
+## Changing the size of the controls
+
+The size of each button can be changed by quickly tapping its icon.
+
+Each button has **11 size levels**, numbered from level `0` to level `10`.
+
+The default level is:
+
+```txt
+Level 5
+```
+
+With each quick tap, the button size will increase by **10%**, provided that its current level is lower than `10`.
+
+The behavior is cyclical:
+
+```txt
+0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 0 → 1...
+```
+
+Therefore:
+
+- If the button is at a level lower than `10`, it will advance to the next level.
+- If the button is at level `10`, the next tap will return it to level `0`.
+
+
+## Special behavior of the menu arrows
+
+The four arrows that form the directional pad in the menu control layout have an additional feature.
+
+They can be moved in two different ways:
+
+- **Move the entire directional pad:** drag the central space formed by the four arrows.
+- **Move an individual arrow:** drag the specific arrow you want to reposition, just like any other button.
+
+This makes it possible to move all four arrows together as a single group or adjust the position of each arrow individually.
+
+---
+
+
 
 ## Version 0.91.0.1 - Touch Navigation in the Statistics Book
 
@@ -652,6 +844,103 @@ Version **0.87** is a huge step toward making the port feel much more comfortabl
 
 # 🇫🇷 Français
 
+## Version 0.92 - Nouveau menu de personnalisation des commandes tactiles.
+
+La version **0.92** ajoute la possibilité pour l’utilisateur final de personnaliser facilement et intuitivement les commandes tactiles directement dans le jeu. Il est possible de modifier aussi bien la taille que la position des boutons à l’écran, tandis que leur opacité (transparence) peut être ajustée à l’aide du fichier suivant :
+
+```txt
+Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+
+## Accès au menu de personnalisation
+
+Le bouton permettant d’accéder à ce nouveau menu est disponible aux emplacements suivants :
+
+- Dans le menu principal des options, à l’intérieur de la **maison d’Homer**.
+- Dans le menu de pause du **monde 3D**, dans la section **Options**.
+
+
+> Ce menu ayant été entièrement conçu pour être utilisé avec les commandes tactiles, il ne sera disponible que lorsqu’**AUCUNE manette externe n’est connectée**.
+
+## Fonctionnement général
+
+Lorsque vous accédez au menu de personnalisation, deux boutons apparaissent dans la partie supérieure centrale de l’écran :
+
+### Enregistrer et continuer
+
+Le bouton situé à gauche permet de :
+
+1. Enregistrer les modifications apportées à la disposition actuelle des commandes tactiles.
+2. Passer à la disposition de commandes suivante.
+
+Les dispositions sont présentées dans l’ordre suivant :
+
+1. **Commandes à pied**
+2. **Commandes du véhicule**
+3. **Commandes des menus**
+
+Une fois la troisième disposition terminée, tous les groupes de commandes tactiles disponibles auront été configurés.
+
+### Réinitialiser les commandes
+
+Le bouton **RESET**, également situé dans la partie supérieure centrale de l’écran, permet de restaurer la configuration par défaut de la disposition actuellement affichée.
+
+La réinitialisation affecte uniquement la disposition actuelle.
+
+Par exemple, si vous modifiez les **commandes du véhicule** et appuyez sur **RESET**, seules les commandes du véhicule seront restaurées selon leur configuration par défaut. Les commandes à pied et les commandes des menus conserveront leur configuration actuelle.
+
+## Déplacer les commandes
+
+Les différentes icônes peuvent être déplacées librement sur l’écran à l’aide du geste suivant :
+
+- Maintenez l’icône enfoncée.
+- Faites-la glisser jusqu’à la position souhaitée.
+- Relâchez l’icône pour la placer à son nouvel emplacement.
+
+Ce système permet à chaque utilisateur d’adapter la disposition des commandes à ses préférences et à ses besoins.
+
+## Modifier la taille des commandes
+
+La taille de chaque bouton peut être modifiée en appuyant rapidement sur son icône.
+
+Chaque bouton possède **11 niveaux de taille**, numérotés du niveau `0` au niveau `10`.
+
+Le niveau par défaut est :
+
+```txt
+Niveau 5
+```
+
+À chaque pression rapide, la taille du bouton augmente de **10 %**, à condition que son niveau actuel soit inférieur à `10`.
+
+Le fonctionnement est cyclique :
+
+```txt
+0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 0 → 1...
+```
+
+Par conséquent :
+
+- Si le bouton se trouve à un niveau inférieur à `10`, il passera au niveau suivant.
+- Si le bouton se trouve au niveau `10`, la pression suivante le ramènera au niveau `0`.
+
+
+## Fonctionnement particulier des flèches du menu
+
+Les quatre flèches formant la croix directionnelle de la disposition correspondant aux commandes des menus disposent d’une fonctionnalité supplémentaire.
+
+Elles peuvent être déplacées de deux manières différentes :
+
+- **Déplacer toute la croix directionnelle :** faites glisser l’espace central formé par les quatre flèches.
+- **Déplacer une flèche individuellement :** faites directement glisser la flèche que vous souhaitez repositionner, comme pour les autres boutons.
+
+Il est ainsi possible de déplacer les quatre flèches ensemble comme un seul groupe ou d’ajuster individuellement la position de chacune d’entre elles.
+
+---
+
+
+
 ## Version 0.91.0.1 - Navigation tactile dans le livre des statistiques
 
 La version **0.91.0.1** ajoute la possibilité de naviguer correctement dans l'écran du livre des statistiques par niveau, permettant de passer d'un niveau à l'autre en appuyant sur la moitié droite ou gauche de l'écran.
@@ -972,6 +1261,103 @@ La version **0.87** est une énorme avancée pour rendre le port beaucoup plus c
 ---
 
 # 🇩🇪 Deutsch
+
+## Version 0.92 - Neues Menü zur Anpassung der Touch-Steuerung.
+
+Mit Version **0.92** wurde die Möglichkeit hinzugefügt, die Touch-Steuerung im Spiel auf einfache und intuitive Weise an die eigenen Bedürfnisse anzupassen. Sowohl die Größe als auch die Position der Schaltflächen im Spiel können geändert werden. Die Deckkraft (Transparenz) der Touch-Schaltflächen lässt sich außerdem über die folgende Datei anpassen:
+
+```txt
+Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+
+## Zugriff auf das Anpassungsmenü
+
+Die Schaltfläche zum Öffnen dieses neuen Menüs ist an den folgenden Stellen verfügbar:
+
+- Im Hauptmenü unter den Optionen innerhalb von **Homers Haus**.
+- Im Pausenmenü der **3D-Welt** im Bereich **Optionen**.
+
+
+> Da dieses Menü vollständig für die Bedienung über Touch-Steuerung entwickelt wurde, ist es nur verfügbar, wenn **KEIN externer Controller verbunden ist**.
+
+## Allgemeine Funktionsweise
+
+Nach dem Öffnen des Anpassungsmenüs werden oben in der Mitte des Bildschirms zwei Schaltflächen angezeigt:
+
+### Speichern und fortfahren
+
+Mit der Schaltfläche auf der linken Seite können folgende Aktionen ausgeführt werden:
+
+1. Die am aktuellen Layout der Touch-Steuerung vorgenommenen Änderungen speichern.
+2. Zum nächsten Steuerungslayout wechseln.
+
+Die Layouts werden in der folgenden Reihenfolge angezeigt:
+
+1. **Steuerung zu Fuß**
+2. **Fahrzeugsteuerung**
+3. **Menüsteuerung**
+
+Nach Abschluss des dritten Layouts wurden alle verfügbaren Gruppen der Touch-Steuerung konfiguriert.
+
+### Steuerung zurücksetzen
+
+Mit der ebenfalls oben in der Mitte angezeigten Schaltfläche **RESET** kann die Standardkonfiguration des aktuell angezeigten Layouts wiederhergestellt werden.
+
+Das Zurücksetzen betrifft ausschließlich das aktuelle Layout.
+
+Wenn beispielsweise die **Fahrzeugsteuerung** bearbeitet und anschließend **RESET** gedrückt wird, wird nur die Fahrzeugsteuerung auf ihre Standardkonfiguration zurückgesetzt. Die Steuerung zu Fuß und die Menüsteuerung behalten ihre aktuelle Konfiguration bei.
+
+## Steuerungselemente verschieben
+
+Die verschiedenen Symbole können mit der folgenden Geste frei auf dem Bildschirm verschoben werden:
+
+- Das Symbol gedrückt halten.
+- Das Symbol an die gewünschte Position ziehen.
+- Das Symbol loslassen, um es an seiner neuen Position zu platzieren.
+
+Auf diese Weise kann jeder Benutzer die Anordnung der Steuerungselemente an seine eigenen Vorlieben und Bedürfnisse anpassen.
+
+## Größe der Steuerungselemente ändern
+
+Die Größe jeder Schaltfläche kann durch kurzes Antippen des jeweiligen Symbols geändert werden.
+
+Jede Schaltfläche verfügt über **11 Größenstufen**, die von Stufe `0` bis Stufe `10` nummeriert sind.
+
+Die Standardstufe ist:
+
+```txt
+Stufe 5
+```
+
+Mit jedem kurzen Antippen wird die Schaltfläche um **10 %** vergrößert, sofern die aktuelle Stufe kleiner als `10` ist.
+
+Das Verhalten ist zyklisch:
+
+```txt
+0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 0 → 1...
+```
+
+Das bedeutet:
+
+- Befindet sich die Schaltfläche auf einer Stufe unter `10`, wechselt sie zur nächsten Stufe.
+- Befindet sich die Schaltfläche auf Stufe `10`, wird sie beim nächsten Antippen auf Stufe `0` zurückgesetzt.
+
+
+## Besonderes Verhalten der Menüpfeile
+
+Die vier Pfeile, die das Steuerkreuz des Menüsteuerungslayouts bilden, verfügen über eine zusätzliche Funktion.
+
+Sie können auf zwei verschiedene Arten verschoben werden:
+
+- **Das gesamte Steuerkreuz verschieben:** den von den vier Pfeilen gebildeten freien Bereich in der Mitte ziehen.
+- **Einen einzelnen Pfeil verschieben:** den gewünschten Pfeil direkt ziehen, genauso wie die übrigen Schaltflächen.
+
+Dadurch können entweder alle vier Pfeile gemeinsam als eine Einheit verschoben oder die Positionen der einzelnen Pfeile unabhängig voneinander angepasst werden.
+
+---
+
+
 
 ## Version 0.91.0.1 - Touch-Navigation im Statistikbuch
 

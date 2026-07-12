@@ -101,6 +101,13 @@ Valores recomendados:
 
 ## 📱 Configuración de los controles táctiles
 
+En la version **0.92** se añadió la posibilidad de poder personalizar los controles táctiles dentro del juego de forma sencilla e intuitiva para el usuario final, pudiendo modificar tanto el tamaño, como la posición de los botones dentro del juego, por otro lado la opacidad (transparencia) de los botones táctiles puede ser modificada a través del archivo:
+
+```txt
+Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+Para más información, consulta el archivo **[TOUCH_CONTROLS.md](TOUCH_CONTROLS.md)**.
+
 La versión **0.87** introdujo controles táctiles integrados, permitiendo jugar directamente desde la pantalla del dispositivo Android.
 
 Por defecto, el juego utiliza el **Modo 1** para las coordenadas táctiles. Este modo debería funcionar correctamente en la mayoría de dispositivos.
@@ -115,8 +122,6 @@ Resumen:
 
 * **Modo 1:** modo por defecto recomendado.
 * **Modo 2:** modo alternativo si los controles táctiles no funcionan correctamente en tu dispositivo.
-
-Para más información, consulta el archivo **[TOUCH_CONTROLS.md](TOUCH_CONTROLS.md)**.
 
 ---
 
@@ -264,6 +269,15 @@ Recommended values:
 ---
 
 ## 📱 Touch Controls Configuration
+
+In version **0.92**, the ability to customize the touch controls within the game in a simple and intuitive way for the end user was added, allowing both the size and the position of the in-game buttons to be modified. Additionally, the opacity (transparency) of the touch buttons can be modified through the following file:
+
+```txt
+Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+````
+
+For more information, see the **[TOUCH_CONTROLS.md](TOUCH_CONTROLS.md)** file.
+
 
 Version **0.87** introduced integrated touch controls, allowing the game to be played directly from the Android device screen.
 
@@ -427,6 +441,14 @@ Valeurs recommandées :
 ---
 
 ## 📱 Configuration des contrôles tactiles
+
+Dans la version **0.92**, la possibilité de personnaliser les commandes tactiles directement dans le jeu de manière simple et intuitive pour l’utilisateur final a été ajoutée, permettant de modifier aussi bien la taille que la position des boutons dans le jeu. Par ailleurs, l’opacité (transparence) des boutons tactiles peut être modifiée à l’aide du fichier suivant :
+
+```txt
+Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+````
+
+Pour plus d’informations, consultez le fichier **[TOUCH_CONTROLS.md](TOUCH_CONTROLS.md)**.
 
 La version **0.87** a introduit des contrôles tactiles intégrés, permettant de jouer directement depuis l’écran de l’appareil Android.
 
@@ -593,6 +615,14 @@ Empfohlene Werte:
 ---
 
 ## 📱 Konfiguration der Touch-Steuerung
+
+In Version **0.92** wurde die Möglichkeit hinzugefügt, die Touch-Steuerung im Spiel auf einfache und intuitive Weise für den Endbenutzer anzupassen. Dabei können sowohl die Größe als auch die Position der Schaltflächen im Spiel geändert werden. Darüber hinaus kann die Deckkraft (Transparenz) der Touch-Schaltflächen über die folgende Datei angepasst werden:
+
+```txt
+Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+````
+
+Weitere Informationen findest du in der Datei **[TOUCH_CONTROLS.md](TOUCH_CONTROLS.md)**.
 
 Version **0.87** führte integrierte Touch-Steuerungen ein, mit denen das Spiel direkt über den Bildschirm des Android-Geräts gespielt werden kann.
 

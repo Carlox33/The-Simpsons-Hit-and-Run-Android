@@ -60,9 +60,10 @@ Este proyecto continúa el trabajo de la comunidad con el objetivo de llevar **T
 
 ## Estado del proyecto
 
-Versión actual: **0.91**
+Versión actual: **0.92**
 
 * ✔ Controles táctiles nativos integrados con el juego y sus herramientas propias.
+* ✔ Nuevo menú para configurar los controles táctiles posición y tamaño dentro del juego. Para más información revisa [Controles Tactiles](TOUCH_CONTROLS.md)
 * ✔ Modo historia jugable de principio a fin.
 * ✔ Cinemáticas funcionando correctamente durante el juego.
 * ✔ Soporte para mandos/controladores externos.
@@ -163,9 +164,10 @@ This project continues the community effort with the goal of bringing **The Simp
 
 ## Project Status
 
-Current version: **0.91**
+Current version: **0.92**
 
 * ✔ Native touch controls integrated with the game and its own tools.
+* ✔ New menu for configuring the position and size of the in-game touch controls. For more information, see [Touch Controls](TOUCH_CONTROLS.md).
 * ✔ Story mode playable from start to finish.
 * ✔ Cutscenes working correctly during gameplay.
 * ✔ Support for controllers/external gamepads.
@@ -266,9 +268,10 @@ Ce projet poursuit le travail de la communauté avec l'objectif d'amener **The S
 
 ## État du projet
 
-Version actuelle : **0.91**
+Version actuelle : **0.92**
 
 * ✔ Commandes tactiles natives intégrées au jeu et à ses propres outils.
+* ✔ Nouveau menu permettant de configurer la position et la taille des commandes tactiles dans le jeu. Pour plus d’informations, consultez [Commandes tactiles](TOUCH_CONTROLS.md).
 * ✔ Mode histoire jouable du début à la fin.
 * ✔ Cinématiques fonctionnant correctement pendant le jeu.
 * ✔ Support des manettes/contrôleurs externes.
@@ -369,9 +372,10 @@ Dieses Projekt führt die Arbeit der Community fort, mit dem Ziel, **The Simpson
 
 ## Projektstatus
 
-Aktuelle Version: **0.91**
+Aktuelle Version: **0.92**
 
 * ✔ Native Touch-Steuerung, die in das Spiel und die eigenen Tools integriert ist.
+* ✔ Neues Menü zum Anpassen der Position und Größe der Touch-Steuerung im Spiel. Weitere Informationen findest du unter [Touch-Steuerung](TOUCH_CONTROLS.md).
 * ✔ Story-Modus von Anfang bis Ende spielbar.
 * ✔ Zwischensequenzen funktionieren während des Spiels korrekt.
 * ✔ Unterstützung für Controller/externe Gamepads.

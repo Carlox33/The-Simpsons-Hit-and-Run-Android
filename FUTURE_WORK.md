@@ -14,9 +14,7 @@ Este documento recoge algunas de las mejoras y funcionalidades que está previst
 
 ### Controles táctiles
 
-Una de las principales mejoras previstas es la posibilidad de personalizar los controles táctiles, incluyendo su posición, tamaño y opacidad en pantalla.
-
-El objetivo es que cada jugador pueda adaptar la interfaz a sus preferencias y jugar cómodamente sin necesidad de utilizar un mando externo.
+Añadir posibilidad personalización controles táctiles al minijuego(juego principal ya disponible dicha personalización)
 
 ### Cambiar la carpeta de instalación
 
@@ -44,9 +42,8 @@ This document outlines some of the improvements and features planned for future 
 
 ### Touch controls
 
-One of the main planned improvements is the possibility of customizing the touch controls, including their position, size, and opacity on the screen.
+Add touch control customization to the minigame (this customization is already available in the main game).
 
-The goal is to allow each player to adapt the interface to their preferences and play comfortably without needing an external controller.
 
 ### Changing the installation folder
 
@@ -74,9 +71,8 @@ Ce document présente certaines des améliorations et fonctionnalités prévues 
 
 ### Commandes tactiles
 
-L’une des principales améliorations prévues est la possibilité de personnaliser les commandes tactiles, notamment leur position, leur taille et leur opacité à l’écran.
+Ajouter la personnalisation des commandes tactiles au mini-jeu (cette personnalisation est déjà disponible dans le jeu principal).
 
-L’objectif est de permettre à chaque joueur d’adapter l’interface à ses préférences et de jouer confortablement sans avoir besoin d’une manette externe.
 
 ### Changer le dossier d’installation
 
@@ -104,9 +100,8 @@ Dieses Dokument beschreibt einige der Verbesserungen und Funktionen, die für zu
 
 ### Touch-Steuerung
 
-Eine der wichtigsten geplanten Verbesserungen ist die Möglichkeit, die Touch-Steuerung anzupassen, einschließlich ihrer Position, Größe und Transparenz auf dem Bildschirm.
+Die Anpassung der Touch-Steuerung zum Minispiel hinzufügen (diese Anpassungsmöglichkeit ist im Hauptspiel bereits verfügbar).
 
-Ziel ist es, jedem Spieler zu ermöglichen, die Benutzeroberfläche an die eigenen Vorlieben anzupassen und bequem ohne externen Controller zu spielen.
 
 ### Ändern des Installationsordners
 
