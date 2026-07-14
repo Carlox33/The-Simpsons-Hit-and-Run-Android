@@ -59,6 +59,7 @@ void TouchContextResolver::Reset()
     mPurchaseRewardConversationActive = false;
     mLanguageSelectionActive = false;
     mSuspendedSuperSprintProfile = TOUCH_PROFILE_FRONTEND;
+    mScrapbookContentsActive = false;
 }
 
 TouchProfile TouchContextResolver::Resolve() const
@@ -359,6 +360,16 @@ bool TouchContextResolver::IsPurchaseRewardConversationActive() const
     return mPurchaseRewardConversationActive;
 }
 
+void TouchContextResolver::SetScrapbookContentsActive( bool active )
+{
+    mScrapbookContentsActive = active;
+}
+
+bool TouchContextResolver::IsScrapbookContentsActive() const
+{
+    return mScrapbookContentsActive;
+}
+
 bool TouchContextResolver::IsGameplayFrontendLikeState() const
 {
     // Agrupamos dialogo mision, dialogo mision bonus, dialogo conversacion de carrera y dialogo compra de vehiculo
@@ -545,7 +556,6 @@ bool TouchContextResolver::IsValidProfile( TouchProfile profile ) const
         case TOUCH_PROFILE_SPECIAL:
         case TOUCH_PROFILE_MINIGAME_VEHICLE:
         case TOUCH_PROFILE_MINIGAME_SUMMARY:
-        case TOUCH_PROFILE_SCRAPBOOK_CONTENTS:
         {
             return true;
         }

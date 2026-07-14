@@ -573,7 +573,7 @@ static const TouchActionDefinition sTouchActions[] =
     "feL1",
     TOUCH_IM_FE_L1,
     TOUCH_ACTION_CATEGORY_FRONTEND,
-    TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
+    TOUCH_PROFILE_FRONTEND,
     TOUCH_CONTROL_BUTTON,
     false
     },
@@ -582,7 +582,7 @@ static const TouchActionDefinition sTouchActions[] =
     "feR1",
     TOUCH_IM_FE_R1,
     TOUCH_ACTION_CATEGORY_FRONTEND,
-    TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
+    TOUCH_PROFILE_FRONTEND,
     TOUCH_CONTROL_BUTTON,
     false
     },

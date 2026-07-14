@@ -474,36 +474,35 @@ bool TouchHudSystem::HandleFingerDown
             break;
         }
 
-         case TOUCH_PROFILE_SCRAPBOOK_CONTENTS:
+         case TOUCH_PROFILE_FRONTEND:
         {
             /*
-             * ScrapBookContents has its own visible frontend-style buttons.
-             *
-             * If the touch did not hit any rendered button, use the remaining
-             * screen area as invisible L1/R1 zones:
-             *
-             * Left half  -> L1
-             * Right half -> R1
-             */
-            const TouchHudControlId zoneControlId =
-                ( x < 0.5f ) ?
-                TOUCH_HUD_CONTROL_SCRAPBOOK_L1_ZONE :
-                TOUCH_HUD_CONTROL_SCRAPBOOK_R1_ZONE;
-
-            const TouchHudControlDefinition* zoneControl =
-                GetControlDefinition( zoneControlId );
-
-            if ( zoneControl != 0 )
+     * Los controles frontend visibles ya se han comprobado antes de
+     * llegar aquí.
+     *
+     * En ScrapBookContents, cualquier toque que no haya alcanzado
+     * un botón visible se utiliza como zona invisible L1/R1.
+     */
+            if(TouchContextResolver::GetInstance(). IsScrapbookContentsActive())
             {
-                BeginButton( finger, zoneControl, x, y );
-                return true;
-            }
+                const TouchHudControlId zoneControlId =
+                    ( x < 0.5f ) ?
+                    TOUCH_HUD_CONTROL_SCRAPBOOK_L1_ZONE :
+                    TOUCH_HUD_CONTROL_SCRAPBOOK_R1_ZONE;
 
+                const TouchHudControlDefinition* zoneControl =
+                    GetControlDefinition( zoneControlId );
+
+                if ( zoneControl != 0 )
+                {
+                    BeginButton( finger, zoneControl, x, y );
+                    return true;
+                }
+            }
             break;
         }
 
         case TOUCH_PROFILE_VEHICLE:
-        case TOUCH_PROFILE_FRONTEND:
         case TOUCH_PROFILE_CINEMATIC:
         case TOUCH_PROFILE_SPECIAL:
         default:
@@ -1297,6 +1296,27 @@ void TouchHudSystem::InitializeDefaultControls()
     "FrontendStart"
     );
 
+    //--------------------------------------------------------------------------
+    // Special L1/R1 for CGuiScreenScrapBookContents(libro estadisticas menu principal)
+    //--------------------------------------------------------------------------
+    AddControl(
+    TOUCH_HUD_CONTROL_SCRAPBOOK_L1_ZONE,
+    TOUCH_PROFILE_FRONTEND,
+    TOUCH_ACTION_FE_L1,
+    TouchRect( 0.0f, 0.0f, 0.0f, 0.0f ),
+    false,
+    "ScrapBookL1Zone"
+    );
+
+    AddControl(
+    TOUCH_HUD_CONTROL_SCRAPBOOK_R1_ZONE,
+    TOUCH_PROFILE_FRONTEND,
+    TOUCH_ACTION_FE_R1,
+    TouchRect( 0.0f, 0.0f, 0.0f, 0.0f ),
+    false,
+    "ScrapBookR1Zone"
+    );
+
 
     // -------------------------------------------------------------------------
     // Touch controls editor
@@ -1339,85 +1359,6 @@ void TouchHudSystem::InitializeDefaultControls()
         "EditorReset"
     );
 
-    // -------------------------------------------------------------------------
-    // ScrapBookContents frontend menu 
-    // -------------------------------------------------------------------------
-
-    AddControl(
-    TOUCH_HUD_CONTROL_SCRAPBOOK_FE_MOVE_UP,
-    TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
-    TOUCH_ACTION_FE_MOVE_UP,
-    TouchRect(0.135f, 0.530f, 0.144f, 0.120f ),
-    true,
-    "ScrapBookFeMoveUp"
-    );
-
-    AddControl(
-        TOUCH_HUD_CONTROL_SCRAPBOOK_FE_MOVE_DOWN,
-        TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
-        TOUCH_ACTION_FE_MOVE_DOWN,
-        TouchRect( 0.135f, 0.770f, 0.144f, 0.120f ),
-        true,
-        "ScrapBookFeMoveDown"
-    );
-
-    AddControl(
-        TOUCH_HUD_CONTROL_SCRAPBOOK_FE_MOVE_LEFT,
-        TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
-        TOUCH_ACTION_FE_MOVE_LEFT,
-        TouchRect( 0.065f, 0.650f, 0.144f, 0.120f ),
-        true,
-        "ScrapBookFeMoveLeft"
-    );
-
-    AddControl(
-        TOUCH_HUD_CONTROL_SCRAPBOOK_FE_MOVE_RIGHT,
-        TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
-        TOUCH_ACTION_FE_MOVE_RIGHT,
-        TouchRect( 0.205f, 0.650f, 0.144f, 0.120f ),
-        true,
-        "ScrapBookFeMoveRight"
-    );
-
-    AddControl(
-        TOUCH_HUD_CONTROL_SCRAPBOOK_FE_SELECT,
-        TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
-        TOUCH_ACTION_JUMP,
-        TouchRect( 0.78f, 0.68f, 0.12f, 0.22f ),
-        true,
-        "ScrapBookFeSelect"
-    );
-
-    AddControl(
-        TOUCH_HUD_CONTROL_SCRAPBOOK_FE_BACK,
-        TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
-        TOUCH_ACTION_FE_BACK,
-        TouchRect( 0.64f, 0.68f, 0.12f, 0.22f ),
-        true,
-        "ScrapBookFeBack"
-    );
-
-
-    // ScrapBookContents invisible half-screen zones
-
-    AddControl(
-    TOUCH_HUD_CONTROL_SCRAPBOOK_L1_ZONE,
-    TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
-    TOUCH_ACTION_FE_L1,
-    TouchRect( 0.0f, 0.0f, 0.0f, 0.0f ),
-    false,
-    "ScrapBookL1Zone"
-    );
-
-    AddControl(
-    TOUCH_HUD_CONTROL_SCRAPBOOK_R1_ZONE,
-    TOUCH_PROFILE_SCRAPBOOK_CONTENTS,
-    TOUCH_ACTION_FE_R1,
-    TouchRect( 0.0f, 0.0f, 0.0f, 0.0f ),
-    false,
-    "ScrapBookR1Zone"
-    );
-    
     // -------------------------------------------------------------------------
     // Cinematic
     // -------------------------------------------------------------------------

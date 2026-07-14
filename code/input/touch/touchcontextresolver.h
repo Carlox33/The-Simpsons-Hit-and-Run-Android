@@ -106,7 +106,8 @@ public:
     bool IsCinematic() const;
     bool IsSpecial() const;
     
-
+    void SetScrapbookContentsActive( bool active );
+    bool IsScrapbookContentsActive() const;
 private:
     TouchContextResolver();
     ~TouchContextResolver();
@@ -126,6 +127,7 @@ private:
     bool IsGameplayConversationActive() const;
     bool mPurchaseRewardConversationActive;
     bool mLanguageSelectionActive;
+    bool mScrapbookContentsActive;
 private:
     TouchContextArea mContextArea;
 

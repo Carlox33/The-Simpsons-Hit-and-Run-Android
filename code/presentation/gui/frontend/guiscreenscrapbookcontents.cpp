@@ -238,7 +238,7 @@ CGuiScreenScrapBookContents::CGuiScreenScrapBookContents
 CGuiScreenScrapBookContents::~CGuiScreenScrapBookContents()
 {
     #if defined(RAD_ANDROID)
-    TouchContextResolver::GetInstance().ClearForcedProfile();
+    TouchContextResolver::GetInstance().SetScrapbookContentsActive( false );
     #endif
 
     if( m_pMenu != NULL )
@@ -459,9 +459,7 @@ void CGuiScreenScrapBookContents::SetLevelBarVisible( bool isVisible )
 void CGuiScreenScrapBookContents::InitIntro()
 {
     #if defined(RAD_ANDROID)
-    TouchContextResolver::GetInstance().SetForcedProfile(
-        TOUCH_PROFILE_SCRAPBOOK_CONTENTS
-    );
+    TouchContextResolver::GetInstance().SetScrapbookContentsActive( true );
     #endif
     // this is needed here to update all the unlocked n/N values
     //
@@ -514,7 +512,7 @@ void CGuiScreenScrapBookContents::InitRunning()
 void CGuiScreenScrapBookContents::InitOutro()
 {
     #if defined(RAD_ANDROID)
-    TouchContextResolver::GetInstance().ClearForcedProfile();
+    TouchContextResolver::GetInstance().SetScrapbookContentsActive( false );
     #endif
 }
 
