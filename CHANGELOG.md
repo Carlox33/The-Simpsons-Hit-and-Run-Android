@@ -8,6 +8,20 @@
 
 # 🇪🇸 Español
 
+## Versión 0.92.0.1 - Corregido el menú del libro de estadísticas del menú principal (casa de Homer)
+
+Se ha aplicado una corrección a esta pantalla. Anteriormente, utilizaba su propio menú táctil duplicado, basado en el layout habitual de los menús.
+
+Sin embargo, tras incorporar la personalización de los controles táctiles, los cambios realizados por el usuario en el layout del menú no se aplicaban a la pantalla del libro de estadísticas. Esto ocurría porque, a efectos prácticos, el juego trataba el libro de estadísticas como un layout táctil independiente.
+
+Este problema ha sido corregido y, actualmente, el libro de estadísticas utiliza el mismo layout táctil que el resto de las pantallas de menú.
+
+Además, continúa incorporando los dos botones invisibles:
+
+* Al pulsar la **mitad izquierda de la pantalla**, sin tocar ningún otro botón de la pantalla del libro de estadísticas, se registra un input del botón **L1/LT**, lo que permite visualizar el nivel anterior.
+* Al pulsar la **mitad derecha de la pantalla**, se registra un input del botón **R1/RT**, permitiendo visualizar las estadísticas del nivel siguiente.
+
+
 ## Versión 0.92 - Nuevo menú personalización controles táctiles.
 
 Esta  version **0.92** se añadió la posibilidad de poder personalizar los controles táctiles dentro del juego de forma sencilla e intuitiva para el usuario final, pudiendo modificar tanto el tamaño, como la posición de los botones dentro del juego, por otro lado la opacidad (transparencia) de los botones táctiles puede ser modificada a través del archivo:
@@ -423,6 +437,20 @@ La versión **0.87** es un paso enorme para hacer que el port sea mucho más có
 ---
 
 # 🇬🇧 English
+
+## Version 0.92.0.1 - Statistics Book menu from the main menu fixed (Homer’s house)
+
+A fix has been implemented for this screen. Previously, it used its own duplicated touch menu based on the standard menu layout.
+
+However, after introducing touch control customization, any changes made to the menu layout would not be applied to the Statistics Book screen. This happened because, in practice, the game treated the Statistics Book as a separate touch layout.
+
+This issue has now been fixed, and the Statistics Book currently uses the same touch layout as the rest of the menu screens.
+
+It also continues to include two invisible buttons:
+
+* Pressing the **left half of the screen**, without touching any other button on the Statistics Book screen, registers an **L1/LT** input, allowing you to view the previous level.
+* Pressing the **right half of the screen** registers an **R1/RT** input, allowing you to view the statistics for the next level.
+
 
 ## Version 0.92 - New touch control customization menu.
 
@@ -844,6 +872,20 @@ Version **0.87** is a huge step toward making the port feel much more comfortabl
 
 # 🇫🇷 Français
 
+## Version 0.92.0.1 - Correction du menu du livre des statistiques depuis le menu principal (maison d’Homer)
+
+Un correctif a été appliqué à cet écran. Auparavant, celui-ci utilisait son propre menu tactile dupliqué, basé sur la disposition du menu standard.
+
+Cependant, après l’ajout de la personnalisation des commandes tactiles, les modifications apportées à la disposition du menu ne s’appliquaient pas à l’écran du livre des statistiques. En pratique, le jeu considérait le livre des statistiques comme une disposition tactile distincte.
+
+Ce problème a maintenant été corrigé et le livre des statistiques utilise désormais la même disposition tactile que le reste des écrans de menu.
+
+Il conserve également les deux boutons invisibles :
+
+* Appuyer sur la **moitié gauche de l’écran**, sans toucher un autre bouton de l’écran du livre des statistiques, enregistre une entrée **L1/LT**, permettant d’afficher le niveau précédent.
+* Appuyer sur la **moitié droite de l’écran** enregistre une entrée **R1/RT**, permettant d’afficher les statistiques du niveau suivant.
+
+
 ## Version 0.92 - Nouveau menu de personnalisation des commandes tactiles.
 
 La version **0.92** ajoute la possibilité pour l’utilisateur final de personnaliser facilement et intuitivement les commandes tactiles directement dans le jeu. Il est possible de modifier aussi bien la taille que la position des boutons à l’écran, tandis que leur opacité (transparence) peut être ajustée à l’aide du fichier suivant :
@@ -1261,6 +1303,20 @@ La version **0.87** est une énorme avancée pour rendre le port beaucoup plus c
 ---
 
 # 🇩🇪 Deutsch
+
+## Version 0.92.0.1 - Statistikbuch-Menü im Hauptmenü behoben (Homers Haus)
+
+Für diesen Bildschirm wurde eine Korrektur vorgenommen. Zuvor verwendete er ein eigenes, dupliziertes Touch-Menü, das auf dem normalen Menü-Layout basierte.
+
+Nach der Einführung der Anpassungsmöglichkeiten für die Touch-Steuerung wurden Änderungen am Menü-Layout jedoch nicht auf den Statistikbuch-Bildschirm angewendet. Der Grund dafür war, dass das Spiel das Statistikbuch praktisch als separates Touch-Layout behandelte.
+
+Dieses Problem wurde nun behoben. Das Statistikbuch verwendet jetzt dasselbe Touch-Layout wie die übrigen Menübildschirme.
+
+Zusätzlich bleiben die beiden unsichtbaren Schaltflächen erhalten:
+
+* Beim Drücken auf die **linke Hälfte des Bildschirms**, ohne eine andere Schaltfläche im Statistikbuch zu berühren, wird eine **L1/LT**-Eingabe registriert. Dadurch kann das vorherige Level angezeigt werden.
+* Beim Drücken auf die **rechte Hälfte des Bildschirms** wird eine **R1/RT**-Eingabe registriert. Dadurch können die Statistiken des nächsten Levels angezeigt werden.
+
 
 ## Version 0.92 - Neues Menü zur Anpassung der Touch-Steuerung.
 
