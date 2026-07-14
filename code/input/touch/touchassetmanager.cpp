@@ -528,38 +528,8 @@ tSprite* TouchAssetManager::GetSpriteForControl( TouchHudControlId controlId ) c
         }
 
         // -------------------------------------------------------------
-        // Frontend CGuiScreenScrapBookContents
+        // L1/R1 special invisibles buttons for  CGuiScreenScrapBookContents
         // -------------------------------------------------------------
-
-        case TOUCH_HUD_CONTROL_SCRAPBOOK_FE_MOVE_UP:
-    {
-        return GetSpriteForControl( TOUCH_HUD_CONTROL_FRONTEND_MOVE_UP );
-    }
-
-    case TOUCH_HUD_CONTROL_SCRAPBOOK_FE_MOVE_DOWN:
-    {
-        return GetSpriteForControl( TOUCH_HUD_CONTROL_FRONTEND_MOVE_DOWN );
-    }
-
-    case TOUCH_HUD_CONTROL_SCRAPBOOK_FE_MOVE_LEFT:
-    {
-        return GetSpriteForControl( TOUCH_HUD_CONTROL_FRONTEND_MOVE_LEFT );
-    }
-
-    case TOUCH_HUD_CONTROL_SCRAPBOOK_FE_MOVE_RIGHT:
-    {
-        return GetSpriteForControl( TOUCH_HUD_CONTROL_FRONTEND_MOVE_RIGHT );
-    }
-
-    case TOUCH_HUD_CONTROL_SCRAPBOOK_FE_SELECT:
-    {
-        return GetSpriteForControl( TOUCH_HUD_CONTROL_FRONTEND_SELECT );
-    }
-
-    case TOUCH_HUD_CONTROL_SCRAPBOOK_FE_BACK:
-    {
-        return GetSpriteForControl( TOUCH_HUD_CONTROL_FRONTEND_BACK );
-    }
 
     case TOUCH_HUD_CONTROL_SCRAPBOOK_L1_ZONE:
     case TOUCH_HUD_CONTROL_SCRAPBOOK_R1_ZONE:

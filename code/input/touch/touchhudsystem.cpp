@@ -483,7 +483,7 @@ bool TouchHudSystem::HandleFingerDown
      * En ScrapBookContents, cualquier toque que no haya alcanzado
      * un botón visible se utiliza como zona invisible L1/R1.
      */
-            if(TouchContextResolver::GetInstance(). IsScrapbookContentsActive())
+            if(TouchContextResolver::GetInstance().IsScrapbookContentsActive())
             {
                 const TouchHudControlId zoneControlId =
                     ( x < 0.5f ) ?
