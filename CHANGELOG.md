@@ -8,6 +8,14 @@
 
 # 🇪🇸 Español
 
+## Versión 0.92.2 - Personalización de controles táctiles del minijuego
+
+Se ha añadido una opción para acceder al editor de controles táctiles desde el **menú de pausa del minijuego**.
+
+Este editor permite personalizar la **posición** y el **tamaño** de los controles táctiles del minijuego (minijuego de vehículos), funcionando del mismo modo que el menú principal de personalización introducido en la versión **0.92** para las distribuciones **a pie**, **vehículo** y **menú**.
+
+El botón **RESET** restaura únicamente la distribución de los controles táctiles del minijuego.
+
 ## Versión 0.92.0.1 - Corregido el menú del libro de estadísticas del menú principal (casa de Homer)
 
 Se ha aplicado una corrección a esta pantalla. Anteriormente, utilizaba su propio menú táctil duplicado, basado en el layout habitual de los menús.
@@ -437,6 +445,14 @@ La versión **0.87** es un paso enorme para hacer que el port sea mucho más có
 ---
 
 # 🇬🇧 English
+
+## Version 0.92.2 - Minigame Touch Control Customization
+
+An option to access the touch control editor has been added to the **minigame pause menu**.
+
+This editor allows players to customize the **position** and **size** of the minigame (vehicle minigame) touch controls, working in the same way as the main customization menu introduced in version **0.92** for the **on-foot**, **vehicle**, and **menu** layouts.
+
+The **RESET** button restores only the minigame touch control layout.
 
 ## Version 0.92.0.1 - Statistics Book menu from the main menu fixed (Homer’s house)
 
@@ -872,6 +888,14 @@ Version **0.87** is a huge step toward making the port feel much more comfortabl
 
 # 🇫🇷 Français
 
+## Version 0.92.2 - Personnalisation des commandes tactiles du mini-jeu
+
+Une nouvelle option permettant d'acc&eacute;der &agrave; l'&eacute;diteur des commandes tactiles a &eacute;t&eacute; ajout&eacute;e au **menu pause du mini-jeu**.
+
+Cet &eacute;diteur permet de personnaliser la **position** et la **taille** des commandes tactiles du mini-jeu (mini-jeu de v&eacute;hicules), de la m&ecirc;me mani&egrave;re que le menu principal de personnalisation introduit dans la version **0.92** pour les configurations **&agrave; pied**, **v&eacute;hicule** et **menu**.
+
+Le bouton **RESET** restaure uniquement la configuration des commandes tactiles du mini-jeu.
+
 ## Version 0.92.0.1 - Correction du menu du livre des statistiques depuis le menu principal (maison d’Homer)
 
 Un correctif a été appliqué à cet écran. Auparavant, celui-ci utilisait son propre menu tactile dupliqué, basé sur la disposition du menu standard.
@@ -1303,6 +1327,14 @@ La version **0.87** est une énorme avancée pour rendre le port beaucoup plus c
 ---
 
 # 🇩🇪 Deutsch
+
+## Version 0.92.2 &ndash; Anpassung der Touch-Steuerung im Minispiel
+
+Es wurde eine neue Option hinzugef&uuml;gt, um den Editor f&uuml;r die Touch-Steuerung &uuml;ber das **Pausenmen&uuml; des Minispiels** zu &ouml;ffnen.
+
+Mit diesem Editor k&ouml;nnen die **Position** und **Gr&ouml;&szlig;e** der Touch-Steuerung des Minispiels (Fahrzeug-Minispiel) angepasst werden. Er funktioniert genauso wie das in Version **0.92** eingef&uuml;hrte Hauptmen&uuml; zur Anpassung der Steuerung f&uuml;r die Layouts **zu Fu&szlig;**, **Fahrzeug** und **Men&uuml;**.
+
+Die Schaltfl&auml;che **RESET** stellt ausschlie&szlig;lich das Touch-Steuerungslayout des Minispiels wieder her.
 
 ## Version 0.92.0.1 - Statistikbuch-Menü im Hauptmenü behoben (Homers Haus)
 
