@@ -20,7 +20,7 @@
 #endif
 
 // Increase this when the TXT format changes and must be migrated or regenered if is corrupted or not exist
-static const char* TOUCH_CONTROLS_CONFIGURATION_VERSION = "1";
+static const char* TOUCH_CONTROLS_CONFIGURATION_VERSION = "2";
 
 static const char* TOUCH_CONTROLS_CONFIGURATION_FILENAME =
     "Simpsons_touch_controls_configuration.txt";
@@ -223,14 +223,16 @@ bool TouchControlsConfigurationManager::Save()
     {
         TOUCH_EDITABLE_LAYOUT_CHARACTER,
         TOUCH_EDITABLE_LAYOUT_VEHICLE,
-        TOUCH_EDITABLE_LAYOUT_FRONTEND
+        TOUCH_EDITABLE_LAYOUT_FRONTEND,
+        TOUCH_EDITABLE_LAYOUT_MINIGAME_VEHICLE
     };
 
     const char* sectionNames[ TOUCH_EDITABLE_LAYOUT_COUNT ] =
     {
         "CHARACTER",
         "VEHICLE",
-        "FRONTEND"
+        "FRONTEND",
+        "MINIGAME_VEHICLE"
     };
 
     for ( int layoutIndex = 0; layoutIndex < TOUCH_EDITABLE_LAYOUT_COUNT; ++layoutIndex )
@@ -792,14 +794,16 @@ bool TouchControlsConfigurationManager::WriteDefaultConfigurationFile() const
     {
         TOUCH_EDITABLE_LAYOUT_CHARACTER,
         TOUCH_EDITABLE_LAYOUT_VEHICLE,
-        TOUCH_EDITABLE_LAYOUT_FRONTEND
+        TOUCH_EDITABLE_LAYOUT_FRONTEND,
+        TOUCH_EDITABLE_LAYOUT_MINIGAME_VEHICLE
     };
 
     const char* sectionNames[ TOUCH_EDITABLE_LAYOUT_COUNT ] =
     {
         "CHARACTER",
         "VEHICLE",
-        "FRONTEND"
+        "FRONTEND",
+        "MINIGAME_VEHICLE"
     };
 
     for ( int layoutIndex = 0; layoutIndex < TOUCH_EDITABLE_LAYOUT_COUNT; ++layoutIndex )
@@ -992,9 +996,7 @@ bool TouchControlsConfigurationManager::IsEditorControl
     TouchHudControlId controlId
 ) const
 {
-    return controlId == TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME ||
-           controlId == TOUCH_HUD_CONTROL_EDITOR_NEXT_LAYOUT ||
-           controlId == TOUCH_HUD_CONTROL_EDITOR_RESET;
+   return TouchHudSystem::GetInstance().IsEditorControl(controlId);
 }
 
 bool TouchControlsConfigurationManager::IsControlInLayout
@@ -1031,6 +1033,11 @@ bool TouchControlsConfigurationManager::IsControlInLayout
         case TOUCH_EDITABLE_LAYOUT_FRONTEND:
         {
             return control->profile == TOUCH_PROFILE_FRONTEND;
+        }
+
+        case TOUCH_EDITABLE_LAYOUT_MINIGAME_VEHICLE:
+        {
+            return control->profile == TOUCH_PROFILE_MINIGAME_VEHICLE;
         }
 
         default:

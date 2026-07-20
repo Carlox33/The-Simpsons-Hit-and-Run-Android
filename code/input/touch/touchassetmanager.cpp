@@ -609,6 +609,8 @@ tSprite* TouchAssetManager::GetSpriteForControl( TouchHudControlId controlId ) c
 
         case TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME:
         case TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU:
+        case TOUCH_HUD_CONTROL_EDITOR_ENTER_MINIGAME:
+        case TOUCH_HUD_CONTROL_EDITOR_FINISH_MINIGAME:
         {
             return GetSprite( TOUCH_ASSET_EDITOR_MOVE_CONTROLS );
         }

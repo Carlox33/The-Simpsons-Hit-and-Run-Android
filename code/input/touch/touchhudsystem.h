@@ -90,7 +90,9 @@ enum TouchHudControlId
     TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME, // Icono flechas en menu opciones in-game
     TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU, // mismo icono flechas pero en menu principañ 
     TOUCH_HUD_CONTROL_EDITOR_NEXT_LAYOUT, // 1/3, 2/3, 3/3 
+    TOUCH_HUD_CONTROL_EDITOR_FINISH_MINIGAME, // este será unico para guardar y salir en el minijuego(menu de pausa)
     TOUCH_HUD_CONTROL_EDITOR_RESET, //icono RESET
+    TOUCH_HUD_CONTROL_EDITOR_ENTER_MINIGAME, // icono igual que entrar in-game y en menu(MoverControlesTactiles)
 
     TOUCH_HUD_CONTROL_COUNT
 
@@ -225,6 +227,9 @@ public:
     void SetTouchControlsEditorMainMenuEntryAllowed( bool allowed );
     bool IsTouchControlsEditorMainMenuEntryAllowed() const;
 
+    void SetTouchControlsEditorMinigameEntryAllowed( bool allowed );
+    bool IsTouchControlsEditorMinigameEntryAllowed() const;
+
     bool IsTouchControlsEditModeActive() const;
     TouchEditableLayout GetCurrentEditableLayout() const;
 
@@ -267,9 +272,13 @@ private:
     
     bool mTouchControlsEditorEntryAllowed;
     bool mTouchControlsEditModeActive;
+    
     TouchEditableLayout mCurrentEditableLayout;
 
     bool mTouchControlsEditorMainMenuEntryAllowed;
+
+    bool mTouchControlsEditorMinigameEntryAllowed;
+    TouchControlsEditorFlow mCurrentEditorFlow;
     
     float Clamp01( float value ) const;
 
@@ -316,7 +325,7 @@ private:
     void ApplyMovementActions();
     void ClearMovementActions();
 
-    void BeginTouchControlsEditMode();
+    void BeginTouchControlsEditMode(TouchControlsEditorFlow editorFlow);
     void EndTouchControlsEditMode();
     void AdvanceTouchControlsEditLayout();
     void ResetCurrentTouchControlsEditLayout();

@@ -434,7 +434,7 @@ void TouchHudRenderer::RenderControlDefinition
     const bool pressed = hudSystem.IsControlPressed( control.id );
     float opacity = pressed ? mPressedOpacity : mOpacity;
 
-    if ( control.id == TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME || control.id == TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU )
+    if ( control.id == TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME || control.id == TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU || control.id == TOUCH_HUD_CONTROL_EDITOR_ENTER_MINIGAME )
     {
         opacity = pressed ? 0.5f : 0.85f;
     }

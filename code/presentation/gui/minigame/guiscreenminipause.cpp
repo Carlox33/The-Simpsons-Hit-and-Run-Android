@@ -30,6 +30,9 @@
 #include <Group.h>
 #include <Text.h>
 
+#ifdef RAD_ANDROID
+#include <input/touch/touchhudsystem.h>
+#endif
 //===========================================================================
 // Global Data, Local Data, Local Classes
 //===========================================================================
@@ -115,6 +118,10 @@ CGuiScreenMiniPause::CGuiScreenMiniPause
 //===========================================================================
 CGuiScreenMiniPause::~CGuiScreenMiniPause()
 {
+    #ifdef RAD_ANDROID
+    TouchHudSystem::GetInstance().SetTouchControlsEditorMinigameEntryAllowed( false );
+    #endif
+
     if( m_pMenu != NULL )
     {
         delete m_pMenu;
@@ -228,6 +235,10 @@ void CGuiScreenMiniPause::InitIntro()
 
     GetSoundManager()->OnPauseStart();
 
+    #ifdef RAD_ANDROID
+    TouchHudSystem::GetInstance().SetTouchControlsEditorMinigameEntryAllowed( true );
+    #endif
+
 #ifdef RAD_PC
     GetInputManager()->GetFEMouse()->SetInGameMode( false );
 #endif
@@ -265,8 +276,11 @@ void CGuiScreenMiniPause::InitRunning()
 //===========================================================================
 void CGuiScreenMiniPause::InitOutro()
 {
-    GetSoundManager()->OnPauseEnd();
+    #ifdef RAD_ANDROID
+    TouchHudSystem::GetInstance().SetTouchControlsEditorMinigameEntryAllowed( false );
+    #endif
 
+    GetSoundManager()->OnPauseEnd();
 #ifdef RAD_PC
     GetInputManager()->GetFEMouse()->SetInGameMode( true );
 #endif

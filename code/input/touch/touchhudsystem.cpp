@@ -125,7 +125,8 @@ TouchHudSystem::TouchHudSystem():mEnabled( true ),mCurrentProfile( TOUCH_PROFILE
 mCurrentInteractionType( TOUCH_INTERACTION_NONE ),mCurrentInteractionIcon( TOUCH_INTERACTION_ICON_NONE ),mTouchInputWasSuppressed (false),
 mTouchControlsEditorEntryAllowed( false ),mTouchControlsEditModeActive( false ),mCurrentEditableLayout( TOUCH_EDITABLE_LAYOUT_CHARACTER ),
 mEditingControlId( TOUCH_HUD_CONTROL_NONE ),mEditingControlWasDragged( false ),mEditingFrontendArrowGroup( false ),
-mEditingStartPosition( 0.0f, 0.0f ),mEditingLastPosition( 0.0f, 0.0f ),mTouchControlsEditorMainMenuEntryAllowed( false )
+mEditingStartPosition( 0.0f, 0.0f ),mEditingLastPosition( 0.0f, 0.0f ),mTouchControlsEditorMainMenuEntryAllowed( false ),mTouchControlsEditorMinigameEntryAllowed( false ),
+mCurrentEditorFlow( TOUCH_CONTROLS_EDITOR_FLOW_NONE )
 {
     InitializeDefaultControls();
     ClearActiveTouches();
@@ -158,14 +159,15 @@ void TouchHudSystem::Reset()
     mTouchControlsEditorEntryAllowed = false;
     mTouchControlsEditorMainMenuEntryAllowed = false;
     mTouchControlsEditModeActive = false;
+    mTouchControlsEditorMinigameEntryAllowed = false;
     mCurrentEditableLayout = TOUCH_EDITABLE_LAYOUT_CHARACTER;
+    mCurrentEditorFlow = TOUCH_CONTROLS_EDITOR_FLOW_NONE;
 
     mEditingControlId = TOUCH_HUD_CONTROL_NONE;
     mEditingControlWasDragged = false;
     mEditingFrontendArrowGroup = false;
     mEditingStartPosition = TouchVector2( 0.0f, 0.0f );
     mEditingLastPosition = TouchVector2( 0.0f, 0.0f );
-    
 }
 
 void TouchHudSystem::SetEnabled( bool enabled )
@@ -252,7 +254,24 @@ bool TouchHudSystem::IsControlVisible( TouchHudControlId controlId ) const
                    !mTouchControlsEditModeActive;
         }
 
+        case TOUCH_HUD_CONTROL_EDITOR_ENTER_MINIGAME:
+        {
+            return mTouchControlsEditorMinigameEntryAllowed &&
+                !mTouchControlsEditModeActive;
+        }
+
         case TOUCH_HUD_CONTROL_EDITOR_NEXT_LAYOUT:
+        {
+            return mTouchControlsEditModeActive &&
+                   mCurrentEditorFlow ==  TOUCH_CONTROLS_EDITOR_FLOW_STANDARD;
+        }
+
+        case TOUCH_HUD_CONTROL_EDITOR_FINISH_MINIGAME:
+        {
+            return mTouchControlsEditModeActive &&
+                mCurrentEditorFlow ==
+                    TOUCH_CONTROLS_EDITOR_FLOW_MINIGAME_VEHICLE;
+        }
         case TOUCH_HUD_CONTROL_EDITOR_RESET:
         {
             return mTouchControlsEditModeActive;
@@ -724,6 +743,11 @@ TouchProfile TouchHudSystem::GetProfileForEditableLayout ( TouchEditableLayout l
         case TOUCH_EDITABLE_LAYOUT_FRONTEND:
         {
             return TOUCH_PROFILE_FRONTEND;
+        }
+
+        case TOUCH_EDITABLE_LAYOUT_MINIGAME_VEHICLE:
+        {
+            return TOUCH_PROFILE_MINIGAME_VEHICLE;
         }
 
         default:
@@ -1342,12 +1366,30 @@ void TouchHudSystem::InitializeDefaultControls()
     );
 
     AddControl(
+    TOUCH_HUD_CONTROL_EDITOR_ENTER_MINIGAME,
+    TOUCH_PROFILE_FRONTEND,
+    TOUCH_ACTION_INVALID,
+    TouchRect(0.4572f, 0.52f, 0.080f, 0.165f),
+    true,
+    "EditorEnterMinigame"
+    );
+
+    AddControl(
         TOUCH_HUD_CONTROL_EDITOR_NEXT_LAYOUT,
         TOUCH_PROFILE_FRONTEND,
         TOUCH_ACTION_INVALID,
         TouchRect( 0.38f, 0.02f, 0.11f, 0.20f ),
         true,
         "EditorNextLayout"
+    );
+
+    AddControl(
+    TOUCH_HUD_CONTROL_EDITOR_FINISH_MINIGAME,
+    TOUCH_PROFILE_FRONTEND,//TOUCH_PROFILE_MINIGAME_VEHICLE,
+    TOUCH_ACTION_INVALID,
+    TouchRect( 0.38f, 0.02f, 0.11f, 0.20f ),
+    true,
+    "EditorFinishMinigame"
     );
 
     AddControl(
@@ -1599,13 +1641,25 @@ void TouchHudSystem::EndButton( TouchHudFingerState* finger )
             case TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME:
             case TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU:
             {
-                BeginTouchControlsEditMode();
+                BeginTouchControlsEditMode(TOUCH_CONTROLS_EDITOR_FLOW_STANDARD);
                 break;
             }
 
             case TOUCH_HUD_CONTROL_EDITOR_NEXT_LAYOUT:
             {
                 AdvanceTouchControlsEditLayout();
+                break;
+            }
+
+            case TOUCH_HUD_CONTROL_EDITOR_ENTER_MINIGAME:
+            {
+                BeginTouchControlsEditMode(TOUCH_CONTROLS_EDITOR_FLOW_MINIGAME_VEHICLE);
+                break;
+            }
+
+            case TOUCH_HUD_CONTROL_EDITOR_FINISH_MINIGAME:
+            {
+                EndTouchControlsEditMode();
                 break;
             }
 
@@ -1877,6 +1931,12 @@ TouchRect TouchHudSystem::GetEffectiveControlRect
         return TouchRect( 0.0f, 0.0f, 0.0f, 0.0f );
     }
 
+    // Los controles del propio menu de edición no se pueden modificar su posición ni tamaño
+     if ( IsEditorControl( controlId ) )
+    {
+        return control->rect;
+    }
+
 #if defined(RAD_ANDROID)
     return TouchControlsConfigurationManager::GetInstance().GetEffectiveRect(
         controlId,
@@ -1907,9 +1967,19 @@ void TouchHudSystem::SetTouchControlsEditorMainMenuEntryAllowed( bool allowed )
     mTouchControlsEditorMainMenuEntryAllowed = allowed;
 }
 
+void TouchHudSystem::SetTouchControlsEditorMinigameEntryAllowed( bool allowed )
+{
+    mTouchControlsEditorMinigameEntryAllowed = allowed;
+}
+
 bool TouchHudSystem::IsTouchControlsEditorMainMenuEntryAllowed() const
 {
     return mTouchControlsEditorMainMenuEntryAllowed;
+}
+
+bool TouchHudSystem::IsTouchControlsEditorMinigameEntryAllowed() const
+{
+    return mTouchControlsEditorMinigameEntryAllowed;
 }
 
 bool TouchHudSystem::IsTouchControlsEditModeActive() const
@@ -1927,6 +1997,8 @@ bool TouchHudSystem::IsEditorControl( TouchHudControlId controlId ) const
     return controlId == TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME ||
            controlId == TOUCH_HUD_CONTROL_EDITOR_NEXT_LAYOUT ||
            controlId == TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU ||
+           controlId == TOUCH_HUD_CONTROL_EDITOR_ENTER_MINIGAME ||
+           controlId == TOUCH_HUD_CONTROL_EDITOR_FINISH_MINIGAME ||
            controlId == TOUCH_HUD_CONTROL_EDITOR_RESET;
 }
 
@@ -1947,7 +2019,8 @@ bool TouchHudSystem::ShouldControlBeUsedForProfile
     if ( IsEditorControl( controlId ) )
     {
         if ( controlId == TOUCH_HUD_CONTROL_EDITOR_ENTER_IN_GAME ||
-             controlId == TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU  )
+             controlId == TOUCH_HUD_CONTROL_EDITOR_ENTER_MAIN_MENU || 
+             controlId == TOUCH_HUD_CONTROL_EDITOR_ENTER_MINIGAME )
         {
             return profile == TOUCH_PROFILE_FRONTEND;
         }
@@ -1959,7 +2032,7 @@ bool TouchHudSystem::ShouldControlBeUsedForProfile
 }
 
 
-void TouchHudSystem::BeginTouchControlsEditMode()
+void TouchHudSystem::BeginTouchControlsEditMode( TouchControlsEditorFlow editorFlow )
 {
 #if defined(RAD_ANDROID)
     ClearActiveTouches();
@@ -1969,8 +2042,43 @@ void TouchHudSystem::BeginTouchControlsEditMode()
 #endif
 
     mTouchControlsEditModeActive = true;
-    mCurrentEditableLayout = TOUCH_EDITABLE_LAYOUT_CHARACTER;
-    mCurrentProfile = TOUCH_PROFILE_CHARACTER;
+    mCurrentEditorFlow = editorFlow;
+
+    switch ( editorFlow )
+    {
+        case TOUCH_CONTROLS_EDITOR_FLOW_STANDARD:
+        {
+            mCurrentEditableLayout =
+                TOUCH_EDITABLE_LAYOUT_CHARACTER;
+
+            mCurrentProfile =
+                TOUCH_PROFILE_CHARACTER;
+
+            break;
+        }
+
+        case TOUCH_CONTROLS_EDITOR_FLOW_MINIGAME_VEHICLE:
+        {
+            mCurrentEditableLayout =
+                TOUCH_EDITABLE_LAYOUT_MINIGAME_VEHICLE;
+
+            mCurrentProfile =
+                TOUCH_PROFILE_MINIGAME_VEHICLE;
+
+            break;
+        }
+
+        case TOUCH_CONTROLS_EDITOR_FLOW_NONE:
+        default:
+        {
+            mTouchControlsEditModeActive = false;
+            mCurrentEditorFlow =
+                TOUCH_CONTROLS_EDITOR_FLOW_NONE;
+
+            return;
+        }
+    }
+
 
     mCurrentInteractionType = TOUCH_INTERACTION_NONE;
     mCurrentInteractionIcon = TOUCH_INTERACTION_ICON_NONE;
@@ -1988,6 +2096,7 @@ void TouchHudSystem::EndTouchControlsEditMode()
     ClearActiveTouches();
 
     mTouchControlsEditModeActive = false;
+    mCurrentEditorFlow = TOUCH_CONTROLS_EDITOR_FLOW_NONE;
     mCurrentEditableLayout = TOUCH_EDITABLE_LAYOUT_CHARACTER;
 
     mCurrentProfile = TouchContextResolver::GetInstance().Resolve();
