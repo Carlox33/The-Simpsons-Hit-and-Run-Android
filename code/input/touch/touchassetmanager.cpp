@@ -244,10 +244,10 @@ allLoaded = LoadSpriteForAsset(
     "te_reset"
 ) && allLoaded;
 
- TOUCH_ASSET_MANAGER_LOGI(
-        "[TouchAssetManager] LoadAllSprites finished. allLoaded=%d",
-        allLoaded ? 1 : 0
-    );
+ //TOUCH_ASSET_MANAGER_LOGI(
+   //     "[TouchAssetManager] LoadAllSprites finished. allLoaded=%d",
+     //   allLoaded ? 1 : 0
+    //);
     return allLoaded;
 #endif
 }
@@ -283,12 +283,13 @@ bool TouchAssetManager::LoadSpriteForAsset(TouchAssetId assetId,const char* rela
 
         return false;
     }
+    /** 
 
     TOUCH_ASSET_MANAGER_LOGI(
         "[TouchAssetManager] Loaded asset id=%d path=%s",
         static_cast<int>( assetId ),
         relativePath ? relativePath : "(null)"
-    );
+    );*/
 
     return true;
 #endif
@@ -314,11 +315,12 @@ bool TouchAssetManager::Initialize()
         return false;
     }
 
+    /** 
     TOUCH_ASSET_MANAGER_LOGI(
         "[TouchAssetManager] Initializing from root: %s",
         mAssetRoot
     );
-
+*/
     if ( !LoadAllSprites() )
     {
         TOUCH_ASSET_MANAGER_LOGE(
@@ -333,9 +335,9 @@ bool TouchAssetManager::Initialize()
 
     mInitialized = true;
 
-    TOUCH_ASSET_MANAGER_LOGI(
-        "[TouchAssetManager] Initialized successfully."
-    );
+   // TOUCH_ASSET_MANAGER_LOGI(
+     //   "[TouchAssetManager] Initialized successfully."
+    //);
 
     return true;
 #endif
@@ -692,10 +694,10 @@ tSprite* TouchAssetManager::LoadSpriteFromFile
         relativePath
     );
 
-    TOUCH_ASSET_MANAGER_LOGI(
-        "[TouchAssetManager] Loading sprite from: %s",
-        fullPath
-    );
+    //TOUCH_ASSET_MANAGER_LOGI(
+      //  "[TouchAssetManager] Loading sprite from: %s",
+      //  fullPath
+    //);
 
     /*
      * Pure3D old API expects mutable char*, not const char*.
@@ -765,11 +767,13 @@ tSprite* TouchAssetManager::LoadSpriteFromFile
         return 0;
     }
 
+    /** 
     TOUCH_ASSET_MANAGER_LOGI(
         "[TouchAssetManager] PNG file read into memory OK: %s size=%ld",
         fullPath,
         inputSize
     );
+    */
 
    /*
  * Give Pure3D a memory-backed tFile instead of asking Pure3D
@@ -801,19 +805,22 @@ memoryFile->SetFilename( fullPath );
 tImageFactory imageFactory;
 imageFactory.SetDesiredDepth( 32 );
 
+/** 
 TOUCH_ASSET_MANAGER_LOGI(
     "[TouchAssetManager] Calling Pure3D LoadAsImage(tFile*)..."
 );
+*/
 
 tImage* image = imageFactory.LoadAsImage(
     memoryFile,
     imageName
 );
-
+/** 
 TOUCH_ASSET_MANAGER_LOGI(
     "[TouchAssetManager] Returned from Pure3D LoadAsImage(tFile*). image=%p",
     image
 );
+*/
 
 /*
  * Release our external reference.
@@ -849,6 +856,7 @@ fileData = 0;
         return 0;
     }
 
+    /** 
     TOUCH_ASSET_MANAGER_LOGI(
         "[TouchAssetManager] Image loaded: %s width=%d height=%d depth=%d alpha=%d alphaDepth=%d",
         fullPath,
@@ -858,6 +866,7 @@ fileData = 0;
         image->HasAlpha() ? 1 : 0,
         image->GetAlphaDepth()
     );
+    */
 
     /*
      * Build a Pure3D sprite from the decoded image.
@@ -882,10 +891,12 @@ fileData = 0;
 
     image->Release();
 
+    /** 
     TOUCH_ASSET_MANAGER_LOGI(
         "[TouchAssetManager] Sprite created successfully: %s",
         imageName
     );
+    */
 
     return sprite;
 #endif

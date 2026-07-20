@@ -115,17 +115,20 @@ bool TouchAssetExtractor::EnsureAssetsExtracted()
 
     if ( !NeedsExtraction() )
     {
+        /** 
         TOUCH_ASSET_LOGI(
             "[TouchAssets] Assets already extracted at: %s",
             mOutputRoot
         );
+        */
         return true;
     }
-
+ /** 
     TOUCH_ASSET_LOGI(
         "[TouchAssets] Extracting touch assets to: %s",
         mOutputRoot
     );
+    */
 
     if ( !EnsureDirectory( mOutputRoot ) )
     {
@@ -147,7 +150,7 @@ bool TouchAssetExtractor::EnsureAssetsExtracted()
         return false;
     }
 
-    TOUCH_ASSET_LOGI( "[TouchAssets] Extraction completed." );
+    //TOUCH_ASSET_LOGI( "[TouchAssets] Extraction completed." );
 
     return true;
 #endif
@@ -369,12 +372,14 @@ bool TouchAssetExtractor::CopyAssetFile( const char* relativePath )
         return false;
     }
 
+    /** 
     TOUCH_ASSET_LOGI(
         "[TouchAssets] Copied %s -> %s (%u bytes)",
         relativePath,
         outputPath,
         (unsigned int)totalBytes
     );
+    */
 
     return true;
 #endif
