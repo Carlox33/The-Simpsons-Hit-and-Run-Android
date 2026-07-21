@@ -510,7 +510,16 @@ void pglDisplay::SetGamma(float r, float g, float b)
     }
 
 #if SDL_MAJOR_VERSION < 3
+#ifdef RAD_ANDROID
+    // En Android SDL_SetWindowGammaRamp no está garantizado en todos los dispositivos
+    // aplicamos gamma directamente via uniform en los shaders GLES
+    // pasamos 1/r, 1/g, 1/b porque el shader necesita el exponente invertido
+    if(context)
+        context->SetGammaUniform(1.0f/r, 1.0f/g, 1.0f/b);
+#else
+    // En PC, Switch y Vita usamos SDL que sí funciona a nivel de hardware
     SDL_SetWindowGammaRamp(win, gamma[0], gamma[1], gamma[2]);
+#endif
 #endif
 }
 

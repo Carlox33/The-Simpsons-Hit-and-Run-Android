@@ -204,6 +204,7 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
         "uniform vec4 scm;\n"
         "uniform vec4 ecm;\n"
         "uniform float srm;\n"
+        "uniform int lit;\n"
 
         "varying vec2 tc;\n"
         "varying vec4 cpri;\n"
@@ -217,69 +218,82 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
         "    vec4 V = modelview * vec4(position, 1.0);\n"
         "    vec3 n = normalize(mat3(normalmatrix) * normal);\n"
 
-        "    vec3 diff = ecm.rgb + acm.rgb * acs.rgb;\n"
+        "    vec3 diff;\n"
         "    vec3 spec = vec3(0.0);\n"
-        "    for (int i = 0; i < " PDDI_STRINGIZE(PDDI_MAX_LIGHTS) "; i++) {\n"
-        "        if (lights[i].enabled == 0) continue;\n"
-
-        "        vec3 VP = direction(V, lights[i].position);\n"
-        "        float f = product(n,VP) != 0.0 ? 1.0 : 0.0;\n"
-        "        vec3 h = normalize(VP + vec3(0.0, 0.0, 1.0));\n"
-
-        "        vec3 k = lights[i].attenuation;\n"
-        "        float d = distance(V.xyz, lights[i].position.xyz);\n"
-        "        float att = lights[i].position.w != 0.0 ? 1.0 / (k[0] + k[1] * d + k[2] * d * d) : 1.0;\n"
-
-        "        diff += att * product(n,VP) * dcm.rgb * lights[i].colour.rgb;\n"
-        "        spec += att * f * power(product(n,h),srm) * scm.rgb * lights[i].colour.rgb;\n"
+        // si no hay iluminación usa el color del vértice directamente sin modificar
+        "    if(lit == 0) {\n"
+        "        diff = vec3(1.0);\n"
+        "    } else {\n"
+        "        diff = ecm.rgb + acm.rgb * acs.rgb;\n"
+        "        for (int i = 0; i < " PDDI_STRINGIZE(PDDI_MAX_LIGHTS) "; i++) {\n"
+        "            if (lights[i].enabled == 0) continue;\n"
+        "            vec3 VP = direction(V, lights[i].position);\n"
+        "            float f = product(n,VP) != 0.0 ? 1.0 : 0.0;\n"
+        "            vec3 h = normalize(VP + vec3(0.0, 0.0, 1.0));\n"
+        "            vec3 k = lights[i].attenuation;\n"
+        "            float d = distance(V.xyz, lights[i].position.xyz);\n"
+        "            float att = lights[i].position.w != 0.0 ? 1.0 / (k[0] + k[1] * d + k[2] * d * d) : 1.0;\n"
+        "            diff += att * product(n,VP) * dcm.rgb * lights[i].colour.rgb;\n"
+        "            spec += att * f * power(product(n,h),srm) * scm.rgb * lights[i].colour.rgb;\n"
+        "        }\n"
         "    }\n"
-
         "    tc = texcoord;\n"
         "    cpri = color * vec4(diff, dcm.a);\n"
-        "    csec = vec4(spec, 0.0);\n"
+        "    csec = vec4(spec, 0.0);\n" 
         "    gl_Position = projection * V;\n"
         "}\n"
     );
 
     GLuint fragmentShader = pglProgram::CompileShader( GL_FRAGMENT_SHADER,
-        "precision mediump float;\n"
-        "varying vec2 tc;\n"
-        "varying vec4 cpri;\n"
-        "varying vec4 csec;\n"
+    "precision mediump float;\n"
+    "varying vec2 tc;\n"
+    "varying vec4 cpri;\n"
+    "varying vec4 csec;\n"
+    // uniform gamma: recibe el exponente de corrección por canal (1/r, 1/g, 1/b)
+    "uniform vec3 gamma;\n"
 
-        "void main() {\n"
-        "    gl_FragColor = cpri + csec;\n"
-        "}\n"
-    );
+    "void main() {\n"
+    "    vec4 c = cpri + csec;\n"
+    // aplico pow() canal por canal para corregir el gamma antes de mostrar el píxel
+    "    gl_FragColor = vec4(pow(c.rgb, gamma), c.a);\n"
+    "}\n"
+);
 
     GLuint textureShader = pglProgram::CompileShader(GL_FRAGMENT_SHADER,
-        "precision mediump float;\n"
-        "varying vec2 tc;\n"
-        "varying vec4 cpri;\n"
-        "varying vec4 csec;\n"
+    "precision mediump float;\n"
+    "varying vec2 tc;\n"
+    "varying vec4 cpri;\n"
+    "varying vec4 csec;\n"
 
-        "uniform sampler2D tex;\n"
+    "uniform sampler2D tex;\n"
+    // mismo uniform gamma que en el fragmentShader
+    "uniform vec3 gamma;\n"
 
-        "void main() {\n"
-        "    gl_FragColor = texture2D(tex, tc) * cpri + csec;\n"
-        "}\n"
-    );
+    "void main() {\n"
+    "    vec4 c = texture2D(tex, tc) * cpri + csec;\n"
+    // aplico la corrección gamma al color final con textura
+    "    gl_FragColor = vec4(pow(c.rgb, gamma), c.a);\n"
+    "}\n"
+);
 
     GLuint alphaTestShader = pglProgram::CompileShader(GL_FRAGMENT_SHADER,
-        "precision mediump float;\n"
-        "varying vec2 tc;\n"
-        "varying vec4 cpri;\n"
-        "varying vec4 csec;\n"
+    "precision mediump float;\n"
+    "varying vec2 tc;\n"
+    "varying vec4 cpri;\n"
+    "varying vec4 csec;\n"
 
-        "uniform float alpharef;\n"
-        "uniform sampler2D tex;\n"
+    "uniform float alpharef;\n"
+    "uniform sampler2D tex;\n"
+    // mismo uniform gamma
+    "uniform vec3 gamma;\n"
 
-        "void main() {\n"
-        "    vec4 c = texture2D(tex, tc) * cpri + csec;\n"
-        "    if (c.a < alpharef) discard;\n"
-        "    gl_FragColor = c;\n"
-        "}\n"
-    );
+    "void main() {\n"
+    "    vec4 c = texture2D(tex, tc) * cpri + csec;\n"
+    // el alpha test se hace antes de aplicar gamma porque el alpha no se corrige
+    "    if (c.a < alpharef) discard;\n"
+    "    gl_FragColor = vec4(pow(c.rgb, gamma), c.a);\n"
+    "}\n"
+);
 #endif
 
     colorProgram = pglProgram::CreateProgram(vertexShader, fragmentShader);
@@ -304,6 +318,12 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
     defaultShader = new pglMat(this);
     defaultShader->AddRef();
     SetShaderProgram(colorProgram);
+
+    // gamma a 1.0 en los 3 shaders (sin corrección)
+    // se actualizará cuando el juego llame a SetGamma
+    colorProgram->SetGamma(1.0f, 1.0f, 1.0f);
+    textureProgram->SetGamma(1.0f, 1.0f, 1.0f);
+    alphaTestProgram->SetGamma(1.0f, 1.0f, 1.0f);
 }
 
 pglContext::~pglContext()
@@ -1199,4 +1219,21 @@ void pglContext::SetTextureEnvironment(const pglTextureEnv* texEnv)
     else
         SetShaderProgram(colorProgram);
     currentProgram->SetTextureEnvironment(texEnv);
+}
+void pglContext::SetGammaUniform(float r, float g, float b)
+{
+    // activamos cada programa y seteamos el uniform gamma
+    // hay que activar el programa antes de poder setear su uniform
+    colorProgram->UseProgram();
+    colorProgram->SetGamma(r, g, b);
+
+    textureProgram->UseProgram();
+    textureProgram->SetGamma(r, g, b);
+
+    alphaTestProgram->UseProgram();
+    alphaTestProgram->SetGamma(r, g, b);
+
+    // restauramos el programa que estaba activo antes
+    if(currentProgram)
+        currentProgram->UseProgram();
 }

@@ -87,6 +87,11 @@ public :
     void SetShaderProgram(pglProgram* program);
     void SetTextureEnvironment(const pglTextureEnv* texEnv);
 
+    // aplico corrección gamma a los 3 shaders via uniform
+    // se llama desde pglDisplay::SetGamma
+    // r, g, b deben venir ya invertidos (1/gamma) desde SetGamma
+    void SetGammaUniform(float r, float g, float b);
+
     unsigned contextID;
 
 protected:
@@ -186,4 +191,3 @@ protected:
 };
     
 #endif
-

@@ -110,6 +110,10 @@ void pglProgram::SetModelViewMatrix(const pddiMatrix* matrix)
 void pglProgram::SetTextureEnvironment(const pglTextureEnv* texEnv)
 {
 #ifdef RAD_CG
+    // para que el shader sepa si este material tiene o no iluminación 
+    if(lit >= 0)
+        glUniform1i(lit, texEnv->lit ? 1 : 0);
+
     if (texEnv->lit)
     {
         UniformColour(acm, texEnv->ambient);
@@ -138,6 +142,10 @@ void pglProgram::SetTextureEnvironment(const pglTextureEnv* texEnv)
 #else
     if (sampler >= 0)
         glUniform1i(sampler, 0);
+
+    // el shader necesita saber si este material tiene o no iluminación
+    if(lit >= 0)
+        glUniform1i(lit, texEnv->lit ? 1 : 0);
 
     if (texEnv->lit)
     {
@@ -305,6 +313,10 @@ bool pglProgram::LinkProgram(GLuint vertexShader, GLuint fragmentShader)
     scm = glGetUniformLocation(program, "scm");
     ecm = glGetUniformLocation(program, "ecm");
     srm = glGetUniformLocation(program, "srm");
+    // registro la ubicación del uniform gamma
+    gamma = glGetUniformLocation(program, "gamma");
+    // registro si el material está iluminado o no
+    lit = glGetUniformLocation(program, "lit");
 
 #ifndef RAD_VITAGL
     // Always detach shaders after a successful link
@@ -399,4 +411,11 @@ pglProgram* pglProgram::CreateProgram(GLuint vertexShader, GLuint fragmentShader
         return nullptr;
     }
     return program;
+}
+void pglProgram::SetGamma(float r, float g, float b)
+{
+    // seteo el uniform gamma en el shader activo
+    // gamma >= 0 significa que el uniform existe en este shader
+    if(gamma >= 0)
+        glUniform3f(gamma, r, g, b);
 }
