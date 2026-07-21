@@ -86,7 +86,9 @@ public :
     pglDisplay* GetDisplay(void) {return display;}
     void SetShaderProgram(pglProgram* program);
     void SetTextureEnvironment(const pglTextureEnv* texEnv);
-
+    // aplique corrección gamma a los 3 shaders via uniform
+    // se llama desde pglDisplay::SetGamma en Android
+    void SetGammaUniform(float r, float g, float b);
     unsigned contextID;
 
 protected:

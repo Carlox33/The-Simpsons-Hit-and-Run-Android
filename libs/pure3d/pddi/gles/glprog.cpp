@@ -138,6 +138,11 @@ void pglProgram::SetTextureEnvironment(const pglTextureEnv* texEnv)
 #else
     if (sampler >= 0)
         glUniform1i(sampler, 0);
+#ifdef RAD_ANDROID
+    // indica al shader si este material tiene iluminación
+    if(lit >= 0)
+        glUniform1i(lit, texEnv->lit ? 1 : 0);
+#endif
 
     if (texEnv->lit)
     {
@@ -305,6 +310,10 @@ bool pglProgram::LinkProgram(GLuint vertexShader, GLuint fragmentShader)
     scm = glGetUniformLocation(program, "scm");
     ecm = glGetUniformLocation(program, "ecm");
     srm = glGetUniformLocation(program, "srm");
+#ifdef RAD_ANDROID
+    gamma = glGetUniformLocation(program, "gamma");
+    lit = glGetUniformLocation(program, "lit");
+#endif
 
 #ifndef RAD_VITAGL
     // Always detach shaders after a successful link
@@ -400,3 +409,11 @@ pglProgram* pglProgram::CreateProgram(GLuint vertexShader, GLuint fragmentShader
     }
     return program;
 }
+#ifdef RAD_ANDROID
+void pglProgram::SetGamma(float r, float g, float b)
+{
+    // gamma >= 0 significa que el uniform existe en este shader
+    if(gamma >= 0)
+        glUniform3f(gamma, r, g, b);
+}
+#endif

@@ -170,14 +170,23 @@ void RenderFlow::DoAllRegistration()
     mpDebugXBoxGamma->GetGamma( &mDebugGammaR, &mDebugGammaG, &mDebugGammaB );
 #endif
 
-#ifdef RAD_WIN32
+#if defined(RAD_WIN32) || defined(RAD_ANDROID)
     mpGammaControl = (pddiExtGammaControl*)p3d::pddi->GetExtension(PDDI_EXT_GAMMACONTROL);
-
+    if(mpGammaControl)
+{
+#ifdef RAD_ANDROID
+    // en Android aplico gamma fijo
+    mpGammaControl->SetGamma( 0.9f, 0.9f, 0.9f );
+    mGamma = 0.9f;
+#else
+    // en PC se toma el gamma actual del sistema
     float r,g,b;
     mpGammaControl->GetGamma( &r, &g, &b );
     mpGammaControl->SetGamma( r, r, r );    // We will only deal with one degree.
 
     mGamma = r;     
+#endif
+}
 #endif
    ParticleSystemRandomData::SetUp();
 
@@ -242,7 +251,7 @@ END_PROFILE("RenderFlow");
 
 }
 
-#ifdef RAD_WIN32
+#if defined(RAD_WIN32) || defined(RAD_ANDROID)
 //==============================================================================
 // RenderFlow::SetGamma
 //==============================================================================
@@ -288,7 +297,7 @@ float RenderFlow::GetGamma() const
     return mGamma;
 }
 
-#endif //rad_win32
+#endif //rad_win32 || rad_android
 
 
 //******************************************************************************
@@ -321,7 +330,7 @@ RenderFlow::RenderFlow() :
 
     mpDebugXBoxGamma = NULL;
 #endif
-#ifdef RAD_WIN32
+#if defined(RAD_WIN32) || defined(RAD_ANDROID)
     mpGammaControl = NULL;
     mGamma = 0.0f;
 #endif

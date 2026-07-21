@@ -204,7 +204,9 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
         "uniform vec4 scm;\n"
         "uniform vec4 ecm;\n"
         "uniform float srm;\n"
-
+        // indica al shader si el material tiene iluminación o no
+        "uniform int lit;\n"
+    
         "varying vec2 tc;\n"
         "varying vec4 cpri;\n"
         "varying vec4 csec;\n"
@@ -217,21 +219,26 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
         "    vec4 V = modelview * vec4(position, 1.0);\n"
         "    vec3 n = normalize(mat3(normalmatrix) * normal);\n"
 
-        "    vec3 diff = ecm.rgb + acm.rgb * acs.rgb;\n"
+        "    vec3 diff;\n"
         "    vec3 spec = vec3(0.0);\n"
-        "    for (int i = 0; i < " PDDI_STRINGIZE(PDDI_MAX_LIGHTS) "; i++) {\n"
-        "        if (lights[i].enabled == 0) continue;\n"
+        // si no hay iluminación usa el color del vértice directamente sin modificar
+        "    if(lit == 0) {\n"
+        "        diff = vec3(1.0);\n"
 
-        "        vec3 VP = direction(V, lights[i].position);\n"
-        "        float f = product(n,VP) != 0.0 ? 1.0 : 0.0;\n"
-        "        vec3 h = normalize(VP + vec3(0.0, 0.0, 1.0));\n"
+        "    } else {\n"
+        "        diff = ecm.rgb + acm.rgb * acs.rgb;\n"
+        "        for (int i = 0; i < " PDDI_STRINGIZE(PDDI_MAX_LIGHTS) "; i++) {\n"
 
-        "        vec3 k = lights[i].attenuation;\n"
-        "        float d = distance(V.xyz, lights[i].position.xyz);\n"
-        "        float att = lights[i].position.w != 0.0 ? 1.0 / (k[0] + k[1] * d + k[2] * d * d) : 1.0;\n"
+        "            if (lights[i].enabled == 0) continue;\n"
+        "            vec3 VP = direction(V, lights[i].position);\n"
+        "            float f = product(n,VP) != 0.0 ? 1.0 : 0.0;\n"
 
-        "        diff += att * product(n,VP) * dcm.rgb * lights[i].colour.rgb;\n"
-        "        spec += att * f * power(product(n,h),srm) * scm.rgb * lights[i].colour.rgb;\n"
+        "            vec3 k = lights[i].attenuation;\n"
+        "            float d = distance(V.xyz, lights[i].position.xyz);\n"
+        "            float att = lights[i].position.w != 0.0 ? 1.0 / (k[0] + k[1] * d + k[2] * d * d) : 1.0;\n"
+        "            diff += att * product(n,VP) * dcm.rgb * lights[i].colour.rgb;\n"
+        "            spec += att * f * power(product(n,h),srm) * scm.rgb * lights[i].colour.rgb;\n"
+        "    }\n"
         "    }\n"
 
         "    tc = texcoord;\n"
@@ -248,7 +255,9 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
         "varying vec4 csec;\n"
 
         "void main() {\n"
-        "    gl_FragColor = cpri + csec;\n"
+        "uniform vec3 gamma;\n"
+        "    vec4 c = cpri + csec;\n"
+        "    gl_FragColor = vec4(pow(c.rgb, gamma), c.a);\n"
         "}\n"
     );
 
@@ -259,9 +268,11 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
         "varying vec4 csec;\n"
 
         "uniform sampler2D tex;\n"
+        "uniform vec3 gamma;\n"
 
         "void main() {\n"
-        "    gl_FragColor = texture2D(tex, tc) * cpri + csec;\n"
+        "    vec4 c = texture2D(tex, tc) * cpri + csec;\n"
+        "    gl_FragColor = vec4(pow(c.rgb, gamma), c.a);\n"
         "}\n"
     );
 
@@ -273,11 +284,12 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
 
         "uniform float alpharef;\n"
         "uniform sampler2D tex;\n"
+        "uniform vec3 gamma;\n"
 
         "void main() {\n"
         "    vec4 c = texture2D(tex, tc) * cpri + csec;\n"
         "    if (c.a < alpharef) discard;\n"
-        "    gl_FragColor = c;\n"
+        "    gl_FragColor = vec4(pow(c.rgb, gamma), c.a);\n"
         "}\n"
     );
 #endif
@@ -304,6 +316,18 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
     defaultShader = new pglMat(this);
     defaultShader->AddRef();
     SetShaderProgram(colorProgram);
+    if(colorProgram)
+    {
+    colorProgram->SetGamma(1.0f, 1.0f, 1.0f);
+    }
+    if(textureProgram)
+    {
+    textureProgram->SetGamma(1.0f, 1.0f, 1.0f);
+    }
+    if(alphaTestProgram)
+    {
+    alphaTestProgram->SetGamma(1.0f, 1.0f, 1.0f);
+    }
 }
 
 pglContext::~pglContext()
@@ -1199,4 +1223,26 @@ void pglContext::SetTextureEnvironment(const pglTextureEnv* texEnv)
     else
         SetShaderProgram(colorProgram);
     currentProgram->SetTextureEnvironment(texEnv);
+}
+void pglContext::SetGammaUniform(float r, float g, float b)
+{
+	if(colorProgram)
+	{
+    colorProgram->UseProgram();
+    colorProgram->SetGamma(r, g, b);
+    }
+    if(textureProgram)
+    {
+    textureProgram->UseProgram();
+    textureProgram->SetGamma(r, g, b);
+    }
+    if(alphaTestProgram)
+    {
+    alphaTestProgram->UseProgram();
+    alphaTestProgram->SetGamma(r, g, b);
+    }
+    if(currentProgram)
+    {
+        currentProgram->UseProgram();
+    }
 }

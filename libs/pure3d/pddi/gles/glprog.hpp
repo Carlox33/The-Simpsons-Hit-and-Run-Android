@@ -36,6 +36,8 @@ public:
     void SetTextureEnvironment(const pglTextureEnv* texEnv);
     void SetLightState(int handle, const pddiLight* lightState);
     void SetAmbientLight(pddiColour ambient);
+    // setea el valor de gamma en el shader via uniform
+    void SetGamma(float r, float g, float b);
 
     inline bool SupportsLighting() { return acs >= 0; }
     inline bool SupportsTextures() { return sampler >= 0; }
@@ -67,6 +69,10 @@ protected:
         GLint enabled, position, colour, attenuation;
     } lights[PDDI_MAX_LIGHTS];
     GLint acs, acm, dcm, scm, ecm, srm;
+    // ubicación del uniform gamma en el shader
+    GLint gamma;
+    // indica al shader si el material tiene iluminación o no
+    GLint lit;
 #endif
 };
 
