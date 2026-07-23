@@ -11,8 +11,8 @@ android {
         applicationId "com.c4rlox.simpsons"
         minSdkVersion 24
         targetSdkVersion 35
-        versionCode 92
-        versionName "0.92.2"
+        versionCode 93
+        versionName "0.93"
 
         externalNativeBuild {
             cmake {
