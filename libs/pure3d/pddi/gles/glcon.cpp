@@ -220,11 +220,12 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
 
                 "void main() {\n"
                 "    vec4 V = modelview * vec4(position, 1.0);\n"
-                 "    vec3 n = normalize(mat3(normalmatrix) * normal);\n"
+                 
 
     #ifdef RAD_ANDROID
             "    vec3 diff;\n"
     #else
+            "    vec3 n = normalize(mat3(normalmatrix) * normal);\n"
             "    vec3 diff = ecm.rgb + acm.rgb * acs.rgb;\n"
     #endif
 
@@ -236,6 +237,7 @@ pglContext::pglContext(pglDevice* dev, pglDisplay* disp) : pddiBaseContext((pddi
             "    if (lit == 0) {\n"
             "        diff = vec3(1.0);\n"
             "    } else {\n"
+            "        vec3 n = normalize(mat3(normalmatrix) * normal);\n"
             "        diff = ecm.rgb + acm.rgb * acs.rgb;\n"
     #endif
 
