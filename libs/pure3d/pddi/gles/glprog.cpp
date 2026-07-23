@@ -53,6 +53,11 @@ pglProgram::pglProgram()
 #else
     program = 0;
     projection = modelview = normalmatrix = alpharef = sampler = acs = -1;
+
+    #ifdef RAD_ANDROID
+    lit = -1;
+    #endif
+
 #endif
 }
 
@@ -138,6 +143,12 @@ void pglProgram::SetTextureEnvironment(const pglTextureEnv* texEnv)
 #else
     if (sampler >= 0)
         glUniform1i(sampler, 0);
+
+
+    #ifdef RAD_ANDROID
+    if (lit >= 0)
+        glUniform1i(lit, texEnv->lit ? 1 : 0);
+    #endif
 
     if (texEnv->lit)
     {
@@ -305,6 +316,10 @@ bool pglProgram::LinkProgram(GLuint vertexShader, GLuint fragmentShader)
     scm = glGetUniformLocation(program, "scm");
     ecm = glGetUniformLocation(program, "ecm");
     srm = glGetUniformLocation(program, "srm");
+
+    #ifdef RAD_ANDROID
+    lit = glGetUniformLocation(program, "lit");
+    #endif
 
 #ifndef RAD_VITAGL
     // Always detach shaders after a successful link
