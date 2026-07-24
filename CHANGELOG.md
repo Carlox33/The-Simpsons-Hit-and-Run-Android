@@ -8,6 +8,20 @@
 
 # 🇪🇸 Español
 
+## Version 0.93 - Corrección de la iluminación en OpenGL ES y mejora del rendimiento
+
+Se ha corregido un problema visual del renderer **OpenGL ES** (utilizado en Android) que provocaba que determinados elementos del juego apareciesen con un brillo excesivo o con una iluminación incorrecta.
+
+La causa del problema estaba en el tratamiento de los materiales configurados como **no iluminados**. Antes de esta modificación, el *vertex shader* ejecutaba siempre los cálculos de iluminación, independientemente de si el material debía recibir luz o no.
+
+Con esta actualización se ha mejorado el rendimiento, ya que los materiales no iluminados no necesitan procesar la iluminación y, por lo tanto, se ahorran una gran cantidad de cálculos, repercutiendo en un mayor rendimiento y un menor consumo de batería mientras se ejecuta el software.
+
+Con esta corrección, cada elemento del juego se mostrará con el brillo adecuado. Además, también se ha corregido el brillo excesivo presente en las cinemáticas cuando se reproducían desde el menú de opciones, ya que se veían afectadas por esa iluminación incorrecta.
+
+Los cambios introducidos en esta actualización también han mejorado el rendimiento de las partículas del juego en general, ya que dichas partículas están formadas por pequeños polígonos considerados como no iluminados. Al evitar procesar iluminación sobre ellos, el dispositivo realiza mucho menos trabajo y evita cálculos completamente innecesarios.
+
+En resumen, esta actualización corrige el brillo excesivo presente anteriormente y mejora de forma significativa el rendimiento al tratarse de un cambio profundo realizado sobre el backend gráfico del juego. A partir de ahora, una gran cantidad de vértices pertenecientes a polígonos sin iluminación dejarán de ejecutar costosos cálculos de iluminación en el *vertex shader*, reduciendo la carga de trabajo de la GPU y consiguiendo un menor consumo energético. Como resultado, incluso en aquellos dispositivos donde el juego ya funcionaba correctamente, esta optimización permitirá reducir el consumo de batería y aumentar la eficiencia general del motor gráfico.
+
 ## Versión 0.92.2 - Personalización de controles táctiles del minijuego
 
 Se ha añadido una opción para acceder al editor de controles táctiles desde el **menú de pausa del minijuego**.
@@ -445,6 +459,20 @@ La versión **0.87** es un paso enorme para hacer que el port sea mucho más có
 ---
 
 # 🇬🇧 English
+
+## Version 0.93 - OpenGL ES Lighting Fix and Performance Improvements
+
+A visual issue affecting the **OpenGL ES** renderer (used on Android) has been fixed. This issue caused certain game elements to appear with excessive brightness or incorrect lighting.
+
+The root cause was the handling of materials configured as **unlit**. Before this change, the *vertex shader* always executed lighting calculations, regardless of whether a material was supposed to receive lighting or not.
+
+This update also improves performance, as unlit materials no longer need to process lighting calculations. As a result, a significant amount of unnecessary work is eliminated, leading to better performance and lower battery consumption while the game is running.
+
+With this fix, every game element is now rendered with the correct brightness. Additionally, the excessive brightness affecting in-game cinematics when played from the options menu has also been corrected, as they were impacted by the same lighting issue.
+
+The changes introduced in this update also improve the overall performance of the game's particle effects, since these particles are composed of small polygons that are considered unlit. By skipping unnecessary lighting calculations, the device performs considerably less work and avoids costly operations.
+
+In summary, this update fixes the excessive brightness present in previous versions while significantly improving performance through a deep optimization of the game's graphics backend. From now on, a large number of vertices belonging to unlit polygons will no longer execute expensive lighting calculations in the *vertex shader*, reducing GPU workload and lowering power consumption. As a result, even on devices where the game was already running correctly, this optimization helps reduce battery usage and further improves the overall efficiency of the graphics engine.
 
 ## Version 0.92.2 - Minigame Touch Control Customization
 
@@ -888,6 +916,20 @@ Version **0.87** is a huge step toward making the port feel much more comfortabl
 
 # 🇫🇷 Français
 
+## Version 0.93 - Correction de l'éclairage OpenGL ES et amélioration des performances
+
+Un problème visuel affectant le moteur de rendu **OpenGL ES** (utilisé sur Android) a été corrigé. Ce problème provoquait un éclairage incorrect ou une luminosité excessive sur certains éléments du jeu.
+
+L'origine du problème se trouvait dans la gestion des matériaux configurés comme **non éclairés** (*unlit*). Avant cette modification, le *vertex shader* exécutait systématiquement les calculs d'éclairage, que le matériau soit censé recevoir de la lumière ou non.
+
+Cette mise à jour améliore également les performances, car les matériaux non éclairés n'ont désormais plus besoin de traiter les calculs d'éclairage. Cela élimine un grand nombre de calculs inutiles, ce qui se traduit par de meilleures performances et une consommation de batterie réduite pendant l'exécution du jeu.
+
+Grâce à cette correction, tous les éléments du jeu sont désormais affichés avec une luminosité correcte. De plus, la luminosité excessive observée dans les cinématiques lorsqu'elles étaient lancées depuis le menu des options a également été corrigée, puisqu'elles étaient affectées par le même problème d'éclairage.
+
+Les modifications apportées dans cette mise à jour améliorent également les performances globales des effets de particules, car ces derniers sont composés de petits polygones considérés comme non éclairés. En supprimant les calculs d'éclairage inutiles, l'appareil effectue beaucoup moins de travail et évite des opérations coûteuses.
+
+En résumé, cette mise à jour corrige la luminosité excessive présente dans les versions précédentes tout en améliorant considérablement les performances grâce à une optimisation en profondeur du backend graphique du jeu. Désormais, un grand nombre de sommets appartenant à des polygones non éclairés n'exécuteront plus les coûteux calculs d'éclairage dans le *vertex shader*, réduisant ainsi la charge de travail du GPU et la consommation d'énergie. Même sur les appareils où le jeu fonctionnait déjà correctement, cette optimisation permettra de diminuer la consommation de batterie et d'améliorer l'efficacité globale du moteur graphique.
+
 ## Version 0.92.2 - Personnalisation des commandes tactiles du mini-jeu
 
 Une nouvelle option permettant d'acc&eacute;der &agrave; l'&eacute;diteur des commandes tactiles a &eacute;t&eacute; ajout&eacute;e au **menu pause du mini-jeu**.
@@ -1327,6 +1369,20 @@ La version **0.87** est une énorme avancée pour rendre le port beaucoup plus c
 ---
 
 # 🇩🇪 Deutsch
+
+## Version 0.93 - OpenGL ES-Beleuchtungsfehler behoben und Leistungsverbesserungen
+
+Ein Darstellungsfehler im **OpenGL ES**-Renderer (verwendet unter Android) wurde behoben. Dieser führte dazu, dass bestimmte Spielelemente mit übermäßiger Helligkeit oder einer fehlerhaften Beleuchtung dargestellt wurden.
+
+Die Ursache lag in der Behandlung von Materialien, die als **unbeleuchtet** (*unlit*) konfiguriert sind. Vor dieser Änderung führte der *Vertex Shader* stets Beleuchtungsberechnungen aus – unabhängig davon, ob ein Material überhaupt beleuchtet werden sollte.
+
+Mit diesem Update wurde außerdem die Leistung verbessert, da unbeleuchtete Materialien nun keine Beleuchtungsberechnungen mehr durchführen müssen. Dadurch werden zahlreiche unnötige Berechnungen eingespart, was zu einer höheren Leistung und einem geringeren Akkuverbrauch während des Spielens führt.
+
+Mit dieser Korrektur wird nun jedes Spielelement mit der richtigen Helligkeit dargestellt. Darüber hinaus wurde auch die übermäßige Helligkeit der Zwischensequenzen behoben, wenn diese über das Optionsmenü abgespielt wurden, da auch sie von diesem Beleuchtungsfehler betroffen waren.
+
+Die in diesem Update vorgenommenen Änderungen verbessern außerdem die Gesamtleistung der Partikeleffekte, da diese aus kleinen Polygonen bestehen, die als unbeleuchtet gelten. Durch das Überspringen unnötiger Beleuchtungsberechnungen muss das Gerät deutlich weniger Arbeit verrichten und vermeidet kostspielige Berechnungen.
+
+Zusammenfassend beseitigt dieses Update die zuvor vorhandene übermäßige Helligkeit und verbessert die Leistung deutlich durch eine tiefgreifende Optimierung des Grafik-Backends des Spiels. Von nun an führen zahlreiche Vertices, die zu unbeleuchteten Polygonen gehören, keine aufwendigen Beleuchtungsberechnungen mehr im *Vertex Shader* aus. Dadurch wird die GPU entlastet und der Energieverbrauch reduziert. Selbst auf Geräten, auf denen das Spiel bereits einwandfrei lief, sorgt diese Optimierung für einen geringeren Akkuverbrauch und eine insgesamt höhere Effizienz der Grafik-Engine.
 
 ## Version 0.92.2 &ndash; Anpassung der Touch-Steuerung im Minispiel
 
