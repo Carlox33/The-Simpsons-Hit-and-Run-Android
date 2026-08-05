@@ -60,7 +60,7 @@ Este proyecto continúa el trabajo de la comunidad con el objetivo de llevar **T
 
 ## Estado del proyecto
 
-Versión actual: **0.92**
+Versión actual: 
 
 * ✔ Controles táctiles nativos integrados con el juego y sus herramientas propias.
 * ✔ Nuevo menú para configurar los controles táctiles posición y tamaño dentro del juego. Para más información revisa [Controles Tactiles](TOUCH_CONTROLS.md)
@@ -164,7 +164,7 @@ This project continues the community effort with the goal of bringing **The Simp
 
 ## Project Status
 
-Current version: **0.92**
+Current version: 
 
 * ✔ Native touch controls integrated with the game and its own tools.
 * ✔ New menu for configuring the position and size of the in-game touch controls. For more information, see [Touch Controls](TOUCH_CONTROLS.md).
@@ -268,7 +268,7 @@ Ce projet poursuit le travail de la communauté avec l'objectif d'amener **The S
 
 ## État du projet
 
-Version actuelle : **0.92**
+Version actuelle : 
 
 * ✔ Commandes tactiles natives intégrées au jeu et à ses propres outils.
 * ✔ Nouveau menu permettant de configurer la position et la taille des commandes tactiles dans le jeu. Pour plus d’informations, consultez [Commandes tactiles](TOUCH_CONTROLS.md).
@@ -372,7 +372,7 @@ Dieses Projekt führt die Arbeit der Community fort, mit dem Ziel, **The Simpson
 
 ## Projektstatus
 
-Aktuelle Version: **0.92**
+Aktuelle Version: 
 
 * ✔ Native Touch-Steuerung, die in das Spiel und die eigenen Tools integriert ist.
 * ✔ Neues Menü zum Anpassen der Position und Größe der Touch-Steuerung im Spiel. Weitere Informationen findest du unter [Touch-Steuerung](TOUCH_CONTROLS.md).
