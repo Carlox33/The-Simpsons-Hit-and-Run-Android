@@ -658,7 +658,7 @@ bool SteerAction::ShouldRelease(void)
        return true;
    }
 
-   float steer = GetCharacterManager()->GetCharacter(0)->GetController()->GetValue(CharacterController::LeftStickX);
+   float steer = mpCharacter->GetTargetVehicle()->mUnmodifiedInputWheelTurnAngle;
    return (rmt::Abs(steer) < 0.1f) || (mpCharacter->GetTargetVehicle()->IsInReverse()); 
 ;
 }
