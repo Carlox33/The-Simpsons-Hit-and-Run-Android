@@ -463,15 +463,14 @@ void InCar::Update( float timeins )
         }
         */
 
-        // Use the final steering input calculated by VehicleCentral.
-        // It includes analogue, D-pad and touch steering inputs.
-        if(pVehicle)
+        VehicleController* v = GetVehicleCentral()->GetVehicleController(GetVehicleCentral()->GetVehicleId(mpCharacter->GetTargetVehicle(), false));
+        if(v)
         {
-            const float steer = pVehicle->mUnmodifiedInputWheelTurnAngle;
+            float steer = pVehicle->mUnmodifiedInputWheelTurnAngle;
 
             Action* action = NULL;
 
-            float speed = pVehicle->GetSpeedKmh();
+            float speed = mpCharacter->GetTargetVehicle()->GetSpeedKmh();
 
             if(mIsDriver)
             {
@@ -479,21 +478,21 @@ void InCar::Update( float timeins )
                 {
                     action =  new SteerAction(mpCharacter, (steer < 0) ? "turn_left_driver" : "turn_right_driver", 10.0f);
                 }
-                else if (pVehicle->IsInReverse())
+                else if (mpCharacter->GetTargetVehicle()->IsInReverse())
                 {
                     action = new ReverseAction(mpCharacter, "look_back_driver", 25.0f);
                 }
-                else if ((pVehicle->GetAccelMss() > 8.0f) && (speed < 20.0f))
+                else if ((mpCharacter->GetTargetVehicle()->GetAccelMss() > 8.0f) && (speed < 20.0f))
                 {
                     action = new AccelAction(mpCharacter, "accelerate_driver", 15.0f);
                 }
-                else if((pVehicle->GetAccelMss() < -10.0f) && (speed > 50.0f))
+                else if((mpCharacter->GetTargetVehicle()->GetAccelMss() < -10.0f) && (speed > 50.0f))
                 {
                     action = new DecelAction(mpCharacter, "decelerate_driver", 15.0f);
                 }
-                else if(pVehicle->GetAccelMss() < -25.0f)
+                else if(mpCharacter->GetTargetVehicle()->GetAccelMss() < -25.0f)
                 {
-                    if(pVehicle->mVelocityCM.DotProduct(pVehicle->mVehicleFacing) > 0.0f)
+                    if(mpCharacter->GetTargetVehicle()->mVelocityCM.DotProduct(mpCharacter->GetTargetVehicle()->mVehicleFacing) > 0.0f)
                     {
                         action = new PlayAnimationAction(mpCharacter, "crash_driver");
                     }
