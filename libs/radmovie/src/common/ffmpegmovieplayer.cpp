@@ -289,7 +289,7 @@ static std::string RadMakeAbsoluteGamePath(const char* path)
     if (base.find("/Android/data/") == std::string::npos)
     {
         // OJO: aquí sí tienes hardcodeado el package (igual que en tu fallback actual)
-        base += "/Android/data/org.libsdl.app/files";
+        base += "/Android/data/com.c4rlox.simpsons/files/";
     }
 
     if (!base.empty() && base.back() != '/')
