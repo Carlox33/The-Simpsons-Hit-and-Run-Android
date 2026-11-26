@@ -22,6 +22,7 @@
 
 #include <radoptions.hpp>
 #ifdef RAD_ANDROID
+    #include <radandroidstorage.hpp>
     #include <string>
     #include <errno.h>
     #include <cstdio>
@@ -256,7 +257,7 @@ static std::string RadMakeAbsoluteGamePath(const char* path)
 */
 
 
-// Trial storage mode: match the drive without centralizing the base path yet.
+// Resolve movies using the same storage mode and shared root as the drive.
 #ifdef RAD_ANDROID
 #include <SDL_system.h>
 #include <string>
@@ -274,13 +275,13 @@ static std::string RadMakeAbsoluteGamePath(const char* path)
     const char* storageMode = SDL_getenv("SHAR_STORAGE_MODE");
     const bool useSharedStorage = storageMode && SDL_strcmp(storageMode, "shared") == 0;
     const char* ext = useSharedStorage
-        ? "/storage/emulated/0/c4rloxSimpsons"
+        ? radGetAndroidSharedStoragePath()
         : SDL_AndroidGetExternalStoragePath();
 
     // Never append Android/data to a valid shared folder. Keep fallback in
     // the selected mode rather than redirecting videos to another installation.
     std::string base = (ext && ext[0]) ? ext : (useSharedStorage
-        ? "/storage/emulated/0/c4rloxSimpsons"
+        ? radGetAndroidSharedStoragePath()
         : "/storage/emulated/0/Android/data/com.c4rlox.simpsons/files");
 
     for (char& c : base) if (c == '\\') c = '/';

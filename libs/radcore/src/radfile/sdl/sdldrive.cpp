@@ -43,6 +43,7 @@
 #include <string.h>     // strerror()
 #include <sys/stat.h>   // stat()
 #include <SDL_system.h>
+#include <radandroidstorage.hpp>
 #include <jni.h>
 #endif
 
@@ -362,15 +363,14 @@ radSdlDrive::radSdlDrive(const char* pdrivespec, radMemoryAllocator alloc)
 #endif
 
     // ============================================================
-    // Trial storage mode is selected once in Java before SDL_main starts.
-    // Keep this path local until the storage consumers are centralized.
+    // Storage mode is selected once in Java before SDL_main starts.
     // ============================================================
 #if defined(RAD_ANDROID)
 
     const char* storageMode = SDL_getenv("SHAR_STORAGE_MODE");
     const bool useSharedStorage = storageMode && SDL_strcmp(storageMode, "shared") == 0;
     const char* ext = useSharedStorage
-        ? "/storage/emulated/0/c4rloxSimpsons"
+        ? radGetAndroidSharedStoragePath()
         : SDL_AndroidGetExternalStoragePath();
 
     if (ext && ext[0])
@@ -383,7 +383,7 @@ radSdlDrive::radSdlDrive(const char* pdrivespec, radMemoryAllocator alloc)
     {
         // Keep even the fallback in the selected mode.
         const char* fallback = useSharedStorage
-            ? "/storage/emulated/0/c4rloxSimpsons/"
+            ? radGetAndroidSharedStoragePath()
             : "/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/";
         strncpy(m_DrivePath, fallback, radFileFilenameMax);
         m_DrivePath[radFileFilenameMax] = '\0';

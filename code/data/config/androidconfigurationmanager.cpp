@@ -5,6 +5,7 @@
 
 #if defined(RAD_ANDROID)
     #include <SDL.h>
+    #include <radandroidstorage.hpp>
     #include <sys/stat.h>
     #include <errno.h>
 #endif
@@ -183,7 +184,7 @@ bool AndroidConfigurationManager::BuildPaths()
     const bool useSharedStorage =
         storageMode && SDL_strcmp( storageMode, "shared" ) == 0;
     const char* basePath = useSharedStorage
-        ? "/storage/emulated/0/c4rloxSimpsons"
+        ? radGetAndroidSharedStoragePath()
         : SDL_AndroidGetExternalStoragePath();
 
     // Preserve the old internal fallback only for existing legacy installations.

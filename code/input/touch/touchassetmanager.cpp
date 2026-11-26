@@ -10,6 +10,7 @@
 #if defined(RAD_ANDROID)
 #include <SDL.h>
 #include <SDL_system.h>
+#include <radandroidstorage.hpp>
 #include <android/log.h>
 
 #define TOUCH_ASSET_MANAGER_LOG_TAG "SimpsonsHitAndRun"
@@ -652,7 +653,7 @@ bool TouchAssetManager::BuildAssetRoot()
     const bool useSharedStorage =
         storageMode && SDL_strcmp( storageMode, "shared" ) == 0;
     const char* storagePath = useSharedStorage
-        ? "/storage/emulated/0/c4rloxSimpsons"
+        ? radGetAndroidSharedStoragePath()
         : SDL_AndroidGetExternalStoragePath();
 
     if ( storagePath == 0 || storagePath[ 0 ] == '\0' )

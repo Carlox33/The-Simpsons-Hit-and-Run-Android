@@ -24,6 +24,7 @@ import android.widget.TextView;
 import org.libsdl.app.R;
 import org.libsdl.app.SDLActivity;
 import org.libsdl.app.SDLSurface;
+import org.libsdl.app.SHARStoragePaths;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,8 +36,7 @@ public class SimpsonsActivity extends SDLActivity {
     private static final String KEY_INITIAL_GAME_FILES_CONFIRMED = "initial_game_files_confirmed";
     private static final int REQUEST_STORAGE = 4201;
 
-    // Trial implementation: each consumer still owns its path literal.
-    // Only the legacy/shared decision is shared, never re-detected during a run.
+    // The legacy/shared decision is selected once, never re-detected during a run.
     private boolean mUseSharedStorage;
     private boolean mStorageModeSelected;
     private volatile boolean mStorageReady;
@@ -97,7 +97,7 @@ public class SimpsonsActivity extends SDLActivity {
 
     @Override
     protected SDLSurface createSDLSurface(Context context) {
-        // This is a mode, not a centralized base path. Set it before any native reader.
+        // Set the selected mode before any native reader resolves its storage root.
         nativeSetenv("SHAR_STORAGE_MODE", mUseSharedStorage ? "shared" : "legacy");
         nativeSetenv("SHAR_INITIAL_GAME_FILES_CONFIRMED", mInitialGameFilesConfirmed ? "1" : "0");
         return super.createSDLSurface(context);
@@ -164,7 +164,7 @@ public class SimpsonsActivity extends SDLActivity {
 
     private File getActiveStorageDirectory() {
         if (mUseSharedStorage) {
-            return new File("/storage/emulated/0/c4rloxSimpsons");
+            return SHARStoragePaths.getSharedGameDirectory(this);
         }
         File legacyRoot = getExternalFilesDir(null);
         return legacyRoot != null ? legacyRoot

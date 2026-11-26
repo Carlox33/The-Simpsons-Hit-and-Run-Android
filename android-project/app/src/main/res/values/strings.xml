@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Simpsons</string>
-    <string name="storage_setup_message">The app creates the game folder on its first launch.\n\nFolder:\n%1$s\n\n%2$s\n\nCopy the original PC release assets into this folder, preserving their directory structure. Then close and reopen the app.</string>
+    <string name="storage_setup_message">The app creates the game folder on its first launch.\n\nFolder:\n%1$s\n(This folder is at the root of shared storage, alongside folders such as Download and DCIM.)\n\n%2$s\n\nCopy the original PC release assets into this folder, preserving their directory structure. Then close and reopen the app.</string>
     <string name="storage_permission_message">To read and write files in a non-private folder (outside Android/data), you need to grant this app storage access.\nThe first launch takes 2-3 seconds longer because the touch control icons need to be extracted and copied.</string>
     <string name="storage_directory_error">The game folder could not be created or is not writable. Check storage access and available space.</string>
     <string name="storage_settings_error">Storage settings could not be opened. Enable storage access in Android Settings, then close and reopen the app.</string>

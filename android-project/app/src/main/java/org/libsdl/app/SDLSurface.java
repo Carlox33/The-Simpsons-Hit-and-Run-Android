@@ -170,10 +170,9 @@ public class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     private File getSHARStorageBaseDir() {
-        // Trial path kept here deliberately; only the startup mode is shared.
         if (getContext() instanceof SDLActivity
                 && ((SDLActivity) getContext()).usesSharedGameStorage()) {
-            return new File("/storage/emulated/0/c4rloxSimpsons");
+            return SHARStoragePaths.getSharedGameDirectory(getContext());
         }
 
         File baseDir = null;
