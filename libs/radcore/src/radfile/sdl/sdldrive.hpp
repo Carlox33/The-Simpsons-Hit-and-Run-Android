@@ -131,6 +131,9 @@ public:
 private:
     void SetMediaInfo( void );
     void BuildFileSpec( const char* fileName, char* fullName, unsigned int size );
+#if defined(RAD_ANDROID)
+    void RecordInitialGameFileOpen( const char* relativePath );
+#endif
 #if SDL_MAJOR_VERSION > 2
     radFileError TranslateDirInfo( IRadDrive::DirectoryInfo*   pDirectoryInfo,
                                    const SDL_PathInfo*         pPathInfo,
@@ -139,6 +142,10 @@ private:
 
     unsigned int    m_Capabilities;
     unsigned int    m_OpenFiles;
+#if defined(RAD_ANDROID)
+    bool            m_TrackInitialGameFiles;
+    unsigned int    m_InitialGameFilesOpened;
+#endif
     char            m_DriveName[ radFileDrivenameMax + 1 ];
     char            m_DrivePath[ radFileFilenameMax + 1 ];
 
@@ -149,4 +156,3 @@ private:
 };
 
 #endif // SDLDRIVE_HPP
-

@@ -318,6 +318,24 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         return new SDLSurface(context);
     }
 
+    // Subclasses can wait for storage/permissions before reading Surface configuration
+    // or starting SDL_main. Check this in handleNativeState too: focus and Surface
+    // callbacks can resume SDL without going through resumeNativeThread().
+    protected boolean isNativeStartupReady() {
+        return true;
+    }
+
+    public boolean usesSharedGameStorage() {
+        return false;
+    }
+
+    private void createSDLSurfaceIfReady() {
+        if (mSurface == null && isNativeStartupReady()) {
+            mSurface = createSDLSurface(this);
+            mLayout.addView(mSurface, 0);
+        }
+    }
+
     // Setup
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -398,11 +416,9 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         mHIDDeviceManager = HIDDeviceManager.acquire(this);
 
-        // Set up the surface
-        mSurface = createSDLSurface(this);
-
+        // The game may defer the Surface until its storage is ready.
         mLayout = new RelativeLayout(this);
-        mLayout.addView(mSurface);
+        createSDLSurfaceIfReady();
 
         // Get our current screen orientation and pass it down.
         mCurrentOrientation = SDLActivity.getCurrentOrientation();
@@ -454,6 +470,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
            return;
         }
 
+        createSDLSurfaceIfReady();
         SDLActivity.handleNativeState();
     }
 
@@ -717,7 +734,10 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         // Try a transition to resumed state
         if (mNextNativeState == NativeState.RESUMED) {
-            if (mSurface.mIsSurfaceReady && mHasFocus && mIsResumedCalled) {
+            if (mSingleton == null || !mSingleton.isNativeStartupReady()) {
+                return;
+            }
+            if (mSurface != null && mSurface.mIsSurfaceReady && mHasFocus && mIsResumedCalled) {
                 if (mSDLThread == null) {
                     // This is the entry point to the C app.
                     // Start up the C app thread and enable sensor input for the first time
@@ -816,7 +836,9 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
                     mScreenKeyboardShown = false;
 
-                    mSurface.requestFocus();
+                    if (mSurface != null) {
+                        mSurface.requestFocus();
+                    }
                 }
                 break;
             case COMMAND_SET_KEEP_SCREEN_ON:
@@ -858,7 +880,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
                 boolean bShouldWait = false;
 
-                if (data instanceof Integer) {
+                if (data instanceof Integer && mSurface != null) {
                     // Let's figure out if we're already laid out fullscreen or not.
                     Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
                     DisplayMetrics realMetrics = new DisplayMetrics();

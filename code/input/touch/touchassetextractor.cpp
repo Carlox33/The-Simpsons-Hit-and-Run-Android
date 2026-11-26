@@ -14,6 +14,18 @@
 #define TOUCH_ASSET_LOG_TAG "SimpsonsHitAndRun"
 #define TOUCH_ASSET_LOGI(...) __android_log_print(ANDROID_LOG_INFO, TOUCH_ASSET_LOG_TAG, __VA_ARGS__)
 #define TOUCH_ASSET_LOGE(...) __android_log_print(ANDROID_LOG_ERROR, TOUCH_ASSET_LOG_TAG, __VA_ARGS__)
+
+// File-local trial path, not a shared provider. All five extraction/version
+// operations must use the same root as the loader and touch configuration.
+static const char* GetTouchExtractionStoragePath()
+{
+    const char* storageMode = SDL_getenv( "SHAR_STORAGE_MODE" );
+    const bool useSharedStorage =
+        storageMode && SDL_strcmp( storageMode, "shared" ) == 0;
+    return useSharedStorage
+        ? "/storage/emulated/0/c4rloxSimpsons"
+        : SDL_AndroidGetExternalStoragePath();
+}
 #endif
 
 // Increase this when you change bundled touch PNGs and want to force recopy.
@@ -175,7 +187,7 @@ bool TouchAssetExtractor::BuildOutputRoot()
 #if !defined(RAD_ANDROID)
     return true;
 #else
-    const char* storagePath = SDL_AndroidGetExternalStoragePath();
+    const char* storagePath = GetTouchExtractionStoragePath();
 
     if ( storagePath == NULL || storagePath[ 0 ] == '\0' )
     {
@@ -204,7 +216,7 @@ bool TouchAssetExtractor::NeedsExtraction() const
         return true;
     }
 
-    const char* storagePath = SDL_AndroidGetExternalStoragePath();
+    const char* storagePath = GetTouchExtractionStoragePath();
 
     if ( storagePath == NULL || storagePath[ 0 ] == '\0' )
     {
@@ -262,7 +274,7 @@ bool TouchAssetExtractor::CopyAssetFile( const char* relativePath )
         return false;
     }
 
-    const char* storagePath = SDL_AndroidGetExternalStoragePath();
+    const char* storagePath = GetTouchExtractionStoragePath();
 
     if ( storagePath == NULL || storagePath[ 0 ] == '\0' )
     {
@@ -474,7 +486,7 @@ bool TouchAssetExtractor::WriteVersionFile() const
 #if !defined(RAD_ANDROID)
     return true;
 #else
-    const char* storagePath = SDL_AndroidGetExternalStoragePath();
+    const char* storagePath = GetTouchExtractionStoragePath();
 
     if ( storagePath == NULL || storagePath[ 0 ] == '\0' )
     {
@@ -514,7 +526,7 @@ bool TouchAssetExtractor::IsVersionFileValid() const
 #if !defined(RAD_ANDROID)
     return true;
 #else
-    const char* storagePath = SDL_AndroidGetExternalStoragePath();
+    const char* storagePath = GetTouchExtractionStoragePath();
 
     if ( storagePath == NULL || storagePath[ 0 ] == '\0' )
     {

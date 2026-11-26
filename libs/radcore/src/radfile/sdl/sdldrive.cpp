@@ -43,6 +43,7 @@
 #include <string.h>     // strerror()
 #include <sys/stat.h>   // stat()
 #include <SDL_system.h>
+#include <jni.h>
 #endif
 
 
@@ -63,6 +64,51 @@ static void LogPathStatus(const char* label, const char* path)
         LOGI("%s: stat('%s') FAIL errno=%d (%s)",
              label, path, errno, strerror(errno));
     }
+}
+
+// Called only after the original loader opens all three initial game files.
+// Do not turn a preference/JNI failure into a drive error or open extra files.
+static bool ConfirmAndroidInitialGameFilesOpened()
+{
+    JNIEnv* env = static_cast<JNIEnv*>( SDL_AndroidGetJNIEnv() );
+    if( env == NULL )
+    {
+        return false;
+    }
+
+    bool confirmed = false;
+    jobject activity = static_cast<jobject>( SDL_AndroidGetActivity() );
+    jclass activityClass = activity != NULL ? env->GetObjectClass( activity ) : NULL;
+    if( activityClass != NULL && !env->ExceptionCheck() )
+    {
+        jmethodID callback = env->GetMethodID( activityClass,
+                                             "onInitialGameFilesOpened",
+                                             "()Z" );
+        if( callback != NULL && !env->ExceptionCheck() )
+        {
+            const jboolean saved = env->CallBooleanMethod( activity, callback );
+            confirmed = !env->ExceptionCheck() && saved == JNI_TRUE;
+        }
+    }
+
+    if( env->ExceptionCheck() )
+    {
+        env->ExceptionClear();
+        LOGI( "Could not persist the initial game-file access confirmation." );
+    }
+    if( activityClass != NULL )
+    {
+        env->DeleteLocalRef( activityClass );
+    }
+    if( activity != NULL )
+    {
+        env->DeleteLocalRef( activity );
+    }
+    if( confirmed )
+    {
+        SDL_setenv( "SHAR_INITIAL_GAME_FILES_CONFIRMED", "1", 1 );
+    }
+    return confirmed;
 }
 #endif
 
@@ -273,8 +319,18 @@ radSdlDrive::radSdlDrive(const char* pdrivespec, radMemoryAllocator alloc)
     :
     radDrive(),
     m_OpenFiles(0),
+#if defined(RAD_ANDROID)
+    m_TrackInitialGameFiles(false),
+    m_InitialGameFilesOpened(0),
+#endif
     m_pMutex(NULL)
 {
+#if defined(RAD_ANDROID)
+    const char* initialFilesConfirmed = SDL_getenv("SHAR_INITIAL_GAME_FILES_CONFIRMED");
+    m_TrackInitialGameFiles =
+        initialFilesConfirmed && SDL_strcmp(initialFilesConfirmed, "0") == 0;
+#endif
+
     radThreadCreateMutex(&m_pMutex, alloc);
     rAssert(m_pMutex != NULL);
 
@@ -306,13 +362,16 @@ radSdlDrive::radSdlDrive(const char* pdrivespec, radMemoryAllocator alloc)
 #endif
 
     // ============================================================
-    // CAMBIO AQUÍ: En Android FORZAMOS SIEMPRE el root al external
-    // storage "Android/data/<package>/files/" usando SDL.
+    // Trial storage mode is selected once in Java before SDL_main starts.
+    // Keep this path local until the storage consumers are centralized.
     // ============================================================
 #if defined(RAD_ANDROID)
 
-    // CAMBIO AQUÍ: usamos SDL_AndroidGetExternalStoragePath (SDL_system.h)
-    const char* ext = SDL_AndroidGetExternalStoragePath();
+    const char* storageMode = SDL_getenv("SHAR_STORAGE_MODE");
+    const bool useSharedStorage = storageMode && SDL_strcmp(storageMode, "shared") == 0;
+    const char* ext = useSharedStorage
+        ? "/storage/emulated/0/c4rloxSimpsons"
+        : SDL_AndroidGetExternalStoragePath();
 
     if (ext && ext[0])
     {
@@ -322,8 +381,11 @@ radSdlDrive::radSdlDrive(const char* pdrivespec, radMemoryAllocator alloc)
     }
     else
     {
-        // CAMBIO AQUÍ: fallback por si SDL devuelve null (raro)
-        strncpy(m_DrivePath, "/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/", radFileFilenameMax);
+        // Keep even the fallback in the selected mode.
+        const char* fallback = useSharedStorage
+            ? "/storage/emulated/0/c4rloxSimpsons/"
+            : "/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/";
+        strncpy(m_DrivePath, fallback, radFileFilenameMax);
         m_DrivePath[radFileFilenameMax] = '\0';
     }
 
@@ -527,6 +589,16 @@ radDrive::CompletionStatus radSdlDrive::OpenFile
         *pSize = SDL_GetIOSize( (SDL_IOStream*)*pHandle );
 #endif
         m_LastError = Success;
+#if defined(RAD_ANDROID)
+        // Reuse this successful read-only open and its existing size query.
+        // Ignore writes/creation, empty files, duplicates and unrelated assets.
+        if( m_TrackInitialGameFiles && flags == OpenExisting && !writeAccess &&
+            *pSize > 0 && *pSize != UINT_MAX )
+        {
+            // BuildFileSpec has already normalized the directory separators.
+            RecordInitialGameFileOpen( fullName + strlen( m_DrivePath ) );
+        }
+#endif
         return Complete;
     }
     else
@@ -535,6 +607,42 @@ radDrive::CompletionStatus radSdlDrive::OpenFile
         return Error;
     }
 }
+
+#if defined(RAD_ANDROID)
+void radSdlDrive::RecordInitialGameFileOpen( const char* relativePath )
+{
+    // Ignore optional leading separators and "./" in otherwise relative paths.
+    while( relativePath[ 0 ] == '/' ||
+           ( relativePath[ 0 ] == '.' && relativePath[ 1 ] == '/' ) )
+    {
+        relativePath += relativePath[ 0 ] == '/' ? 1 : 2;
+    }
+
+    unsigned int fileBit = 0;
+    if( SDL_strcasecmp( relativePath, "scripts.rcf" ) == 0 )
+    {
+        fileBit = 1;
+    }
+    else if( SDL_strcasecmp( relativePath, "soundfx.rcf" ) == 0 )
+    {
+        fileBit = 2;
+    }
+    else if( SDL_strcasecmp( relativePath, "art/frontend/scrooby/bootup.p3d" ) == 0 )
+    {
+        fileBit = 4;
+    }
+    if( fileBit == 0 )
+    {
+        return;
+    }
+
+    m_InitialGameFilesOpened |= fileBit;
+    if( m_InitialGameFilesOpened == 7 && ConfirmAndroidInitialGameFilesOpened() )
+    {
+        m_TrackInitialGameFiles = false;
+    }
+}
+#endif
 
 //=============================================================================
 // Function:    radSdlDrive::CloseFile

@@ -179,9 +179,15 @@ void AndroidConfigurationManager::SetPhoneVibrationEnabled( bool enabled )
 
 bool AndroidConfigurationManager::BuildPaths()
 {
-    const char* basePath = SDL_AndroidGetExternalStoragePath();
+    const char* storageMode = SDL_getenv( "SHAR_STORAGE_MODE" );
+    const bool useSharedStorage =
+        storageMode && SDL_strcmp( storageMode, "shared" ) == 0;
+    const char* basePath = useSharedStorage
+        ? "/storage/emulated/0/c4rloxSimpsons"
+        : SDL_AndroidGetExternalStoragePath();
 
-    if( basePath == NULL || basePath[ 0 ] == '\0' )
+    // Preserve the old internal fallback only for existing legacy installations.
+    if( !useSharedStorage && ( basePath == NULL || basePath[ 0 ] == '\0' ) )
     {
         basePath = SDL_AndroidGetInternalStoragePath();
     }

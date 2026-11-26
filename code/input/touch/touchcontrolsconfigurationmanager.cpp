@@ -555,7 +555,12 @@ bool TouchControlsConfigurationManager::BuildPaths()
 
     return true;
 #else
-    const char* storagePath = SDL_AndroidGetExternalStoragePath();
+    const char* storageMode = SDL_getenv( "SHAR_STORAGE_MODE" );
+    const bool useSharedStorage =
+        storageMode && SDL_strcmp( storageMode, "shared" ) == 0;
+    const char* storagePath = useSharedStorage
+        ? "/storage/emulated/0/c4rloxSimpsons"
+        : SDL_AndroidGetExternalStoragePath();
 
     if ( storagePath == 0 || storagePath[ 0 ] == '\0' )
     {

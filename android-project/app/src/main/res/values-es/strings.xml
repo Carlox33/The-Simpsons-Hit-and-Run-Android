@@ -1,0 +1,8 @@
+<resources>
+    <string name="storage_setup_message">En el primer arranque de la app se crea la carpeta del juego.\n\nCarpeta:\n%1$s\n\n%2$s\n\nCopia los assets originales de la versión final de PC en esta carpeta, conservando su estructura. Después, cierra y vuelve a abrir la app.</string>
+    <string name="storage_permission_message">Para poder leer y escribir archivos en  una carpeta NO privada (fuera de Android/data), necesitas autorizar el acceso al almacenamiento para esta aplicación.\nEl primer arranque es 2-3 segundos más lento debido a la extracción de los iconos táctiles y al copiado de los mismos.</string>
+    <string name="storage_directory_error">No se ha podido crear la carpeta del juego o escribir en ella. Comprueba el acceso al almacenamiento y el espacio disponible.</string>
+    <string name="storage_settings_error">No se han podido abrir los ajustes de almacenamiento. Autoriza el acceso desde los ajustes de Android y después cierra y vuelve a abrir la app.</string>
+    <string name="storage_grant_permission">Autorizar acceso al almacenamiento</string>
+    <string name="storage_exit">Salir</string>
+</resources>

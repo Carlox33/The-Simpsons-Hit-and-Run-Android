@@ -256,7 +256,7 @@ static std::string RadMakeAbsoluteGamePath(const char* path)
 */
 
 
-// Ahora pongo una nueva version que no hardcodea el paquete org.libsdl y se supone que nos ofrecera mismo comportamiento correcto que la funcion de arriba
+// Trial storage mode: match the drive without centralizing the base path yet.
 #ifdef RAD_ANDROID
 #include <SDL_system.h>
 #include <string>
@@ -271,26 +271,19 @@ static std::string RadMakeAbsoluteGamePath(const char* path)
     if (p[0] == '/' || (p.size() >= 2 && p[1] == ':') || p.find("://") != std::string::npos)
         return p;
 
-    const char* ext = SDL_AndroidGetExternalStoragePath();
+    const char* storageMode = SDL_getenv("SHAR_STORAGE_MODE");
+    const bool useSharedStorage = storageMode && SDL_strcmp(storageMode, "shared") == 0;
+    const char* ext = useSharedStorage
+        ? "/storage/emulated/0/c4rloxSimpsons"
+        : SDL_AndroidGetExternalStoragePath();
 
-    std::string base;
-    if (ext && ext[0])
-    {
-        base = ext;
-    }
-    else
-    {
-        base = "/storage/emulated/0";
-    }
+    // Never append Android/data to a valid shared folder. Keep fallback in
+    // the selected mode rather than redirecting videos to another installation.
+    std::string base = (ext && ext[0]) ? ext : (useSharedStorage
+        ? "/storage/emulated/0/c4rloxSimpsons"
+        : "/storage/emulated/0/Android/data/com.c4rlox.simpsons/files");
 
     for (char& c : base) if (c == '\\') c = '/';
-
-    // Si SDL solo devuelve "/storage/emulated/0", completamos como haces con el drive “ideal”
-    if (base.find("/Android/data/") == std::string::npos)
-    {
-        // OJO: aquí sí tienes hardcodeado el package (igual que en tu fallback actual)
-        base += "/Android/data/com.c4rlox.simpsons/files/";
-    }
 
     if (!base.empty() && base.back() != '/')
         base.push_back('/');

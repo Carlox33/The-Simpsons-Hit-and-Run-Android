@@ -169,7 +169,13 @@ public class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         mIsSurfaceReady = false;
     }
 
-    private File getSHARPrivateBaseDir() {
+    private File getSHARStorageBaseDir() {
+        // Trial path kept here deliberately; only the startup mode is shared.
+        if (getContext() instanceof SDLActivity
+                && ((SDLActivity) getContext()).usesSharedGameStorage()) {
+            return new File("/storage/emulated/0/c4rloxSimpsons");
+        }
+
         File baseDir = null;
 
         try {
@@ -188,7 +194,7 @@ public class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     private File getSHARResolutionConfigFile() {
-        File baseDir = getSHARPrivateBaseDir();
+        File baseDir = getSHARStorageBaseDir();
 
         if (baseDir == null) {
             return null;
@@ -198,7 +204,7 @@ public class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     private File getSHARTouchModeConfigFile() {
-        File baseDir = getSHARPrivateBaseDir();
+        File baseDir = getSHARStorageBaseDir();
 
         if (baseDir == null) {
             return null;
