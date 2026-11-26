@@ -10,7 +10,7 @@
 #if defined(RAD_ANDROID)
 #include <SDL.h>
 #include <SDL_system.h>
-#include <radandroidstorage.hpp>
+#include <radfile.hpp>
 #include <android/log.h>
 
 #define TOUCH_ASSET_MANAGER_LOG_TAG "SimpsonsHitAndRun"

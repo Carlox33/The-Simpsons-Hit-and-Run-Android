@@ -37,6 +37,11 @@
 #include <radmemory.hpp>
 #include <radthread.hpp>
 
+#if defined(RAD_ANDROID)
+// Shared game storage root, resolved by the SDL drive for this run.
+const char* radGetAndroidSharedStoragePath();
+#endif
+
 //=============================================================================
 // Forward Class/Struct Declarations
 //=============================================================================

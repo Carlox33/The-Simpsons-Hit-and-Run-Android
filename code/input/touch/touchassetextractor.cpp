@@ -6,7 +6,7 @@
 #if defined(RAD_ANDROID)
 #include <SDL.h>
 #include <SDL_system.h>
-#include <radandroidstorage.hpp>
+#include <radfile.hpp>
 #include <sys/stat.h>
 #include <errno.h>
 #include <unistd.h>

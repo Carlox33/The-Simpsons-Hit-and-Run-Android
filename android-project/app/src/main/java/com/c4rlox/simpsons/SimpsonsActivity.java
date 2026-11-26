@@ -24,7 +24,6 @@ import android.widget.TextView;
 import org.libsdl.app.R;
 import org.libsdl.app.SDLActivity;
 import org.libsdl.app.SDLSurface;
-import org.libsdl.app.SHARStoragePaths;
 
 import java.io.File;
 import java.io.IOException;

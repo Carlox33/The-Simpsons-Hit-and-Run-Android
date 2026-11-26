@@ -5,7 +5,7 @@
 
 #if defined(RAD_ANDROID)
     #include <SDL.h>
-    #include <radandroidstorage.hpp>
+    #include <radfile.hpp>
     #include <sys/stat.h>
     #include <errno.h>
 #endif
