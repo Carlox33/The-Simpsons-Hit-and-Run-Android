@@ -205,7 +205,7 @@ void DemoContext::OnStart( ContextEnum previousContext )
     rAssert( sun );
     rm->SetLevelLayerLights( sun );
 
-    float aspect = p3d::display->IsWidescreen() ? (16.0f / 9.0f) : (4.0f / 3.0f);
+    float aspect = p3d::display->IsWidescreen() ? ((float)p3d::display->GetWidth() / (float)p3d::display->GetHeight()) : (4.0f / 3.0f);
 
     unsigned int view = 0;
 

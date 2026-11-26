@@ -456,8 +456,11 @@ void FePure3dObject::Render()
     static const float WIDE_SCREEN_CORRECTION_SCALE = (4.0f / 3.0f) * (9.0f / 16.0f);
     if( m_isWideScreenCorrectionEnabled && p3d::display->IsWidescreen() )
     {
-        width *= WIDE_SCREEN_CORRECTION_SCALE;
-        posX = (posX - 0.5f) * WIDE_SCREEN_CORRECTION_SCALE + 0.5f;
+        float wideScale = (p3d::display->GetWidth() > 0)
+            ? ((4.0f / 3.0f) * ((float)p3d::display->GetHeight() / (float)p3d::display->GetWidth()))
+            : WIDE_SCREEN_CORRECTION_SCALE;
+        width *= wideScale;
+        posX = (posX - 0.5f) * wideScale + 0.5f;
     }
 
     float l = posX + mViewTranslateX;
