@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -33,11 +34,15 @@ public class SimpsonsActivity extends SDLActivity {
     private static final String STORAGE_PREFS = "SimpsonsStorage";
     private static final String KEY_SHARED_STORAGE = "use_shared_game_storage";
     private static final String KEY_INITIAL_GAME_FILES_CONFIRMED = "initial_game_files_confirmed";
+    private static final String KEY_STORAGE_SETUP_PENDING = "storage_setup_pending";
+    private static final String KEY_STORAGE_CLEANUP_PENDING = "storage_cleanup_pending";
     private static final int REQUEST_STORAGE = 4201;
 
-    // The legacy/shared decision is selected once, never re-detected during a run.
+    // Permission chooses the candidate only during new-install setup.
+    // Once selected, the mode stays fixed before the Surface/native startup.
     private boolean mUseSharedStorage;
     private boolean mStorageModeSelected;
+    private boolean mAwaitingStorageChoice;
     private volatile boolean mStorageReady;
     private boolean mActivityResumed;
     // Written by the native drive after the normal loader opens the three basic
@@ -46,14 +51,13 @@ public class SimpsonsActivity extends SDLActivity {
     private ScrollView mStorageScreen;
     private TextView mStorageMessage;
     private Button mPermissionButton;
+    private Button mExitButton;
     private String mStorageError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mInitialGameFilesConfirmed = getSharedPreferences(STORAGE_PREFS, MODE_PRIVATE)
                 .getBoolean(KEY_INITIAL_GAME_FILES_CONFIRMED, false);
-        selectStorageMode();
-
         // mStorageReady is still false: do not construct SDLSurface/read its files yet.
         super.onCreate(savedInstanceState);
     }
@@ -74,12 +78,48 @@ public class SimpsonsActivity extends SDLActivity {
                 // Retry later rather than persisting a switch away from legacy.
                 return false;
             }
-            mUseSharedStorage = !hasLegacyGameAssets(legacyRoot);
-            if (!preferences.edit().putBoolean(KEY_SHARED_STORAGE, mUseSharedStorage).commit()) {
-                Log.w(TAG, "Could not persist the storage mode; it will be detected next launch.");
+            if (!preferences.getBoolean(KEY_STORAGE_SETUP_PENDING, false)
+                    && hasLegacyGameAssets(legacyRoot)) {
+                mUseSharedStorage = false;
+                if (!preferences.edit().putBoolean(KEY_SHARED_STORAGE, false).commit()) {
+                    mStorageError = getString(R.string.storage_preferences_error);
+                    return false;
+                }
+            } else {
+                mAwaitingStorageChoice = true;
+                mUseSharedStorage = hasSharedStoragePermission();
+                // Remember new-install setup across restarts: partially copied files
+                // must not later be mistaken for an old legacy installation.
+                if (!preferences.getBoolean(KEY_STORAGE_SETUP_PENDING, false)
+                        && !preferences.edit().putBoolean(KEY_STORAGE_SETUP_PENDING, true).commit()) {
+                    mStorageError = getString(R.string.storage_preferences_error);
+                    return false;
+                }
+                if (!ensureStorageDirectory(legacyRoot)) {
+                    return false;
+                }
+                if (mUseSharedStorage
+                        && !ensureStorageDirectory(SHARStoragePaths.getSharedGameDirectory(this))) {
+                    return false;
+                }
+                if (!hasInitialGameAssets(getActiveStorageDirectory())) {
+                    mStorageError = getString(R.string.storage_files_pending);
+                    return false;
+                }
+                // Lock the mode before constructing SDLSurface or starting native code.
+                if (!preferences.edit()
+                        .putBoolean(KEY_SHARED_STORAGE, mUseSharedStorage)
+                        .putBoolean(KEY_INITIAL_GAME_FILES_CONFIRMED, false)
+                        .putBoolean(KEY_STORAGE_CLEANUP_PENDING, true)
+                        .remove(KEY_STORAGE_SETUP_PENDING).commit()) {
+                    mStorageError = getString(R.string.storage_preferences_error);
+                    return false;
+                }
+                mInitialGameFilesConfirmed = false;
             }
         }
 
+        mAwaitingStorageChoice = false;
         mStorageModeSelected = true;
         return true;
     }
@@ -106,6 +146,7 @@ public class SimpsonsActivity extends SDLActivity {
     // succeed for scripts.rcf, soundfx.rcf and art/frontend/scrooby/bootup.p3d.
     public synchronized boolean onInitialGameFilesOpened() {
         if (mInitialGameFilesConfirmed) {
+            cleanupUnusedStorageDirectory();
             return true;
         }
         if (!mStorageReady) {
@@ -120,7 +161,47 @@ public class SimpsonsActivity extends SDLActivity {
             return false;
         }
         mInitialGameFilesConfirmed = true;
+        cleanupUnusedStorageDirectory();
         return true;
+    }
+
+    private synchronized void cleanupUnusedStorageDirectory() {
+        SharedPreferences preferences = getSharedPreferences(STORAGE_PREFS, MODE_PRIVATE);
+        if (!mInitialGameFilesConfirmed || !mStorageModeSelected
+                || !preferences.getBoolean(KEY_STORAGE_CLEANUP_PENDING, false)) {
+            return;
+        }
+        // This is best-effort cleanup for new installs only. Never recurse or
+        // delete files belonging to another installation.
+        if (!mUseSharedStorage && !hasSharedStoragePermission()) {
+            return;
+        }
+        try {
+            File unused = mUseSharedStorage ? getExternalFilesDir(null)
+                    : SHARStoragePaths.getSharedGameDirectory(this);
+            if (unused == null) {
+                return;
+            }
+            if (unused.exists()) {
+                String[] children = unused.list();
+                if (children == null) {
+                    return;
+                }
+                if (children.length == 0) {
+                    if (!unused.delete()) {
+                        Log.w(TAG, "Could not remove unused empty storage directory: " + unused);
+                        return;
+                    }
+                } else {
+                    Log.i(TAG, "Preserving non-empty alternative storage directory: " + unused);
+                }
+            }
+            if (!preferences.edit().remove(KEY_STORAGE_CLEANUP_PENDING).commit()) {
+                Log.w(TAG, "Could not persist storage cleanup completion.");
+            }
+        } catch (SecurityException e) {
+            Log.w(TAG, "Cannot access the alternative storage directory for cleanup.", e);
+        }
     }
 
     @Override
@@ -179,6 +260,24 @@ public class SimpsonsActivity extends SDLActivity {
                 || new File(root, "art/frontend/scrooby/bootup.p3d").isFile();
     }
 
+    private static boolean hasInitialGameAssets(File root) {
+        return isNonEmptyFile(new File(root, "scripts.rcf"))
+                && isNonEmptyFile(new File(root, "soundfx.rcf"))
+                && isNonEmptyFile(new File(root, "art/frontend/scrooby/bootup.p3d"));
+    }
+
+    private static boolean isNonEmptyFile(File file) {
+        return file.isFile() && file.length() > 0;
+    }
+
+    private boolean ensureStorageDirectory(File root) {
+        if (!root.isDirectory() && !root.mkdirs() && !root.isDirectory()) {
+            mStorageError = getString(R.string.storage_directory_error);
+            return false;
+        }
+        return true;
+    }
+
     private boolean hasSharedStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             return Environment.isExternalStorageManager();
@@ -190,8 +289,18 @@ public class SimpsonsActivity extends SDLActivity {
     }
 
     private boolean prepareGameStorage() {
-        if (!selectStorageMode()) {
+        try {
+            return prepareGameStorageChecked();
+        } catch (SecurityException e) {
+            Log.e(TAG, "Storage access denied.", e);
             mStorageError = getString(R.string.storage_directory_error);
+            return false;
+        }
+    }
+
+    private boolean prepareGameStorageChecked() {
+        mStorageError = getString(R.string.storage_directory_error);
+        if (!selectStorageMode()) {
             return false;
         }
         if (mUseSharedStorage && !hasSharedStoragePermission()) {
@@ -203,13 +312,13 @@ public class SimpsonsActivity extends SDLActivity {
         // storage setup. Missing assets are always handled by the original engine.
         // Storage permission is still required for shared-folder access.
         if (mInitialGameFilesConfirmed || mStorageReady) {
+            cleanupUnusedStorageDirectory();
             return true;
         }
 
         File root = getActiveStorageDirectory();
         try {
-            if (!root.isDirectory() && !root.mkdirs()) {
-                mStorageError = getString(R.string.storage_directory_error);
+            if (!ensureStorageDirectory(root)) {
                 return false;
             }
 
@@ -229,7 +338,8 @@ public class SimpsonsActivity extends SDLActivity {
     }
 
     private void showStorageScreen() {
-        if (mStorageScreen == null) {
+        boolean creatingScreen = mStorageScreen == null;
+        if (creatingScreen) {
             mStorageScreen = new ScrollView(this);
             mStorageScreen.setBackgroundColor(Color.BLACK);
 
@@ -240,30 +350,60 @@ public class SimpsonsActivity extends SDLActivity {
             content.setPadding(padding, padding, padding, padding);
 
             mStorageMessage = new TextView(this);
+            mStorageMessage.setId(View.generateViewId());
             mStorageMessage.setTextColor(Color.WHITE);
             mStorageMessage.setTextSize(18);
             mStorageMessage.setTextIsSelectable(true);
             content.addView(mStorageMessage);
 
             mPermissionButton = new Button(this);
+            mPermissionButton.setId(View.generateViewId());
             mPermissionButton.setText(R.string.storage_grant_permission);
             mPermissionButton.setOnClickListener(view -> requestSharedStoragePermission());
             content.addView(mPermissionButton);
 
-            Button exit = new Button(this);
-            exit.setText(R.string.storage_exit);
-            exit.setOnClickListener(view -> finish());
-            content.addView(exit);
+            mExitButton = new Button(this);
+            mExitButton.setId(View.generateViewId());
+            mExitButton.setText(R.string.storage_exit);
+            mExitButton.setOnClickListener(view -> finish());
+            content.addView(mExitButton);
+
+            // Keep native Android click handling for touch, Enter and D-pad center.
+            for (Button button : new Button[] { mPermissionButton, mExitButton }) {
+                button.setFocusable(true);
+                button.setOnFocusChangeListener((view, focused) ->
+                        view.setBackgroundTintList(ColorStateList.valueOf(
+                                focused ? Color.rgb(255, 213, 79) : Color.LTGRAY)));
+                button.setTextColor(Color.BLACK);
+                button.setBackgroundTintList(ColorStateList.valueOf(Color.LTGRAY));
+            }
+            mPermissionButton.setNextFocusUpId(mStorageMessage.getId());
+            mPermissionButton.setNextFocusDownId(mExitButton.getId());
+            mExitButton.setNextFocusUpId(mPermissionButton.getId());
 
             mStorageScreen.addView(content);
             mLayout.addView(mStorageScreen, new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         }
 
-        mStorageMessage.setText(getString(R.string.storage_setup_message,
-                getActiveStorageDirectory().getAbsolutePath(), mStorageError));
-        mPermissionButton.setVisibility(mUseSharedStorage && !hasSharedStoragePermission()
-                ? View.VISIBLE : View.GONE);
+        if (mAwaitingStorageChoice) {
+            mStorageMessage.setText(getString(R.string.storage_choice_message,
+                    SHARStoragePaths.getSharedGameDirectory(this).getAbsolutePath(),
+                    getActiveStorageDirectory().getAbsolutePath(), mStorageError));
+        } else {
+            mStorageMessage.setText(getString(R.string.storage_setup_message,
+                    getActiveStorageDirectory().getAbsolutePath(), mStorageError));
+        }
+        boolean showPermission = (mAwaitingStorageChoice || mUseSharedStorage)
+                && !hasSharedStoragePermission();
+        mPermissionButton.setVisibility(showPermission ? View.VISIBLE : View.GONE);
+        mStorageMessage.setNextFocusDownId(showPermission
+                ? mPermissionButton.getId() : mExitButton.getId());
+        mExitButton.setNextFocusUpId(showPermission
+                ? mPermissionButton.getId() : mStorageMessage.getId());
+        if (creatingScreen || !mStorageScreen.hasFocus()) {
+            (showPermission ? mPermissionButton : mExitButton).requestFocus();
+        }
     }
 
     private void requestSharedStoragePermission() {
