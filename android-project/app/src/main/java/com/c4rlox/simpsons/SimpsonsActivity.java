@@ -35,7 +35,6 @@ public class SimpsonsActivity extends SDLActivity {
     private static final String KEY_SHARED_STORAGE = "use_shared_game_storage";
     private static final String KEY_INITIAL_GAME_FILES_CONFIRMED = "initial_game_files_confirmed";
     private static final String KEY_STORAGE_SETUP_PENDING = "storage_setup_pending";
-    private static final String KEY_STORAGE_CLEANUP_PENDING = "storage_cleanup_pending";
     private static final int REQUEST_STORAGE = 4201;
 
     // Permission chooses the candidate only during new-install setup.
@@ -110,7 +109,6 @@ public class SimpsonsActivity extends SDLActivity {
                 if (!preferences.edit()
                         .putBoolean(KEY_SHARED_STORAGE, mUseSharedStorage)
                         .putBoolean(KEY_INITIAL_GAME_FILES_CONFIRMED, false)
-                        .putBoolean(KEY_STORAGE_CLEANUP_PENDING, true)
                         .remove(KEY_STORAGE_SETUP_PENDING).commit()) {
                     mStorageError = getString(R.string.storage_preferences_error);
                     return false;
@@ -146,7 +144,6 @@ public class SimpsonsActivity extends SDLActivity {
     // succeed for scripts.rcf, soundfx.rcf and art/frontend/scrooby/bootup.p3d.
     public synchronized boolean onInitialGameFilesOpened() {
         if (mInitialGameFilesConfirmed) {
-            cleanupUnusedStorageDirectory();
             return true;
         }
         if (!mStorageReady) {
@@ -161,47 +158,7 @@ public class SimpsonsActivity extends SDLActivity {
             return false;
         }
         mInitialGameFilesConfirmed = true;
-        cleanupUnusedStorageDirectory();
         return true;
-    }
-
-    private synchronized void cleanupUnusedStorageDirectory() {
-        SharedPreferences preferences = getSharedPreferences(STORAGE_PREFS, MODE_PRIVATE);
-        if (!mInitialGameFilesConfirmed || !mStorageModeSelected
-                || !preferences.getBoolean(KEY_STORAGE_CLEANUP_PENDING, false)) {
-            return;
-        }
-        // This is best-effort cleanup for new installs only. Never recurse or
-        // delete files belonging to another installation.
-        if (!mUseSharedStorage && !hasSharedStoragePermission()) {
-            return;
-        }
-        try {
-            File unused = mUseSharedStorage ? getExternalFilesDir(null)
-                    : SHARStoragePaths.getSharedGameDirectory(this);
-            if (unused == null) {
-                return;
-            }
-            if (unused.exists()) {
-                String[] children = unused.list();
-                if (children == null) {
-                    return;
-                }
-                if (children.length == 0) {
-                    if (!unused.delete()) {
-                        Log.w(TAG, "Could not remove unused empty storage directory: " + unused);
-                        return;
-                    }
-                } else {
-                    Log.i(TAG, "Preserving non-empty alternative storage directory: " + unused);
-                }
-            }
-            if (!preferences.edit().remove(KEY_STORAGE_CLEANUP_PENDING).commit()) {
-                Log.w(TAG, "Could not persist storage cleanup completion.");
-            }
-        } catch (SecurityException e) {
-            Log.w(TAG, "Cannot access the alternative storage directory for cleanup.", e);
-        }
     }
 
     @Override
@@ -312,7 +269,6 @@ public class SimpsonsActivity extends SDLActivity {
         // storage setup. Missing assets are always handled by the original engine.
         // Storage permission is still required for shared-folder access.
         if (mInitialGameFilesConfirmed || mStorageReady) {
-            cleanupUnusedStorageDirectory();
             return true;
         }
 
