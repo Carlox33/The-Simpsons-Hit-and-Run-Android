@@ -13,6 +13,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -310,6 +313,9 @@ public class SimpsonsActivity extends SDLActivity {
             mStorageMessage.setTextColor(Color.WHITE);
             mStorageMessage.setTextSize(18);
             mStorageMessage.setTextIsSelectable(true);
+            mStorageMessage.setLinksClickable(true);
+            mStorageMessage.setMovementMethod(LinkMovementMethod.getInstance());
+            mStorageMessage.setLinkTextColor(Color.rgb(100, 181, 246));
             content.addView(mStorageMessage);
 
             mPermissionButton = new Button(this);
@@ -350,6 +356,17 @@ public class SimpsonsActivity extends SDLActivity {
             mStorageMessage.setText(getString(R.string.storage_setup_message,
                     getActiveStorageDirectory().getAbsolutePath(), mStorageError));
         }
+        String documentationUrl = "https://github.com/Carlox33/The-Simpsons-Hit-and-Run-Android/blob/master/INSTALLATION.md";
+        String message = mStorageMessage.getText().toString()
+                .replace(":\n" + documentationUrl, ".");
+        SpannableString linkedMessage = new SpannableString(message);
+        String linkLabel = getString(R.string.storage_documentation_link);
+        int linkStart = message.indexOf(linkLabel);
+        if (linkStart >= 0) {
+            linkedMessage.setSpan(new URLSpan(documentationUrl), linkStart,
+                    linkStart + linkLabel.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        mStorageMessage.setText(linkedMessage);
         boolean showPermission = (mAwaitingStorageChoice || mUseSharedStorage)
                 && !hasSharedStoragePermission();
         mPermissionButton.setVisibility(showPermission ? View.VISIBLE : View.GONE);
