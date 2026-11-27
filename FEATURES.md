@@ -16,6 +16,10 @@
 
 * ✔ **Nuevo menú para personalizar controles táctiles de forma sencilla e intutiva por el usuario final pudiendo modificar tamaño, posición y opacidad**. [**Controles táctiles**](TOUCH_CONTROLS.md)
 ---
+* ✔ **Los archivos del juego pueden colocarse en** `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files` **o en** `/storage/emulated/0/c4rloxSimpsons` **(fuera de `Android/data`), para ofrecer una instalación más cómoda.**
+---
+* ✔ **Corregida la animación de giro del personaje en vehículo**, gracias al usuario **whyhuron**.
+---
 * ✔ **Habilitado mini-juego (partida extra)**. 
 ---
 
@@ -131,6 +135,10 @@
 ## Features Latest Version
 
 * ✔ **New menu that allows end users to customize touch controls easily and intuitively by modifying their size, position, and opacity**. [**Touch controls**](TOUCH_CONTROLS.md)
+---
+* ✔ **Game files can be placed in** `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files` **or** `/storage/emulated/0/c4rloxSimpsons` **(outside `Android/data`) for a more convenient installation.**
+---
+* ✔ **Fixed the character's vehicle turning animation**, thanks to user **whyhuron**.
 ---
 * ✔ **Mini-game enabled (extra match)**.
 
@@ -252,6 +260,10 @@
 * ✔ **Nouveau menu permettant à l’utilisateur final de personnaliser facilement et intuitivement les commandes tactiles en modifiant leur taille, leur position et leur opacité**. [**Commandes tactiles**](TOUCH_CONTROLS.md)
 
 ---
+* ✔ **Les fichiers du jeu peuvent être placés dans** `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files` **ou dans** `/storage/emulated/0/c4rloxSimpsons` **(en dehors de `Android/data`), pour faciliter l’installation.**
+---
+* ✔ **Correction de l’animation de virage du personnage en véhicule**, grâce à l’utilisateur **whyhuron**.
+---
 * ✔ **Mini-jeu activé (partie supplémentaire)**.
 ---
 
@@ -368,6 +380,10 @@
 ## Features Neueste Version
 
 * ✔ **Neues Menü, mit dem Endbenutzer die Touch-Steuerung einfach und intuitiv anpassen können, indem sie Größe, Position und Deckkraft ändern**. [**Touch-Steuerung**](TOUCH_CONTROLS.md)
+---
+* ✔ **Spieldateien können unter** `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files` **oder unter** `/storage/emulated/0/c4rloxSimpsons` **(außerhalb von `Android/data`) abgelegt werden, um die Installation zu erleichtern.**
+---
+* ✔ **Drehanimation der Spielfigur im Fahrzeug korrigiert**, dank des Nutzers **whyhuron**.
 ---
 
 * ✔ **Minispiel aktiviert (zusätzliche Runde)**.

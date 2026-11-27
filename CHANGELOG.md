@@ -8,6 +8,17 @@
 
 # 🇪🇸 Español
 
+## Versión 0.94 - Instalación fuera de Android/data y corrección de animación
+
+Se añade la posibilidad de elegir dónde instalar los archivos del juego:
+
+1. `Android/data/com.c4rlox.simpsons/files`, como se hacía anteriormente.
+2. `/storage/emulated/0/c4rloxSimpsons`, para facilitar la instalación, ya que Android está bloqueando el acceso a `Android/data` o limitándolo en muchos dispositivos.
+
+Para elegir la segunda carpeta, el usuario deberá conceder a la app los permisos de almacenamiento requeridos. La elección se realiza de forma implícita al no conceder esos permisos, en cuyo caso el juego utilizará `Android/data/com.c4rlox.simpsons/files`. Si se conceden los permisos, el juego utilizará `/storage/emulated/0/c4rloxSimpsons` y no buscará ni leerá archivos en `Android/data/com.c4rlox.simpsons/files`.
+
+Gracias al usuario **whyhuron**, también se ha corregido la animación de giro del personaje en los vehículos. Debido a un error de programación de los desarrolladores originales, esta animación estaba desactivada en la versión de PC y solo funcionaba correctamente en las versiones de consola.
+
 ## Version 0.93 - Corrección de la iluminación en OpenGL ES y mejora del rendimiento
 
 Se ha corregido un problema visual del renderer **OpenGL ES** (utilizado en Android) que provocaba que determinados elementos del juego apareciesen con un brillo excesivo o con una iluminación incorrecta.
@@ -459,6 +470,17 @@ La versión **0.87** es un paso enorme para hacer que el port sea mucho más có
 ---
 
 # 🇬🇧 English
+
+## Version 0.94 - Install outside Android/data and vehicle turn animation fix
+
+Players can now choose where to install the game files:
+
+1. `Android/data/com.c4rlox.simpsons/files`, as before.
+2. `/storage/emulated/0/c4rloxSimpsons`, for easier installation, since Android blocks or restricts convenient access to `Android/data` on many devices.
+
+To use the second folder, the user must grant the app the required storage permissions. The choice is made implicitly by not granting those permissions, in which case the game uses `Android/data/com.c4rlox.simpsons/files`. If permissions are granted, the game uses `/storage/emulated/0/c4rloxSimpsons` and will not search for or read files from `Android/data/com.c4rlox.simpsons/files`.
+
+Thanks to **whyhuron**, the character's vehicle turning animation has also been fixed. Due to a programming error by the original developers, this animation was disabled in the PC version and only worked correctly in the console versions.
 
 ## Version 0.93 - OpenGL ES Lighting Fix and Performance Improvements
 
@@ -916,6 +938,17 @@ Version **0.87** is a huge step toward making the port feel much more comfortabl
 
 # 🇫🇷 Français
 
+## Version 0.94 - Installation en dehors de Android/data et correction de l’animation en véhicule
+
+Il est désormais possible de choisir où installer les fichiers du jeu :
+
+1. `Android/data/com.c4rlox.simpsons/files`, comme auparavant.
+2. `/storage/emulated/0/c4rloxSimpsons`, pour faciliter l’installation, car Android bloque ou limite l’accès pratique à `Android/data` sur de nombreux appareils.
+
+Pour choisir le deuxième dossier, l’utilisateur doit accorder à l’application les autorisations de stockage requises. Le choix est fait implicitement en ne les accordant pas ; le jeu utilise alors `Android/data/com.c4rlox.simpsons/files`. Si les autorisations sont accordées, le jeu utilise `/storage/emulated/0/c4rloxSimpsons` et ne recherche ni ne lit les fichiers dans `Android/data/com.c4rlox.simpsons/files`.
+
+Merci à **whyhuron** : l’animation de virage du personnage en véhicule a également été corrigée. En raison d’une erreur de programmation des développeurs d’origine, cette animation était désactivée dans la version PC et ne fonctionnait correctement que dans les versions console.
+
 ## Version 0.93 - Correction de l'éclairage OpenGL ES et amélioration des performances
 
 Un problème visuel affectant le moteur de rendu **OpenGL ES** (utilisé sur Android) a été corrigé. Ce problème provoquait un éclairage incorrect ou une luminosité excessive sur certains éléments du jeu.
@@ -1369,6 +1402,17 @@ La version **0.87** est une énorme avancée pour rendre le port beaucoup plus c
 ---
 
 # 🇩🇪 Deutsch
+
+## Version 0.94 - Installation außerhalb von Android/data und Fehlerbehebung der Fahrzeug-Drehanimation
+
+Ab sofort kann ausgewählt werden, wo die Spieldateien installiert werden:
+
+1. `Android/data/com.c4rlox.simpsons/files` wie bisher.
+2. `/storage/emulated/0/c4rloxSimpsons` für eine einfachere Installation, da Android den bequemen Zugriff auf `Android/data` auf vielen Geräten blockiert oder einschränkt.
+
+Für den zweiten Ordner muss der Nutzer der App die erforderlichen Speicherberechtigungen erteilen. Die Auswahl erfolgt implizit, indem diese Berechtigungen nicht erteilt werden; in diesem Fall verwendet das Spiel `Android/data/com.c4rlox.simpsons/files`. Werden die Berechtigungen erteilt, verwendet das Spiel `/storage/emulated/0/c4rloxSimpsons` und sucht keine Dateien in `Android/data/com.c4rlox.simpsons/files` und liest sie auch nicht.
+
+Dank **whyhuron** wurde außerdem die Drehanimation der Spielfigur in Fahrzeugen korrigiert. Aufgrund eines Programmierfehlers der ursprünglichen Entwickler war diese Animation in der PC-Version deaktiviert und funktionierte nur in den Konsolenversionen korrekt.
 
 ## Version 0.93 - OpenGL ES-Beleuchtungsfehler behoben und Leistungsverbesserungen
 

@@ -14,8 +14,7 @@ Hola, esto es un **port del videojuego *The Simpsons: Hit & Run* para Android**.
 
 Por favor, lee este pequeño documento en tu idioma correspondiente **de principio a fin**, ya que es de **vital importancia para una correcta instalación**.
 
-
-En el futuro se incorporarán **controles táctiles con sus respectivos iconos**.
+La carpeta utilizada depende de los permisos de almacenamiento: sin concederlos, se usa `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files`; al concederlos, se usa `/storage/emulated/0/c4rloxSimpsons`.
 
 ### Instalación
 
@@ -23,19 +22,19 @@ En el futuro se incorporarán **controles táctiles con sus respectivos iconos**
    * **NTSC**
    * **PAL (multi-lenguaje)**
 
-2. Una vez instalada la aplicación, **debes abrirla al menos una vez**. Esto permitirá que la app **genere su carpeta privada automáticamente** en:
+2. Una vez instalada la aplicación, **debes abrirla al menos una vez**. Esto permitirá que la app **genere automáticamente la siguiente carpeta**:
 
-   `Android/data/com.c4rlox.simpsons/files`
+   `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files`
 
-3. Cuando abras la app te indicará que **faltan archivos**. Estos archivos son los **assets del juego de PC (versión release oficial)**, es decir, **la versión original que venía en el CD**.
+3. Cuando arranques la aplicación por primera vez, aparecerá una pequeña interfaz con fondo negro que explica las dos opciones de instalación disponibles (las dos carpetas mencionadas anteriormente). Debes elegir entre no conceder permisos y usar la carpeta dentro de `Android/data`, o usar la carpeta fuera de `Android/data` concediendo permisos de almacenamiento mediante el botón **"Autorizar acceso al almacenamiento"**.
 
    ⚠️ **No utilices los assets de la versión filtrada del código**, ya que **no corresponde a la versión release oficial y no es compatible**.
 
-4. Una vez tengas tus assets, deberás **copiarlos o moverlos a la siguiente carpeta**:
+4. Una vez tengas tus assets (archivos originales del juego de la versión de PC), deberás **copiarlos o moverlos a una de estas dos carpetas, según la opción elegida**:
 
-   `Android/data/com.c4rlox.simpsons/files`
+   `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files` | `/storage/emulated/0/c4rloxSimpsons`
 
-   ⚠️ **MUY IMPORTANTE:** La carpeta **debe ser generada por la aplicación al abrirla por primera vez**. Si la creas manualmente, **la app puede no tener permisos para leer los archivos dentro de ella**.
+   ⚠️ **MUY IMPORTANTE:** La carpeta **debe ser generada por la aplicación**. Si la creas manualmente, **la app puede no tener permisos para leer los archivos dentro de ella**.
 
 ### Extra – Cómo funcionan los assets PAL y NTSC
 
@@ -73,10 +72,14 @@ Una vez instalada la aplicación y después de abrirla al menos una vez, se gene
 Simpsons_resolution.txt
 ```
 
-Este archivo se generará en la siguiente ruta:
+Este archivo se generará en la siguiente ruta (según la carpeta elegida por el usuario):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons
 ```
 
 Desde este archivo, puedes cambiar la resolución interna de renderizado del juego **antes de iniciarlo**.
@@ -101,10 +104,14 @@ Valores recomendados:
 
 ## 📱 Configuración de los controles táctiles
 
-En la version **0.92** se añadió la posibilidad de poder personalizar los controles táctiles dentro del juego de forma sencilla e intuitiva para el usuario final, pudiendo modificar tanto el tamaño, como la posición de los botones dentro del juego, por otro lado la opacidad (transparencia) de los botones táctiles puede ser modificada a través del archivo:
+En la version **0.92** se añadió la posibilidad de poder personalizar los controles táctiles dentro del juego de forma sencilla e intuitiva para el usuario final, pudiendo modificar tanto el tamaño, como la posición de los botones dentro del juego, por otro lado la opacidad (transparencia) de los botones táctiles puede ser modificada a través del archivo (según la carpeta elegida por el usuario):
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ```
 Para más información, consulta el archivo **[TOUCH_CONTROLS.md](TOUCH_CONTROLS.md)**.
 
@@ -112,10 +119,14 @@ La versión **0.87** introdujo controles táctiles integrados, permitiendo jugar
 
 Por defecto, el juego utiliza el **Modo 1** para las coordenadas táctiles. Este modo debería funcionar correctamente en la mayoría de dispositivos.
 
-Si, después de iniciar el juego, notas que los botones táctiles no responden correctamente, que los toques no coinciden con la posición de los iconos o que la zona táctil parece desplazada, cambia al **Modo 2** modificando este archivo:
+Si, después de iniciar el juego, notas que los botones táctiles no responden correctamente, que los toques no coinciden con la posición de los iconos o que la zona táctil parece desplazada, cambia al **Modo 2** modificando este archivo (según la carpeta elegida por el usuario):
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_mode.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_mode.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_mode.txt
 ```
 
 Resumen:
@@ -133,10 +144,14 @@ El port también incluye un archivo de configuración adicional llamado:
 Simpsons_configuration.txt
 ```
 
-Este archivo se encuentra en la siguiente ruta:
+Este archivo se encuentra en la siguiente ruta (según la carpeta elegida por el usuario):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/Simpsons_configuration/Simpsons_configuration.txt
 ```
 
 Cualquier cambio en este archivo debe realizarse **antes de iniciar el juego**.
@@ -158,20 +173,28 @@ A partir de la versión **0.87.4**, algunos ajustes extra pueden modificarse dir
 * Vibración del mando.
 * Inversión de cámara.
 
-Para usar estas opciones desde el menú de ajustes del juego, es necesario tener aplicado el archivo `ingame.p3d` modificado, debido a que el juego original de 2003 en PC no tenía estas opciones:
+Para usar estas opciones desde el menú de ajustes del juego, es necesario tener aplicado el archivo `ingame.p3d` modificado, debido a que el juego original de 2003 en PC no tenía estas opciones (según la carpeta elegida por el usuario):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/art/frontend/scrooby/ingame.p3d
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/art/frontend/scrooby/ingame.p3d
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/art/frontend/scrooby/ingame.p3d
 ```
 
 Este archivo modificado puede obtenerse uniéndote al servidor de Discord:
 
 [Unirse al servidor de Discord](https://discord.gg/M4FeZpgBxX)
 
-Si no tienes el archivo `ingame.p3d` modificado, estos ajustes todavía pueden cambiarse antes de iniciar el juego editando el archivo de configuración externo:
+Si no tienes el archivo `ingame.p3d` modificado, estos ajustes todavía pueden cambiarse antes de iniciar el juego editando el archivo de configuración externo (según la carpeta elegida por el usuario):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/Simpsons_configuration/Simpsons_configuration.txt
 ```
 ---
 
@@ -186,25 +209,26 @@ Hello, this is an **Android port of the game *The Simpsons: Hit & Run***.
 
 Please read this short document **from start to finish in your corresponding language**, as it is **very important for a proper installation**.
 
+The folder used depends on the storage permissions: without granting them, the game uses `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files`; when granted, it uses `/storage/emulated/0/c4rloxSimpsons`.
 ### Installation
 
 1. Choose carefully which **APK version** you want to install:
    * **NTSC**
    * **PAL (multi-language)**
 
-2. After installing the app, **you must open it at least once**. This allows the app to **generate its private folder automatically** in:
+2. After installing the app, **you must open it at least once**. This will allow the app to **automatically create the following folder**:
 
-   `Android/data/com.c4rlox.simpsons/files`
+   `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files`
 
-3. When you open the app it will tell you that **files are missing**. These files are the **PC game assets (official release version)** — the **original version that came on the CD**.
+3. When you launch the app for the first time, a small interface with a black background will appear, explaining the two available installation options (the two folders mentioned above). Choose either not to grant permissions and use the folder inside `Android/data`, or use the folder outside `Android/data` by granting storage access through the **"Allow storage access"** button.
 
    ⚠️ **Do not use assets from the leaked source code version**, because **they are not from the official release and are not compatible**.
 
-4. Once you have your assets, **copy or move them into the following folder**:
+4. Once you have your assets (the original PC game files), **copy or move them into one of these two folders, depending on your choice**:
 
-   `Android/data/com.c4rlox.simpsons/files`
+   `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files` | `/storage/emulated/0/c4rloxSimpsons`
 
-   ⚠️ **VERY IMPORTANT:** The folder **must be generated by the app when opening it for the first time**. If you create it manually, **the app may not have permission to read the files inside it**.
+   ⚠️ **VERY IMPORTANT:** The folder **must be generated by the app**. If you create it manually, **the app may not have permission to read the files inside it**.
 
 ### Extra – How PAL and NTSC assets work
 
@@ -242,10 +266,14 @@ Once the application has been installed and opened at least once, it will automa
 Simpsons_resolution.txt
 ```
 
-This file will be generated in the following path:
+This file will be generated in the following path (depending on the folder selected by the user):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons
 ```
 
 From this file, you can change the internal rendering resolution of the game **before launching it**.
@@ -270,10 +298,14 @@ Recommended values:
 
 ## 📱 Touch Controls Configuration
 
-In version **0.92**, the ability to customize the touch controls within the game in a simple and intuitive way for the end user was added, allowing both the size and the position of the in-game buttons to be modified. Additionally, the opacity (transparency) of the touch buttons can be modified through the following file:
+In version **0.92**, the ability to customize the touch controls within the game in a simple and intuitive way for the end user was added, allowing both the size and the position of the in-game buttons to be modified. Additionally, the opacity (transparency) of the touch buttons can be modified through the following file (depending on the folder selected by the user):
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ````
 
 For more information, see the **[TOUCH_CONTROLS.md](TOUCH_CONTROLS.md)** file.
@@ -283,10 +315,14 @@ Version **0.87** introduced integrated touch controls, allowing the game to be p
 
 By default, the game uses **Mode 1** for touch coordinates. This mode should work correctly on most devices.
 
-If, after launching the game, you notice that the touch buttons do not respond correctly, the touch input does not match the icon positions, or the touch area seems displaced, change to **Mode 2** by modifying this file:
+If, after launching the game, you notice that the touch buttons do not respond correctly, the touch input does not match the icon positions, or the touch area seems displaced, change to **Mode 2** by modifying this file (depending on the folder selected by the user):
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_mode.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_mode.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_mode.txt
 ```
 
 Summary:
@@ -306,10 +342,14 @@ The port also includes an additional configuration file called:
 Simpsons_configuration.txt
 ```
 
-This file is located in the following path:
+This file is located in the following path (depending on the folder selected by the user):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/Simpsons_configuration/Simpsons_configuration.txt
 ```
 
 Any changes to this file must be made **before launching the game**.
@@ -330,20 +370,28 @@ Starting from version **0.87.4**, some extra settings can be changed directly in
 * Gamepad vibration.
 * Camera inversion.
 
-To use these options from the in-game settings menu, you need to have the modified `ingame.p3d` file applied, because the original 2003 PC game did not include these options:
+To use these options from the in-game settings menu, you need to have the modified `ingame.p3d` file applied, because the original 2003 PC game did not include these options (depending on the folder selected by the user):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/art/frontend/scrooby/ingame.p3d
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/art/frontend/scrooby/ingame.p3d
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/art/frontend/scrooby/ingame.p3d
 ```
 
 This modified file can be obtained by joining the Discord server:
 
 [Join the Discord server](https://discord.gg/M4FeZpgBxX)
 
-If you do not have the modified `ingame.p3d` file, these settings can still be changed before launching the game by editing the external configuration file:
+If you do not have the modified `ingame.p3d` file, these settings can still be changed before launching the game by editing the external configuration file (depending on the folder selected by the user):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/Simpsons_configuration/Simpsons_configuration.txt
 ```
 
 ---
@@ -358,25 +406,26 @@ Bonjour, ceci est **un port Android du jeu *The Simpsons: Hit & Run***.
 
 Veuillez lire ce document **du début à la fin dans votre langue**, car il est **très important pour une installation correcte**.
 
+Le dossier utilisé dépend des autorisations de stockage : si elles ne sont pas accordées, le jeu utilise `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files` ; si elles sont accordées, il utilise `/storage/emulated/0/c4rloxSimpsons`.
 ### Installation
 
 1. Choisissez correctement la **version APK** que vous souhaitez installer :
    * **NTSC**
    * **PAL (multilingue)**
 
-2. Une fois l'application installée, **ouvrez-la au moins une fois**. Cela permettra à l'application **de générer automatiquement son dossier privé** dans :
+2. Une fois l'application installée, **ouvrez-la au moins une fois**. Cela permettra à l'application **de créer automatiquement le dossier suivant** :
 
-   `Android/data/com.c4rlox.simpsons/files`
+   `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files`
 
-3. Lorsque vous ouvrirez l'application, elle indiquera que **des fichiers sont manquants**. Ces fichiers sont les **assets du jeu PC (version officielle release)**, c'est-à-dire **la version originale du CD**.
+3. Lorsque vous lancerez l'application pour la première fois, une petite interface sur fond noir apparaîtra pour expliquer les deux options d'installation disponibles (les deux dossiers mentionnés précédemment). Choisissez soit de ne pas accorder les autorisations et d'utiliser le dossier dans `Android/data`, soit d'utiliser le dossier en dehors de `Android/data` en accordant l'accès au stockage avec le bouton **"Allow storage access"**.
 
    ⚠️ **N'utilisez pas les assets provenant de la version du code source leakée**, car **ils ne correspondent pas à la version officielle et ne sont pas compatibles**.
 
-4. Une fois que vous avez vos assets, **copiez-les dans le dossier suivant** :
+4. Une fois que vous avez vos assets (les fichiers originaux du jeu PC), **copiez-les dans l’un de ces deux dossiers, selon l’option choisie** :
 
-  `Android/data/com.c4rlox.simpsons/files`
+  `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files` | `/storage/emulated/0/c4rloxSimpsons`
 
-   ⚠️ **TRÈS IMPORTANT :** Le dossier **doit être créé par l'application lors de son premier lancement**. Si vous le créez manuellement, **l'application peut ne pas avoir les permissions pour lire les fichiers**.
+   ⚠️ **TRÈS IMPORTANT :** Le dossier **doit être créé par l'application**. Si vous le créez manuellement, **l'application peut ne pas avoir les permissions pour lire les fichiers**.
 
 ### Extra – Fonctionnement des assets PAL et NTSC
 
@@ -414,10 +463,14 @@ Une fois l’application installée et après l’avoir ouverte au moins une foi
 Simpsons_resolution.txt
 ```
 
-Ce fichier sera généré dans le chemin suivant :
+Ce fichier sera généré dans le chemin suivant (selon le dossier choisi par l’utilisateur) :
 
 ```txt
-Android/data/com.c4rlox.simpsons/files
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons
 ```
 
 Depuis ce fichier, vous pouvez modifier la résolution interne de rendu du jeu **avant de le lancer**.
@@ -442,10 +495,14 @@ Valeurs recommandées :
 
 ## 📱 Configuration des contrôles tactiles
 
-Dans la version **0.92**, la possibilité de personnaliser les commandes tactiles directement dans le jeu de manière simple et intuitive pour l’utilisateur final a été ajoutée, permettant de modifier aussi bien la taille que la position des boutons dans le jeu. Par ailleurs, l’opacité (transparence) des boutons tactiles peut être modifiée à l’aide du fichier suivant :
+Dans la version **0.92**, la possibilité de personnaliser les commandes tactiles directement dans le jeu de manière simple et intuitive pour l’utilisateur final a été ajoutée, permettant de modifier aussi bien la taille que la position des boutons dans le jeu. Par ailleurs, l’opacité (transparence) des boutons tactiles peut être modifiée à l’aide du fichier suivant (selon le dossier choisi par l’utilisateur) :
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ````
 
 Pour plus d’informations, consultez le fichier **[TOUCH_CONTROLS.md](TOUCH_CONTROLS.md)**.
@@ -454,10 +511,14 @@ La version **0.87** a introduit des contrôles tactiles intégrés, permettant d
 
 Par défaut, le jeu utilise le **Mode 1** pour les coordonnées tactiles. Ce mode devrait fonctionner correctement sur la plupart des appareils.
 
-Si, après avoir lancé le jeu, vous remarquez que les boutons tactiles ne répondent pas correctement, que les touches ne correspondent pas à la position des icônes ou que la zone tactile semble décalée, passez au **Mode 2** en modifiant ce fichier :
+Si, après avoir lancé le jeu, vous remarquez que les boutons tactiles ne répondent pas correctement, que les touches ne correspondent pas à la position des icônes ou que la zone tactile semble décalée, passez au **Mode 2** en modifiant ce fichier (selon le dossier choisi par l’utilisateur) :
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_mode.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_mode.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_mode.txt
 ```
 
 Résumé :
@@ -477,10 +538,14 @@ Le port inclut également un fichier de configuration supplémentaire appelé :
 Simpsons_configuration.txt
 ```
 
-Ce fichier se trouve dans le chemin suivant :
+Ce fichier se trouve dans le chemin suivant (selon le dossier choisi par l’utilisateur) :
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/Simpsons_configuration/Simpsons_configuration.txt
 ```
 
 Toute modification de ce fichier doit être effectuée **avant de lancer le jeu**.
@@ -502,20 +567,28 @@ Ces options n’étaient pas disponibles à l’origine dans la version PC du je
 * Vibration de la manette.
 * Inversion de la caméra.
 
-Pour utiliser ces options depuis le menu des réglages du jeu, il est nécessaire d’avoir appliqué le fichier `ingame.p3d` modifié, car le jeu PC original de 2003 n’incluait pas ces options:
+Pour utiliser ces options depuis le menu des réglages du jeu, il est nécessaire d’avoir appliqué le fichier `ingame.p3d` modifié, car le jeu PC original de 2003 n’incluait pas ces options (selon le dossier choisi par l’utilisateur):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/art/frontend/scrooby/ingame.p3d
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/art/frontend/scrooby/ingame.p3d
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/art/frontend/scrooby/ingame.p3d
 ```
 
 Ce fichier modifié peut être obtenu en rejoignant le serveur Discord:
 
 [Rejoindre le serveur Discord](https://discord.gg/M4FeZpgBxX)
 
-Si vous n’avez pas le fichier `ingame.p3d` modifié, ces réglages peuvent toujours être changés avant de lancer le jeu en modifiant le fichier de configuration externe:
+Si vous n’avez pas le fichier `ingame.p3d` modifié, ces réglages peuvent toujours être changés avant de lancer le jeu en modifiant le fichier de configuration externe (selon le dossier choisi par l’utilisateur):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/Simpsons_configuration/Simpsons_configuration.txt
 ```
 
 ---
@@ -532,25 +605,26 @@ Hallo, dies ist **ein Android-Port des Spiels *The Simpsons: Hit & Run***.
 
 Bitte lies dieses Dokument **vollständig in deiner Sprache**, da es **sehr wichtig für eine korrekte Installation** ist.
 
+Der verwendete Ordner hängt von den Speicherberechtigungen ab: Ohne Erteilung der Berechtigungen verwendet das Spiel `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files`; mit erteilten Berechtigungen verwendet es `/storage/emulated/0/c4rloxSimpsons`.
 ### Installation
 
 1. Wähle die gewünschte **APK-Version**:
    * **NTSC**
    * **PAL (Mehrsprachig)**
 
-2. Nach der Installation **öffne die App mindestens einmal**, damit sie **automatisch ihren privaten Ordner erstellt**:
+2. Nach der Installation **öffne die App mindestens einmal**, damit die App **automatisch den folgenden Ordner erstellt**:
 
-   `Android/data/com.c4rlox.simpsons/files`
+   `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files`
 
-3. Die App wird anzeigen, dass **Dateien fehlen**. Diese Dateien sind die **PC-Spielassets der offiziellen Release-Version (CD-Version)**.
+3. Beim ersten Start der App erscheint eine kleine Benutzeroberfläche mit schwarzem Hintergrund, die die beiden verfügbaren Installationsoptionen erklärt (die beiden zuvor genannten Ordner). Wähle entweder, keine Berechtigungen zu erteilen und den Ordner in `Android/data` zu verwenden, oder den Ordner außerhalb von `Android/data` zu nutzen und der App über die Schaltfläche **"Allow storage access"** Speicherzugriff zu gewähren.
 
    ⚠️ **Verwende keine Assets aus der geleakten Source-Code-Version**, da diese **nicht kompatibel sind**.
 
-4. Kopiere deine Assets in:
+4. Sobald du deine Assets (die Originaldateien des PC-Spiels) hast, kopiere sie in einen dieser beiden Ordner, je nach ausgewählter Option:
 
-   `Android/data/com.c4rlox.simpsons/files`
+   `/storage/emulated/0/Android/data/com.c4rlox.simpsons/files` | `/storage/emulated/0/c4rloxSimpsons`
 
-   ⚠️ **SEHR WICHTIG:** Der Ordner **muss von der App beim ersten Start erstellt werden**.
+   ⚠️ **SEHR WICHTIG:** Der Ordner **muss von der App erstellt werden**.
 
 ### Extra – Wie PAL- und NTSC-Assets funktionieren
 
@@ -588,10 +662,14 @@ Nachdem die Anwendung installiert und mindestens einmal geöffnet wurde, wird au
 Simpsons_resolution.txt
 ```
 
-Diese Datei wird im folgenden Pfad erstellt:
+Diese Datei wird im folgenden Pfad (je nach vom Benutzer ausgewähltem Ordner) erstellt:
 
 ```txt
-Android/data/com.c4rlox.simpsons/files
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons
 ```
 
 Über diese Datei können Sie die interne Renderauflösung des Spiels **vor dem Starten des Spiels** ändern.
@@ -616,10 +694,14 @@ Empfohlene Werte:
 
 ## 📱 Konfiguration der Touch-Steuerung
 
-In Version **0.92** wurde die Möglichkeit hinzugefügt, die Touch-Steuerung im Spiel auf einfache und intuitive Weise für den Endbenutzer anzupassen. Dabei können sowohl die Größe als auch die Position der Schaltflächen im Spiel geändert werden. Darüber hinaus kann die Deckkraft (Transparenz) der Touch-Schaltflächen über die folgende Datei angepasst werden:
+In Version **0.92** wurde die Möglichkeit hinzugefügt, die Touch-Steuerung im Spiel auf einfache und intuitive Weise für den Endbenutzer anzupassen. Dabei können sowohl die Größe als auch die Position der Schaltflächen im Spiel geändert werden. Darüber hinaus kann die Deckkraft (Transparenz) der Touch-Schaltflächen über die folgende Datei angepasst werden (je nach vom Benutzer ausgewähltem Ordner):
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ````
 
 Weitere Informationen findest du in der Datei **[TOUCH_CONTROLS.md](TOUCH_CONTROLS.md)**.
@@ -628,10 +710,14 @@ Version **0.87** führte integrierte Touch-Steuerungen ein, mit denen das Spiel 
 
 Standardmäßig verwendet das Spiel **Modus 1** für die Touch-Koordinaten. Dieser Modus sollte auf den meisten Geräten korrekt funktionieren.
 
-Wenn Sie nach dem Starten des Spiels feststellen, dass die Touch-Buttons nicht richtig reagieren, die Berührungen nicht mit der Position der Symbole übereinstimmen oder der Touch-Bereich verschoben wirkt, wechseln Sie zu **Modus 2**, indem Sie diese Datei ändern:
+Wenn Sie nach dem Starten des Spiels feststellen, dass die Touch-Buttons nicht richtig reagieren, die Berührungen nicht mit der Position der Symbole übereinstimmen oder der Touch-Bereich verschoben wirkt, wechseln Sie zu **Modus 2**, indem Sie diese Datei ändern (je nach vom Benutzer ausgewähltem Ordner):
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_mode.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_mode.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_mode.txt
 ```
 
 Zusammenfassung:
@@ -651,10 +737,14 @@ Der Port enthält außerdem eine zusätzliche Konfigurationsdatei mit dem Namen:
 Simpsons_configuration.txt
 ```
 
-Diese Datei befindet sich im folgenden Pfad:
+Diese Datei befindet sich im folgenden Pfad (je nach vom Benutzer ausgewähltem Ordner):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/Simpsons_configuration/Simpsons_configuration.txt
 ```
 
 Alle Änderungen an dieser Datei müssen **vor dem Starten des Spiels** vorgenommen werden.
@@ -676,20 +766,28 @@ Ab Version **0.87.4** können einige zusätzliche Einstellungen direkt im Spiel 
 * Gamepad-Vibration.
 * Kamerainvertierung.
 
-Um diese Optionen über das Einstellungsmenü im Spiel zu verwenden, muss die modifizierte Datei `ingame.p3d` angewendet werden, da das originale PC-Spiel von 2003 diese Optionen nicht enthielt:
+Um diese Optionen über das Einstellungsmenü im Spiel zu verwenden, muss die modifizierte Datei `ingame.p3d` angewendet werden, da das originale PC-Spiel von 2003 diese Optionen nicht enthielt (je nach vom Benutzer ausgewähltem Ordner):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/art/frontend/scrooby/ingame.p3d
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/art/frontend/scrooby/ingame.p3d
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/art/frontend/scrooby/ingame.p3d
 ```
 
 Diese modifizierte Datei kann über den Discord-Server bezogen werden:
 
 [Dem Discord-Server beitreten](https://discord.gg/M4FeZpgBxX)
 
-Wenn du die modifizierte Datei `ingame.p3d` nicht hast, können diese Einstellungen trotzdem vor dem Starten des Spiels geändert werden, indem die externe Konfigurationsdatei bearbeitet wird:
+Wenn du die modifizierte Datei `ingame.p3d` nicht hast, können diese Einstellungen trotzdem vor dem Starten des Spiels geändert werden, indem die externe Konfigurationsdatei bearbeitet wird (je nach vom Benutzer ausgewähltem Ordner):
 
 ```txt
-Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/Simpsons_configuration/Simpsons_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/Simpsons_configuration/Simpsons_configuration.txt
 ```
 
 ---

@@ -51,10 +51,14 @@ Con la versión **0.92**, el sistema táctil da un paso más al incorporar un nu
 
 Este nuevo sistema permite modificar tanto la **posición** como el **tamaño** de los botones táctiles, haciendo posible adaptar su distribución a diferentes tamaños de pantalla, formas de jugar y preferencias personales.
 
-Además, la **opacidad o transparencia** de los botones puede configurarse manualmente mediante el siguiente archivo:
+Además, la **opacidad o transparencia** de los botones puede configurarse manualmente mediante el siguiente archivo, que se encuentra en una de estas dos rutas según la carpeta de instalación elegida:
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ```
 
 De esta forma, cada jugador puede crear una distribución más cómoda y adaptada a su dispositivo sin perder la integración del sistema táctil con el motor original del juego.
@@ -153,10 +157,14 @@ Gracias a este comportamiento, es posible desplazar las cuatro flechas como un �
 
 ## ⚙️ Archivo de configuración de los controles táctiles
 
-Los cambios de posición y tamaño realizados desde el menú se almacenan en el archivo:
+Los cambios de posición y tamaño realizados desde el menú se almacenan en una de estas dos rutas, según la carpeta de instalación elegida:
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ```
 
 Este archivo también permite modificar manualmente la opacidad de los botones táctiles, tanto en su estado normal como cuando están siendo pulsados.
@@ -183,10 +191,14 @@ Para ofrecer la mayor compatibilidad posible, he añadido un archivo llamado:
 Simpsons_touch_mode.txt
 ```
 
-Este archivo se encuentra en la siguiente ruta:
+Este archivo se encuentra en una de estas dos rutas, según la carpeta de instalación elegida:
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_mode.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_mode.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_mode.txt
 ```
 
 Por defecto, el juego utiliza el **modo 1**, que debería funcionar correctamente en la mayoría de dispositivos.
@@ -254,10 +266,14 @@ With version **0.92**, the touch control system takes another step forward by in
 
 This new system allows both the **position** and **size** of the touch buttons to be modified, making it possible to adapt their layout to different screen sizes, play styles, and personal preferences.
 
-In addition, the **opacity or transparency** of the buttons can be configured manually through the following file:
+In addition, the **opacity or transparency** of the buttons can be configured manually through the following file, which is located in one of these two paths depending on the installation folder selected:
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ```
 
 This allows each player to create a more comfortable layout adapted to their device without losing the integration of the touch control system with the game’s original engine.
@@ -356,10 +372,14 @@ Thanks to this behavior, the four arrows can either be moved together as a singl
 
 ## ⚙️ Touch control configuration file
 
-The position and size changes made through the menu are stored in the following file:
+The position and size changes made through the menu are stored in one of these two paths, depending on the installation folder selected:
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ```
 
 This file also allows the opacity of the touch buttons to be adjusted manually, both in their normal state and while they are being pressed.
@@ -385,10 +405,14 @@ To provide the best compatibility possible, I have added a file called:
 Simpsons_touch_mode.txt
 ```
 
-This file is located in the following path:
+This file is located in one of these two paths, depending on the installation folder selected:
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_mode.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_mode.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_mode.txt
 ```
 
 By default, the game uses **mode 1**, which should work correctly on most devices.
@@ -456,10 +480,14 @@ Avec la version **0.92**, le système de commandes tactiles franchit une nouvell
 
 Ce nouveau système permet de modifier à la fois la **position** et la **taille** des boutons tactiles, afin d’adapter leur disposition aux différentes tailles d’écran, aux différentes façons de jouer et aux préférences personnelles.
 
-De plus, l’**opacité ou la transparence** des boutons peut être configurée manuellement à l’aide du fichier suivant :
+De plus, l’**opacité ou la transparence** des boutons peut être configurée manuellement à l’aide du fichier suivant, qui se trouve dans l’un de ces deux chemins selon le dossier d’installation choisi :
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ```
 
 Chaque joueur peut ainsi créer une disposition plus confortable et mieux adaptée à son appareil, sans perdre l’intégration du système tactile avec le moteur d’origine du jeu.
@@ -558,10 +586,14 @@ Grâce à ce fonctionnement, les quatre flèches peuvent être déplacées ensem
 
 ## ⚙️ Fichier de configuration des commandes tactiles
 
-Les modifications de position et de taille effectuées depuis le menu sont enregistrées dans le fichier suivant :
+Les modifications de position et de taille effectuées depuis le menu sont enregistrées dans l’un de ces deux chemins, selon le dossier d’installation choisi :
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ```
 
 Ce fichier permet également de modifier manuellement l’opacité des boutons tactiles, aussi bien dans leur état normal que lorsqu’ils sont enfoncés.
@@ -586,10 +618,14 @@ Pour offrir la meilleure compatibilité possible, j’ai ajouté un fichier appe
 Simpsons_touch_mode.txt
 ```
 
-Ce fichier se trouve dans le chemin suivant :
+Ce fichier se trouve dans l’un de ces deux chemins, selon le dossier d’installation choisi :
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_mode.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_mode.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_mode.txt
 ```
 
 Par défaut, le jeu utilise le **mode 1**, qui devrait fonctionner correctement sur la plupart des appareils.
@@ -658,10 +694,14 @@ Mit Version **0.92** wird das Touch-Steuerungssystem um ein neues Menü erweiter
 
 Mit diesem neuen System lassen sich sowohl die **Position** als auch die **Größe** der Touch-Schaltflächen verändern. Dadurch kann ihre Anordnung an unterschiedliche Bildschirmgrößen, Spielweisen und persönliche Vorlieben angepasst werden.
 
-Darüber hinaus kann die **Deckkraft beziehungsweise Transparenz** der Schaltflächen manuell über die folgende Datei konfiguriert werden:
+Darüber hinaus kann die **Deckkraft beziehungsweise Transparenz** der Schaltflächen manuell über die folgende Datei konfiguriert werden. Sie befindet sich je nach ausgewähltem Installationsordner in einem dieser beiden Pfade:
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ```
 
 Auf diese Weise kann jeder Spieler eine bequemere, an das eigene Gerät angepasste Anordnung erstellen, ohne dass die Integration des Touch-Steuerungssystems in die ursprüngliche Spiel-Engine verloren geht.
@@ -760,10 +800,14 @@ Dank dieses Verhaltens können die vier Pfeile entweder gemeinsam als eine Einhe
 
 ## ⚙️ Konfigurationsdatei der Touch-Steuerung
 
-Die über das Menü vorgenommenen Änderungen an Position und Größe werden in der folgenden Datei gespeichert:
+Die über das Menü vorgenommenen Änderungen an Position und Größe werden je nach ausgewähltem Installationsordner in einem dieser beiden Pfade gespeichert:
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_controls_configuration.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_controls_configuration.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_controls_configuration.txt
 ```
 
 Über diese Datei kann außerdem die Deckkraft der Touch-Schaltflächen manuell angepasst werden, sowohl im normalen Zustand als auch während sie gedrückt werden.
@@ -788,10 +832,14 @@ Um die bestmögliche Kompatibilität zu bieten, habe ich eine Datei hinzugefügt
 Simpsons_touch_mode.txt
 ```
 
-Diese Datei befindet sich im folgenden Pfad:
+Diese Datei befindet sich je nach ausgewähltem Installationsordner in einem dieser beiden Pfade:
 
 ```txt
-Android/data/com.c4rlox.simpsons/touch_controls/Simpsons_touch_mode.txt
+/storage/emulated/0/Android/data/com.c4rlox.simpsons/files/touch_controls/Simpsons_touch_mode.txt
+```
+
+```txt
+/storage/emulated/0/c4rloxSimpsons/touch_controls/Simpsons_touch_mode.txt
 ```
 
 Standardmäßig verwendet das Spiel **Modus 1**, der auf den meisten Geräten korrekt funktionieren sollte.
