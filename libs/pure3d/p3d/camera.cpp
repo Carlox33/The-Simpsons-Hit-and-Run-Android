@@ -10,7 +10,8 @@
 tCamera::tCamera()
 {
     bool widescreen = p3d::display ? p3d::display->IsWidescreen() : false;
-    SetFOV(rmt::DegToRadian(90.0f), widescreen  ? (16.0f / 9.0f) : (4.0f / 3.0f));
+    float aspect = widescreen ? ((float)p3d::display->GetWidth() / (float)p3d::display->GetHeight()) : (4.0f / 3.0f);
+    SetFOV(rmt::DegToRadian(90.0f), aspect);
 
     nearPlane = 1.0f;
     farPlane = 1000.0f;
@@ -46,7 +47,14 @@ void tCamera::SetFOV(float newFov, float newAspect)
     fov = newFov;
     aspect = newAspect;
 
-    fovScaleX = 1.0f / rmt::Tan(fov * 0.5f);
+    float effectiveFov = newFov;
+    const float refAspect = 16.0f / 9.0f;
+    if (newAspect > refAspect)
+    {
+        effectiveFov = 2.0f * rmt::ATan(rmt::Tan(newFov * 0.5f) * (newAspect / refAspect));
+    }
+
+    fovScaleX = 1.0f / rmt::Tan(effectiveFov * 0.5f);
     fovScaleY = fovScaleX;
 //  Note: Made fovScaleY = fovScaleX because it seems to mess up the world to device calculations.
 //        To see this effect just draw a quad in world space and then transform the verticies into
@@ -54,8 +62,8 @@ void tCamera::SetFOV(float newFov, float newAspect)
 //        and they won't match up.
 //  fovScaleY = fovScaleX * aspect;
 
-    float fovy = rmt::ATan(rmt::Tan(fov/2.0f) / aspect);
-    float fovx = fov/2;
+    float fovy = rmt::ATan(rmt::Tan(effectiveFov/2.0f) / aspect);
+    float fovx = effectiveFov/2;
 
     float sx = rmt::Sin(fovx);
     float cx = rmt::Cos(fovx);
@@ -303,7 +311,14 @@ void tCamera::SetState(void)
     if(!updated)
         Update();
 
-    p3d::pddi->SetCamera(nearPlane,farPlane,fov,aspect);
+    float effectiveFov = fov;
+    const float refAspect = 16.0f / 9.0f;
+    if (aspect > refAspect)
+    {
+        effectiveFov = 2.0f * rmt::ATan(rmt::Tan(fov * 0.5f) * (aspect / refAspect));
+    }
+
+    p3d::pddi->SetCamera(nearPlane,farPlane,effectiveFov,aspect);
 }
 
 void tCamera::Update()

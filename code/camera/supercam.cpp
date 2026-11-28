@@ -133,7 +133,7 @@ SuperCam::SuperCam() :
 #ifndef WORLD_BUILDER
     if(p3d::display->IsWidescreen())
     {
-        mSCAspect = ( 16.0f / 9.0f );
+        mSCAspect = (float)p3d::display->GetWidth() / (float)p3d::display->GetHeight();
     }
 #endif
 }

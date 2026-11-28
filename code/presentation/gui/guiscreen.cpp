@@ -938,8 +938,11 @@ CGuiScreen::ApplyWideScreenCorrectionScale( Scrooby::Drawable* drawable )
     int screenWidthBy2 = static_cast<int>( Scrooby::App::GetInstance()->GetScreenWidth() ) / 2;
 
     rAssert( drawable != NULL );
+    float wideScale = (p3d::display != NULL && p3d::display->GetWidth() > 0)
+        ? ((4.0f / 3.0f) * ((float)p3d::display->GetHeight() / (float)p3d::display->GetWidth()))
+        : WIDE_SCREEN_CORRECTION_SCALE;
     drawable->Translate( -screenWidthBy2, 0 );
-    drawable->Scale( WIDE_SCREEN_CORRECTION_SCALE, 1.0f, 1.0f );
+    drawable->Scale( wideScale, 1.0f, 1.0f );
     drawable->Translate( screenWidthBy2, 0 );
 }
 
